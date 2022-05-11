@@ -38,16 +38,16 @@ but can be adapted for any platform.
 
 Adding a new sensor is easy! Here are the steps:
 
-* Create an _**SFE_QUAD_Sensor_?????.h**_ file for it, using the existing files as a template
+* Create an _**SFE_QUAD_Sensor_NewSensorName.h**_ file for it, using the existing files as a template
   * You will find the individual sensor header files in the library [src/src](./src/src) sub-directory
 * Edit [SFE_QUAD_Sensors.h](./src/SFE_QUAD_Sensors.h) :
-  * Add a _**#define INCLUDE_SFE_QUAD_SENSOR_?????**_ for the new sensor - in case the user wants to select which sensors to include
+  * Add a _**#define INCLUDE_SFE_QUAD_SENSOR_NewSensorName**_ for the new sensor - in case the user wants to select which sensors to include
   * Add a new entry for the sensor in _**enum SFEQUADSensorType**_ (3 lines for each new sensor)
   * Add a new entry for the sensor in _**SFE_QUAD_Sensor <b>*</b>sensorFactory**_ (4 lines for each new sensor)
 * Edit [SFE_QUAD_Headers.h](./src/SFE_QUAD_Headers.h) :
   * Add a new entry for the sensor (3 lines for each new sensor)
 * Edit [.github/workflows/compile-sketch.yml](./.github/workflows/compile-sketch.yml) :
-  * Add a _**- name: Update ?????**_ entry for the new sensor
+  * Add a _**- name: Update NewSensorName**_ entry for the new sensor
   * This automates copying the Arduino Library files into the [src/src](./src/src) subdirectory
   * The latest versions of the library .h. and .cpp will be copied and added to a GitHub pull request automatically
 
