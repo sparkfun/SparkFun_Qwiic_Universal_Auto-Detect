@@ -219,8 +219,8 @@ public:
 
   enum SFEQUADSensorType
   {
-#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MS5637) // <=== Add more copies of these three lines when adding new sensors
-    Sensor_MS5637,
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_ADS122C04) // <=== Add more copies of these three lines when adding new sensors
+    Sensor_ADS122C04,
 #endif
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_BME280)
     Sensor_BME280,
@@ -228,20 +228,23 @@ public:
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_LPS25HB)
     Sensor_LPS25HB,
 #endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MS5637)
+    Sensor_MS5637,
+#endif
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_NAU7802)
     Sensor_NAU7802,
 #endif
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_UBLOX_GNSS)
     Sensor_UBLOX_GNSS,
 #endif
-    SFE_QUAD_Sensor_Number_Of_Sensors // Must be last
+    SFE_QUAD_Sensor_Number_Of_Sensors // Must be last. <=== Add new sensors _above this line_ to preserve the existing enum values
   };
 
   SFE_QUAD_Sensor *sensorFactory(SFEQUADSensorType type) // Return a pointer to the sensor class for the selected id
   {
-#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MS5637) // <=== Add more copies of these four lines when adding new sensors
-    if (type == Sensor_MS5637)
-      return new SFE_QUAD_Sensor_MS5637;
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_ADS122C04) // <=== Add more copies of these four lines when adding new sensors
+    if (type == Sensor_ADS122C04)
+      return new SFE_QUAD_Sensor_ADS122C04;
 #endif
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_BME280)
     if (type == Sensor_BME280)
@@ -250,6 +253,10 @@ public:
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_LPS25HB)
     if (type == Sensor_LPS25HB)
       return new SFE_QUAD_Sensor_LPS25HB;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MS5637)
+    if (type == Sensor_MS5637)
+      return new SFE_QUAD_Sensor_MS5637;
 #endif
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_NAU7802)
     if (type == Sensor_NAU7802)
