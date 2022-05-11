@@ -270,7 +270,7 @@ bool SFE_QUAD_Sensors::detectSensors(void)
         for (uint16_t type = 0; type < (uint16_t)SFE_QUAD_Sensor_Number_Of_Sensors; type++)
         {
           // Create a new sensor with the desired type
-          SFE_QUAD_Sensor *tryThisSensorType = sensorFactory((OpenLogSensorType)type);
+          SFE_QUAD_Sensor *tryThisSensorType = sensorFactory((SFEQUADSensorType)type);
 
           if (tryThisSensorType != NULL)
           {
@@ -318,7 +318,7 @@ bool SFE_QUAD_Sensors::detectSensors(void)
 
                     if (_head == NULL) // Is this the first sensor we've found?
                     {
-                      _head = sensorFactory((OpenLogSensorType)type);
+                      _head = sensorFactory((SFEQUADSensorType)type);
                       _head->_sensorAddress = tryThisAddress;
                       _head->_muxAddress = muxAddr == 0x6F ? 0 : muxAddr;
                       _head->_muxPort = muxAddr == 0x6F ? 0 : muxPort;
@@ -330,7 +330,7 @@ bool SFE_QUAD_Sensors::detectSensors(void)
                       {
                         nextSensor = nextSensor->_next;
                       }
-                      nextSensor->_next = sensorFactory((OpenLogSensorType)type);
+                      nextSensor->_next = sensorFactory((SFEQUADSensorType)type);
                       nextSensor->_next->_sensorAddress = tryThisAddress;
                       nextSensor->_next->_muxAddress = muxAddr == 0x6F ? 0 : muxAddr;
                       nextSensor->_next->_muxPort = muxAddr == 0x6F ? 0 : muxPort;

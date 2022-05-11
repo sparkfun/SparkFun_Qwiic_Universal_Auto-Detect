@@ -217,7 +217,7 @@ public:
   SFE_QUAD_Sensors(void);
   ~SFE_QUAD_Sensors(void);
 
-  enum OpenLogSensorType
+  enum SFEQUADSensorType
   {
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MS5637) // <=== Add more copies of these three lines when adding new sensors
     Sensor_MS5637,
@@ -237,7 +237,7 @@ public:
     SFE_QUAD_Sensor_Number_Of_Sensors // Must be last
   };
 
-  SFE_QUAD_Sensor *sensorFactory(OpenLogSensorType type) // Return a pointer to the sensor class for the selected id
+  SFE_QUAD_Sensor *sensorFactory(SFEQUADSensorType type) // Return a pointer to the sensor class for the selected id
   {
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MS5637) // <=== Add more copies of these four lines when adding new sensors
     if (type == Sensor_MS5637)
