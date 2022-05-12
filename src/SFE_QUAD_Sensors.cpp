@@ -163,26 +163,28 @@ SFE_QUAD_Sensors::~SFE_QUAD_Sensors(void)
   if (configuration != NULL)
     delete[] configuration;
 
-  // while (_head != NULL) // Have we found any sensors?
-  // {
-  //   SFE_QUAD_Sensor *thisSensor = _head; // Start at the head
-  //   if (thisSensor->_next == NULL)      // Is the the last / only sensor?
-  //   {
-  //     delete thisSensor;
-  //     thisSensor = NULL;
-  //   }
-  //   else
-  //   {
-  //     SFE_QUAD_Sensor *nextSensor = _head; // Start at the head
-  //     while (nextSensor->_next != NULL)   // Keep going until we reach the end of the list
-  //     {
-  //       thisSensor = nextSensor;
-  //       nextSensor = nextSensor->_next;
-  //     }
-  //     delete nextSensor;
-  //     thisSensor->_next = NULL;
-  //   }
-  // }
+  while (_head != NULL) // Have we found any sensors?
+  {
+    if (_head->_next == NULL) // Is the the last / only sensor?
+    {
+      _head->deleteSensorStorage();
+      delete _head;
+      _head = NULL;
+    }
+    else
+    {
+      SFE_QUAD_Sensor *thisSensor = _head;             // Start at the head
+      SFE_QUAD_Sensor *nextSensor = thisSensor->_next; // Point to the next sensor
+      while (nextSensor->_next != NULL)                // Keep going until we reach the end of the list
+      {
+        thisSensor = nextSensor;
+        nextSensor = nextSensor->_next;
+      }
+      nextSensor->deleteSensorStorage();
+      delete nextSensor; // Delete the sensor at the end of the list
+      thisSensor->_next = NULL;
+    }
+  }
 }
 
 void SFE_QUAD_Sensors::setWirePort(TwoWire &port)
@@ -326,7 +328,7 @@ bool SFE_QUAD_Sensors::detectSensors(void)
                     else
                     {
                       SFE_QUAD_Sensor *nextSensor = _head; // Start at the head
-                      while (nextSensor->_next != NULL)   // Keep going until we reach the end of the list
+                      while (nextSensor->_next != NULL)    // Keep going until we reach the end of the list
                       {
                         nextSensor = nextSensor->_next;
                       }
@@ -350,6 +352,7 @@ bool SFE_QUAD_Sensors::detectSensors(void)
             }
 
             tryThisSensorType->deleteSensorStorage(); // Be nice. Release the memory
+            delete tryThisSensorType;
           }
 
           else
@@ -644,7 +647,7 @@ bool SFE_QUAD_Sensors::getSensorNames(void)
             if (newReadings == NULL)                                // Did the memory allocation fail?
             {
               if (_printDebug)
-                _debugPort->println(F("getSensorReadings: newReadings memory allocation failed!"));
+                _debugPort->println(F("getSensorNames: newReadings memory allocation failed!"));
               delete[] scratchpad; // Delete the scratchpad
               return (false);
             }
@@ -717,7 +720,7 @@ bool SFE_QUAD_Sensors::getSenseNames(void)
             if (newReadings == NULL)                                     // Did the memory allocation fail?
             {
               if (_printDebug)
-                _debugPort->println(F("getSensorReadings: newReadings memory allocation failed!"));
+                _debugPort->println(F("getSenseNames: newReadings memory allocation failed!"));
               delete[] scratchpad; // Delete the scratchpad
               return (false);
             }
@@ -1424,8 +1427,7 @@ bool SFE_QUAD_Sensors::getSensorConfiguration(void)
         memset(newConfig, 0, configLen + 1);                     // Clear the memory to make sure it is null-terminated
         memcpy(newConfig, configuration, strlen(configuration)); // Copy in the existing readings
         strcat(newConfig, scratchpad);                           // Append the new configuration item from scratchpad
-        if (configuration != NULL)
-          delete[] configuration;  // Delete configuration
+        delete[] configuration;  // Delete configuration
         configuration = newConfig; // Make config point to newConfig
         delete[] scratchpad;       // Delete the scratchpad
       }
