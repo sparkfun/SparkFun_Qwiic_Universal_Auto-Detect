@@ -79,9 +79,15 @@ public:
   // Detect the sensor. ===> Adapt this to match the sensor type <===
   bool detectSensor(uint8_t sensorAddress, TwoWire &port)
   {
-    CLASSNAME *device = (CLASSNAME *)_classPtr;
-    device->setI2CAddress(sensorAddress);
-    return (device->beginI2C(port));
+    port.beginTransmission(sensorAddress); // Scan the sensor address first. beginI2C takes a long time if no device is connected
+    if (port.endTransmission() == 0)
+    {
+      CLASSNAME *device = (CLASSNAME *)_classPtr;
+      device->setI2CAddress(sensorAddress);
+      return (device->beginI2C(port));
+    }
+    else
+      return (false);
   }
 
   // Begin the sensor. ===> Adapt this to match the sensor type <===
