@@ -5,7 +5,7 @@
 
 // To include all sensors, uncomment #define INCLUDE_SFE_QUAD_SENSOR_ALL
 
-//#define INCLUDE_SFE_QUAD_SENSOR_ALL // Include all sensors
+#define INCLUDE_SFE_QUAD_SENSOR_ALL // Include all sensors
 
 // To select which sensors to include:
 //   comment #define INCLUDE_SFE_QUAD_SENSOR_ALL
@@ -20,7 +20,7 @@
 //#define INCLUDE_SFE_QUAD_SENSOR_MICROPRESSURE
 //#define INCLUDE_SFE_QUAD_SENSOR_MS5637
 //#define INCLUDE_SFE_QUAD_SENSOR_MS8607
-#define INCLUDE_SFE_QUAD_SENSOR_NAU7802
+//#define INCLUDE_SFE_QUAD_SENSOR_NAU7802
 //#define INCLUDE_SFE_QUAD_SENSOR_QWIICBUTTON
 //#define INCLUDE_SFE_QUAD_SENSOR_SCD30
 //#define INCLUDE_SFE_QUAD_SENSOR_SDP3X
