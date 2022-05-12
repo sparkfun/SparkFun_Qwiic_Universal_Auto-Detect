@@ -1016,7 +1016,7 @@ bool SFE_QUAD_Sensors::settingMenu(void)
 
     if (menuItems == 1)
     {
-      _menuPort->println(F("settingMenu: The connected sensors have no settings! Exiting..."));
+      _menuPort->println(F("settingMenu: the connected sensors have no settings! Exiting..."));
       return (false);
     }
 
@@ -1289,6 +1289,43 @@ bool SFE_QUAD_Sensors::getSensorConfiguration(void)
 
   while (keepGoing)
   {
+    // First, record the logging settings
+    uint8_t senseCount;
+    thisSensor->getSenseCount(&senseCount);
+    char loggingStr[strlen(thisSensor->getSensorName()) + 32 + (senseCount * 2)]; // TODO: find a better way to do this!
+    // Use -1 to indicate that these are the logging settings, not a configuration item
+    sprintf(loggingStr, "%s,%d,%d,%d,-1,", thisSensor->getSensorName(), thisSensor->_sensorAddress, thisSensor->_muxAddress, thisSensor->_muxPort);
+    for (uint8_t sense = 0; sense <= senseCount; sense++)
+    {
+      if (thisSensor->_logSense[sense] == 0)
+        strcat(loggingStr, "0");
+      else
+        strcat(loggingStr, "1");
+    }
+    strcat(loggingStr, "\r\n");
+
+    if (_printDebug)
+    {
+      _debugPort->print(F("getSensorConfiguration: logging settings for : "));
+      _debugPort->print(loggingStr);
+    }
+
+    size_t configLen = 0;
+    configLen = strlen(configuration);         // Get the current configuration length
+    configLen += strlen(loggingStr);           // Get the length of the logging settings
+    char *newConfig = new char[configLen + 1]; // Allocate memory to hold configuration plus scratchpad plus a null
+    if (newConfig == NULL)                     // Did the memory allocation fail?
+    {
+      if (_printDebug)
+        _debugPort->println(F("getSensorConfiguration: newConfig memory allocation failed!"));
+      return (false);
+    }
+    memset(newConfig, 0, configLen + 1);                     // Clear the memory to make sure it is null-terminated
+    memcpy(newConfig, configuration, strlen(configuration)); // Copy in the existing readings
+    strcat(newConfig, loggingStr);                           // Append the logging string
+    delete[] configuration;  // Delete configuration
+    configuration = newConfig; // Make config point to newConfig
+
     // If required, configure the mux port
     if (thisSensor->_muxAddress >= 0x70)
     {
@@ -1317,7 +1354,7 @@ bool SFE_QUAD_Sensors::getSensorConfiguration(void)
           _debugPort->println(thisSensor->getSensorName());
         }
 
-        size_t configLen = 0;
+        configLen = 0;
         configLen += strlen(thisSensor->getSensorName()) + 1;
 
         char tempStr[32]; // TODO: find a better way to do this!
@@ -1522,53 +1559,70 @@ bool SFE_QUAD_Sensors::applySensorConfiguration(void)
           delete thisMux;
         }
 
-        uint8_t configCount;
-        bool result = thisSensor->getConfigurationItemCount(&configCount);
-
-        if (result && (configCount > 0))
+        if (configItem == -1) // Is this the logging settings?
         {
-          for (uint8_t thisConfigItem = 0; thisConfigItem < configCount; thisConfigItem++)
+          uint8_t senseCount;
+          thisSensor->getSenseCount(&senseCount);
+          for (uint8_t sense = 0; sense <= senseCount; sense++)
           {
-            if (thisConfigItem == configItem)
-            {
-              if (_printDebug)
-                _debugPort->println(F("applySensorConfiguration: Match found! Using line."));
+            if (configItemValue[sense] == '0')
+              thisSensor->_logSense[sense] = 0;
+            else
+              thisSensor->_logSense[sense] = 1;
+          }
+          if (_printDebug)
+            _debugPort->println(F("applySensorConfiguration: using logging settings."));
+        }
+        else
+        {
+          uint8_t configCount;
+          bool result = thisSensor->getConfigurationItemCount(&configCount);
 
-              SFE_QUAD_Sensor::SFE_QUAD_Sensor_Setting_Type_e type;
-              thisSensor->getConfigurationItemType(configItem, &type);
-              SFE_QUAD_Sensor::SFE_QUAD_Sensor_Every_Type_t value;
-              switch (type)
+          if (result && (configCount > 0))
+          {
+            for (uint8_t thisConfigItem = 0; thisConfigItem < configCount; thisConfigItem++)
+            {
+              if (thisConfigItem == configItem)
               {
-              case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_BOOL:
-                value.BOOL = (bool)strtoul(configItemValue, NULL, 10);
-                thisSensor->setConfigurationItem(configItem, &value);
-                break;
-              case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_FLOAT:
-                value.FLOAT = atof(configItemValue);
-                thisSensor->setConfigurationItem(configItem, &value);
-                break;
-              case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_DOUBLE:
-                value.DOUBLE = strtod(configItemValue, NULL);
-                thisSensor->setConfigurationItem(configItem, &value);
-                break;
-              case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_INT:
-                value.INT = (int)strtol(configItemValue, NULL, 10);
-                thisSensor->setConfigurationItem(configItem, &value);
-                break;
-              case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_UINT8_T:
-                value.UINT8_T = (uint8_t)strtoul(configItemValue, NULL, 10);
-                thisSensor->setConfigurationItem(configItem, &value);
-                break;
-              case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_UINT16_T:
-                value.UINT16_T = (uint16_t)strtoul(configItemValue, NULL, 10);
-                thisSensor->setConfigurationItem(configItem, &value);
-                break;
-              case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_UINT32_T:
-                value.UINT32_T = (uint32_t)strtoul(configItemValue, NULL, 10);
-                thisSensor->setConfigurationItem(configItem, &value);
-                break;
-              default:
-                break;
+                if (_printDebug)
+                  _debugPort->println(F("applySensorConfiguration: Match found! Using line."));
+
+                SFE_QUAD_Sensor::SFE_QUAD_Sensor_Setting_Type_e type;
+                thisSensor->getConfigurationItemType(configItem, &type);
+                SFE_QUAD_Sensor::SFE_QUAD_Sensor_Every_Type_t value;
+                switch (type)
+                {
+                case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_BOOL:
+                  value.BOOL = (bool)strtoul(configItemValue, NULL, 10);
+                  thisSensor->setConfigurationItem(configItem, &value);
+                  break;
+                case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_FLOAT:
+                  value.FLOAT = atof(configItemValue);
+                  thisSensor->setConfigurationItem(configItem, &value);
+                  break;
+                case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_DOUBLE:
+                  value.DOUBLE = strtod(configItemValue, NULL);
+                  thisSensor->setConfigurationItem(configItem, &value);
+                  break;
+                case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_INT:
+                  value.INT = (int)strtol(configItemValue, NULL, 10);
+                  thisSensor->setConfigurationItem(configItem, &value);
+                  break;
+                case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_UINT8_T:
+                  value.UINT8_T = (uint8_t)strtoul(configItemValue, NULL, 10);
+                  thisSensor->setConfigurationItem(configItem, &value);
+                  break;
+                case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_UINT16_T:
+                  value.UINT16_T = (uint16_t)strtoul(configItemValue, NULL, 10);
+                  thisSensor->setConfigurationItem(configItem, &value);
+                  break;
+                case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_UINT32_T:
+                  value.UINT32_T = (uint32_t)strtoul(configItemValue, NULL, 10);
+                  thisSensor->setConfigurationItem(configItem, &value);
+                  break;
+                default:
+                  break;
+                }
               }
             }
           }
