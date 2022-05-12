@@ -979,35 +979,45 @@ bool SFE_QUAD_Sensors::settingMenu(void)
 
     while (keepGoing)
     {
-      _menuPort->print(F("Sensor "));
-      _menuPort->print(thisSensor->getSensorName());
-      _menuPort->print(F(" at address 0x"));
-      _menuPort->print(thisSensor->_sensorAddress, HEX);
-
-      if (thisSensor->_muxAddress >= 0x70)
-      {
-        _menuPort->print(F(", mux address 0x"));
-        _menuPort->print(thisSensor->_muxAddress, HEX);
-        _menuPort->print(F(" port "));
-        _menuPort->println(thisSensor->_muxPort);
-      }
-      else
-        _menuPort->println();
-
       uint8_t settingCount;
       thisSensor->getSettingCount(&settingCount);
-      for (uint8_t setting = 0; setting < settingCount; setting++)
+
+      if (settingCount > 0)
       {
-        _menuPort->print(menuItems);
-        _menuPort->print(F("\t: "));
-        _menuPort->println(thisSensor->getSettingName(setting));
-        menuItems++;
+        _menuPort->print(F("Sensor "));
+        _menuPort->print(thisSensor->getSensorName());
+        _menuPort->print(F(" at address 0x"));
+        _menuPort->print(thisSensor->_sensorAddress, HEX);
+
+        if (thisSensor->_muxAddress >= 0x70)
+        {
+          _menuPort->print(F(", mux address 0x"));
+          _menuPort->print(thisSensor->_muxAddress, HEX);
+          _menuPort->print(F(" port "));
+          _menuPort->println(thisSensor->_muxPort);
+        }
+        else
+          _menuPort->println();
+
+        for (uint8_t setting = 0; setting < settingCount; setting++)
+        {
+          _menuPort->print(menuItems);
+          _menuPort->print(F("\t: "));
+          _menuPort->println(thisSensor->getSettingName(setting));
+          menuItems++;
+        }
       }
 
       if (thisSensor->_next == NULL) // Have we reached the end of the sensor list?
         keepGoing = false;
       else
         thisSensor = thisSensor->_next; // Point to the next sensor
+    }
+
+    if (menuItems == 1)
+    {
+      _menuPort->println(F("settingMenu: The connected sensors have no settings! Exiting..."));
+      return (false);
     }
 
     _menuPort->println(F("Enter a number to change the setting, or enter 0 to exit:"));
