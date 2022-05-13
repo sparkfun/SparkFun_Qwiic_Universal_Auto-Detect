@@ -97,6 +97,14 @@ jobs:
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_MS5637_Arduino_Library/master/src/SparkFun_MS5637_Arduino_Library.h
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_MS5637_Arduino_Library/master/src/SparkFun_MS5637_Arduino_Library.cpp
 
+      - name: Update MS8607
+        run: |
+          cd ./src/src/
+          mkdir -p MS8607
+          cd MS8607
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_PHT_MS8607_Arduino_Library/master/src/SparkFun_PHT_MS8607_Arduino_Library.h
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_PHT_MS8607_Arduino_Library/master/src/SparkFun_PHT_MS8607_Arduino_Library.cpp
+    
       - name: Update NAU7802
         run: |
           cd ./src/src/

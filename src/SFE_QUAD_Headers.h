@@ -28,6 +28,9 @@
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MS5637)
 #include "src/SFE_QUAD_Sensor_MS5637.h"
 #endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MS8607)
+#include "src/SFE_QUAD_Sensor_MS8607.h"
+#endif
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_NAU7802)
 #include "src/SFE_QUAD_Sensor_NAU7802.h"
 #endif

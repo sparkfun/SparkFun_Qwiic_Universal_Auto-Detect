@@ -244,6 +244,9 @@ public:
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MICROPRESSURE)
     Sensor_MICROPRESSURE,
 #endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MS8607) // MS8607 must be before MS5637 (otherwise MS8607 will appear as a MS5637)
+    Sensor_MS8607,
+#endif
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MS5637)
     Sensor_MS5637,
 #endif
@@ -293,6 +296,10 @@ public:
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MS5637)
     if (type == Sensor_MS5637)
       return new SFE_QUAD_Sensor_MS5637;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MS8607)
+    if (type == Sensor_MS8607)
+      return new SFE_QUAD_Sensor_MS8607;
 #endif
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_NAU7802)
     if (type == Sensor_NAU7802)

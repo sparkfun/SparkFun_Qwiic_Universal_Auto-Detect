@@ -297,6 +297,18 @@ bool SFE_QUAD_Sensors::detectSensors(void)
                     _debugPort->println(F(" as it was found on the main branch"));
                   }
                 }
+                // If this is a MS5637, check if we have already found a MS8607. Skip it if we have
+                else if ((strcmp(tryThisSensorType->getSensorName(), "MS5637") == 0)
+                  && ((sensorExists("MS8607", 0x40, 0, 0) != NULL) || (sensorExists("MS8607", 0x40, muxAddr == 0x6F ? 0 : muxAddr, muxPort) != NULL)))
+                {
+                  if (_printDebug)
+                  {
+                    _debugPort->print(F("detectSensors: skipping MS5637 detection for muxAddr 0x"));
+                    _debugPort->print(muxAddr == 0x6F ? 0 : muxAddr, HEX);
+                    _debugPort->print(F(" muxPort 0x"));
+                    _debugPort->println(muxPort);
+                  }
+                }
                 else
                 {
                   if (tryThisSensorType->detectSensor(tryThisAddress, *_i2cPort)) // Check if the device is detected
