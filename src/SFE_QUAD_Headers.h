@@ -43,6 +43,9 @@
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_SDP3X)
 #include "src/SFE_QUAD_Sensor_SDP3X.h"
 #endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_SGP30)
+#include "src/SFE_QUAD_Sensor_SGP30.h"
+#endif
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_UBLOX_GNSS)
 #include "src/SFE_QUAD_Sensor_UBLOX_GNSS.h"
 #endif
