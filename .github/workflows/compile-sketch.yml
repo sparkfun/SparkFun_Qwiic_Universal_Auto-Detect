@@ -132,6 +132,14 @@ jobs:
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SCD30_Arduino_Library/main/src/SparkFun_SCD30_Arduino_Library.h
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SCD30_Arduino_Library/main/src/SparkFun_SCD30_Arduino_Library.cpp
 
+      - name: Update SDP3X
+        run: |
+          cd ./src/src/
+          mkdir -p SDP3X
+          cd SDP3X
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SDP3x_Arduino_Library/main/src/SparkFun_SDP3x_Arduino_Library.h
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SDP3x_Arduino_Library/main/src/SparkFun_SDP3x_Arduino_Library.cpp
+
       - name: Update UBLOX_GNSS
         run: |
           cd ./src/src/
