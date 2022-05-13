@@ -222,6 +222,9 @@ public:
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_ADS122C04) // <=== Add more copies of these three lines when adding new sensors
     Sensor_ADS122C04,
 #endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_AHT20)
+    Sensor_AHT20,
+#endif
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_BME280)
     Sensor_BME280,
 #endif
@@ -245,6 +248,10 @@ public:
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_ADS122C04) // <=== Add more copies of these four lines when adding new sensors
     if (type == Sensor_ADS122C04)
       return new SFE_QUAD_Sensor_ADS122C04;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_AHT20)
+    if (type == Sensor_AHT20)
+      return new SFE_QUAD_Sensor_AHT20;
 #endif
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_BME280)
     if (type == Sensor_BME280)

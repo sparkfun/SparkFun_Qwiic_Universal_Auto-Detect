@@ -4,6 +4,9 @@
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_ADS122C04)
 #include "src/SFE_QUAD_Sensor_ADS122C04.h"
 #endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_AHT20)
+#include "src/SFE_QUAD_Sensor_AHT20.h"
+#endif
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_BME280)
 #include "src/SFE_QUAD_Sensor_BME280.h"
 #endif

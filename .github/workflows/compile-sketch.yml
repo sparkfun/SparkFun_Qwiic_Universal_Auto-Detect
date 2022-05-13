@@ -35,6 +35,16 @@ jobs:
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_ADS122C04_ADC_Arduino_Library/main/src/SparkFun_ADS122C04_ADC_Arduino_Library.h
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_ADS122C04_ADC_Arduino_Library/main/src/SparkFun_ADS122C04_ADC_Arduino_Library.cpp
 
+      - name: Update AHT20
+        run: |
+          cd ./src/src/
+          mkdir -p AHT20
+          cd AHT20
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_Qwiic_Humidity_AHT20_Arduino_Library/main/src/SparkFun_Qwiic_Humidity_AHT20.h
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_Qwiic_Humidity_AHT20_Arduino_Library/main/src/SparkFun_Qwiic_Humidity_AHT20.cpp
+          # SparkFun_Qwiic_Humidity_AHT20.cpp uses #include <SparkFun_Qwiic_Humidity_AHT20.h>. We need to replace the < and > with double quotes
+          sed -i 's/<SparkFun_Qwiic_Humidity_AHT20.h>/'\"'SparkFun_Qwiic_Humidity_AHT20.h'\"'/g' SparkFun_Qwiic_Humidity_AHT20.cpp
+
       - name: Update BME280
         run: |
           cd ./src/src/
