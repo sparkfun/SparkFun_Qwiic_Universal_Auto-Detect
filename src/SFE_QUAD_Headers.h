@@ -34,6 +34,9 @@
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_NAU7802)
 #include "src/SFE_QUAD_Sensor_NAU7802.h"
 #endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_QWIICBUTTON)
+#include "src/SFE_QUAD_Sensor_QWIICBUTTON.h"
+#endif
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_UBLOX_GNSS)
 #include "src/SFE_QUAD_Sensor_UBLOX_GNSS.h"
 #endif

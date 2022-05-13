@@ -113,6 +113,17 @@ jobs:
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_Qwiic_Scale_NAU7802_Arduino_Library/master/src/SparkFun_Qwiic_Scale_NAU7802_Arduino_Library.h
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_Qwiic_Scale_NAU7802_Arduino_Library/master/src/SparkFun_Qwiic_Scale_NAU7802_Arduino_Library.cpp
 
+      - name: Update QWIICBUTTON
+        run: |
+          cd ./src/src/
+          mkdir -p QWIICBUTTON
+          cd QWIICBUTTON
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_Qwiic_Button_Arduino_Library/master/src/SparkFun_Qwiic_Button.h
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_Qwiic_Button_Arduino_Library/master/src/SparkFun_Qwiic_Button.cpp
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_Qwiic_Button_Arduino_Library/master/src/registers.h
+          # SparkFun_Qwiic_Button.cpp uses #include <SparkFun_Qwiic_Button.h>. We need to replace the < and > with double quotes
+          sed -i 's/<SparkFun_Qwiic_Button.h>/'\"'SparkFun_Qwiic_Button.h'\"'/g' SparkFun_Qwiic_Button.cpp
+
       - name: Update UBLOX_GNSS
         run: |
           cd ./src/src/
