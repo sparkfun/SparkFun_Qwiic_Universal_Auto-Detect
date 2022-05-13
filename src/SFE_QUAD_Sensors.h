@@ -14,7 +14,8 @@
 //#define INCLUDE_SFE_QUAD_SENSOR_ADS122C04 // Include individual sensors
 //#define INCLUDE_SFE_QUAD_SENSOR_AHT20
 //#define INCLUDE_SFE_QUAD_SENSOR_BME280
-//#define INCLUDE_SFE_QUAD_SENSOR_CCS811
+//#define INCLUDE_SFE_QUAD_SENSOR_CCS811_5A
+//#define INCLUDE_SFE_QUAD_SENSOR_CCS811_5B
 //#define INCLUDE_SFE_QUAD_SENSOR_LPS25HB
 //#define INCLUDE_SFE_QUAD_SENSOR_MCP9600
 //#define INCLUDE_SFE_QUAD_SENSOR_MICROPRESSURE
@@ -228,6 +229,12 @@ public:
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_BME280)
     Sensor_BME280,
 #endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_CCS811_5A)
+    Sensor_CCS811_5A,
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_CCS811_5B)
+    Sensor_CCS811_5B,
+#endif
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_LPS25HB)
     Sensor_LPS25HB,
 #endif
@@ -256,6 +263,14 @@ public:
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_BME280)
     if (type == Sensor_BME280)
       return new SFE_QUAD_Sensor_BME280;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_CCS811_5A)
+    if (type == Sensor_CCS811_5A)
+      return new SFE_QUAD_Sensor_CCS811_5A;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_CCS811_5B)
+    if (type == Sensor_CCS811_5B)
+      return new SFE_QUAD_Sensor_CCS811_5B;
 #endif
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_LPS25HB)
     if (type == Sensor_LPS25HB)

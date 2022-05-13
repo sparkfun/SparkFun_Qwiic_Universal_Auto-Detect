@@ -10,6 +10,12 @@
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_BME280)
 #include "src/SFE_QUAD_Sensor_BME280.h"
 #endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_CCS811_5A)
+#include "src/SFE_QUAD_Sensor_CCS811_5A.h"
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_CCS811_5B)
+#include "src/SFE_QUAD_Sensor_CCS811_5B.h"
+#endif
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_LPS25HB)
 #include "src/SFE_QUAD_Sensor_LPS25HB.h"
 #endif
