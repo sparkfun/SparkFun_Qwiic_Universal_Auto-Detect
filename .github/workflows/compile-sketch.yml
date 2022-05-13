@@ -71,6 +71,24 @@ jobs:
           # SparkFun_LPS25HB_Arduino_Library.cpp uses #include <SparkFun_LPS25HB_Arduino_Library.h>. We need to replace the < and > with double quotes
           sed -i 's/<SparkFun_LPS25HB_Arduino_Library.h>/'\"'SparkFun_LPS25HB_Arduino_Library.h'\"'/g' SparkFun_LPS25HB_Arduino_Library.cpp
 
+      - name: Update MCP9600
+        run: |
+          cd ./src/src/
+          mkdir -p MCP9600
+          cd MCP9600
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_MCP9600_Arduino_Library/master/src/SparkFun_MCP9600.h
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_MCP9600_Arduino_Library/master/src/SparkFun_MCP9600.cpp
+          # SparkFun_MCP9600.cpp uses #include <SparkFun_MCP9600.h>. We need to replace the < and > with double quotes
+          sed -i 's/<SparkFun_MCP9600.h>/'\"'SparkFun_MCP9600.h'\"'/g' SparkFun_MCP9600.cpp
+
+      - name: Update MICROPRESSURE
+        run: |
+          cd ./src/src/
+          mkdir -p MICROPRESSURE
+          cd MICROPRESSURE
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_MicroPressure_Arduino_Library/main/src/SparkFun_MicroPressure.h
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_MicroPressure_Arduino_Library/main/src/SparkFun_MicroPressure.cpp
+
       - name: Update MS5637
         run: |
           cd ./src/src/

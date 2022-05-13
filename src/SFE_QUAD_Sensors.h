@@ -238,6 +238,12 @@ public:
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_LPS25HB)
     Sensor_LPS25HB,
 #endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MCP9600)
+    Sensor_MCP9600,
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MICROPRESSURE)
+    Sensor_MICROPRESSURE,
+#endif
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MS5637)
     Sensor_MS5637,
 #endif
@@ -275,6 +281,14 @@ public:
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_LPS25HB)
     if (type == Sensor_LPS25HB)
       return new SFE_QUAD_Sensor_LPS25HB;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MCP9600)
+    if (type == Sensor_MCP9600)
+      return new SFE_QUAD_Sensor_MCP9600;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MICROPRESSURE)
+    if (type == Sensor_MICROPRESSURE)
+      return new SFE_QUAD_Sensor_MICROPRESSURE;
 #endif
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MS5637)
     if (type == Sensor_MS5637)
