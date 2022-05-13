@@ -124,6 +124,14 @@ jobs:
           # SparkFun_Qwiic_Button.cpp uses #include <SparkFun_Qwiic_Button.h>. We need to replace the < and > with double quotes
           sed -i 's/<SparkFun_Qwiic_Button.h>/'\"'SparkFun_Qwiic_Button.h'\"'/g' SparkFun_Qwiic_Button.cpp
 
+      - name: Update SCD30
+        run: |
+          cd ./src/src/
+          mkdir -p SCD30
+          cd SCD30
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SCD30_Arduino_Library/main/src/SparkFun_SCD30_Arduino_Library.h
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SCD30_Arduino_Library/main/src/SparkFun_SCD30_Arduino_Library.cpp
+
       - name: Update UBLOX_GNSS
         run: |
           cd ./src/src/
