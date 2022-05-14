@@ -37,6 +37,9 @@
 class CLASSTITLE : public SFE_QUAD_Sensor
 {
 public:
+  bool _tvoc;
+  bool _co2;
+
   CLASSTITLE(void)
   {
     _sensorAddress = 0;
@@ -48,6 +51,8 @@ public:
     for (size_t i = 0; i <= SENSE_COUNT; i++)
       _logSense[i] = true;
     _customInitializePtr = NULL;
+    _tvoc = false;
+    _co2 = false;
   }
 
   void deleteSensorStorage(void)
@@ -146,10 +151,22 @@ public:
     switch (sense)
     {
     case 0:
+      if (_tvoc == false)
+      {
+        device->readAlgorithmResults();
+        _co2 = true;
+      }
+      _tvoc = false;
       sprintf(reading, "%d", device->getTVOC());
       return (true);
       break;
     case 1:
+      if (_co2 == false)
+      {
+        device->readAlgorithmResults();
+        _tvoc = true;
+      }
+      _co2 = false;
       sprintf(reading, "%d", device->getCO2());
       return (true);
       break;
