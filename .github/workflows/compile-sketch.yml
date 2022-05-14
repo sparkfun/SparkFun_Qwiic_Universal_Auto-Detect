@@ -148,6 +148,17 @@ jobs:
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SGP30_Arduino_Library/main/src/SparkFun_SGP30_Arduino_Library.h
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SGP30_Arduino_Library/main/src/SparkFun_SGP30_Arduino_Library.cpp
 
+      - name: Update SGP40
+        run: |
+          cd ./src/src/
+          mkdir -p SGP40
+          cd SGP40
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SGP40_Arduino_Library/main/src/SparkFun_SGP40_Arduino_Library.h
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SGP40_Arduino_Library/main/src/SparkFun_SGP40_Arduino_Library.cpp
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SGP40_Arduino_Library/main/src/sensirion_arch_config.h
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SGP40_Arduino_Library/main/src/sensirion_voc_algorithm.h
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SGP40_Arduino_Library/main/src/sensirion_voc_algorithm.cpp
+
       - name: Update UBLOX_GNSS
         run: |
           cd ./src/src/

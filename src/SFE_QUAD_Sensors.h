@@ -266,6 +266,9 @@ public:
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_SGP30)
     Sensor_SGP30,
 #endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_SGP40)
+    Sensor_SGP40,
+#endif
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_UBLOX_GNSS)
     Sensor_UBLOX_GNSS,
 #endif
@@ -333,6 +336,10 @@ public:
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_SGP30)
     if (type == Sensor_SGP30)
       return new SFE_QUAD_Sensor_SGP30;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_SGP40)
+    if (type == Sensor_SGP40)
+      return new SFE_QUAD_Sensor_SGP40;
 #endif
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_UBLOX_GNSS)
     if (type == Sensor_UBLOX_GNSS)
