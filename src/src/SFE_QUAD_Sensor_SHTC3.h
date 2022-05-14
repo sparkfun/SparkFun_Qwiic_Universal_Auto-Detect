@@ -1,7 +1,7 @@
-#ifndef SPARKFUN_QUAD_SENSOR_HEADER_SGP40_H // <=== Update this with the new sensor type
-#define SPARKFUN_QUAD_SENSOR_HEADER_SGP40_H // <=== Update this with the new sensor type
+#ifndef SPARKFUN_QUAD_SENSOR_HEADER_SHTC3_H // <=== Update this with the new sensor type
+#define SPARKFUN_QUAD_SENSOR_HEADER_SHTC3_H // <=== Update this with the new sensor type
 
-#include "SGP40/SparkFun_SGP40_Arduino_Library.h" // <=== Update this with the new sensor library header file
+#include "SHTC3/SparkFun_SHTC3.h" // <=== Update this with the new sensor library header file
 
 #ifdef CLASSNAME
 #undef CLASSNAME
@@ -22,23 +22,23 @@
 #undef SENSOR_I2C_ADDRESSES
 #endif
 
-#define CLASSNAME SGP40 // <=== Update this with the new sensor type
+#define CLASSNAME SHTC3 // <=== Update this with the new sensor type
 
-#define CLASSTITLE SFE_QUAD_Sensor_SGP40 // <=== Update this with the new sensor type
+#define CLASSTITLE SFE_QUAD_Sensor_SHTC3 // <=== Update this with the new sensor type
 
-#define SENSE_COUNT 1 // <=== Update this with the number of things this sensor can sense
+#define SENSE_COUNT 2 // <=== Update this with the number of things this sensor can sense
 
-#define SETTING_COUNT 2 // <=== Update this with the number of things that can be set on this sensor
+#define SETTING_COUNT 0// <=== Update this with the number of things that can be set on this sensor
 
-#define CONFIGURATION_ITEM_COUNT 2 // <=== Update this with the number of things that can be configured on this sensor
+#define CONFIGURATION_ITEM_COUNT 0 // <=== Update this with the number of things that can be configured on this sensor
 
-#define SENSOR_I2C_ADDRESSES const uint8_t sensorI2cAddresses[] = {0x59} // <=== Update this with the I2C addresses for this sensor
+#define SENSOR_I2C_ADDRESSES const uint8_t sensorI2cAddresses[] = {0x70} // <=== Update this with the I2C addresses for this sensor
 
 class CLASSTITLE : public SFE_QUAD_Sensor
 {
 public:
-  float _rh;
-  float _temp;
+  bool _rh;
+  bool _temp;
 
   CLASSTITLE(void)
   {
@@ -51,18 +51,8 @@ public:
     for (size_t i = 0; i <= SENSE_COUNT; i++)
       _logSense[i] = true;
     _customInitializePtr = NULL;
-    _rh = 50.0;
-    _temp = 25.0;
-  }
-
-  void setRH(float RH)
-  {
-    _rh = RH;
-  }
-
-  void setTemperature(float temp)
-  {
-    _temp = temp;
+    _rh = false;
+    _temp = false;
   }
 
   void deleteSensorStorage(void)
@@ -98,7 +88,7 @@ public:
     if (port.endTransmission() == 0)
     {
       CLASSNAME *device = (CLASSNAME *)_classPtr;
-      return (device->begin(port));
+      return (device->begin(port) == SHTC3_Status_Nominal);
     }
     else
       return (false);
@@ -108,7 +98,7 @@ public:
   bool beginSensor(uint8_t sensorAddress, TwoWire &port)
   {
     CLASSNAME *device = (CLASSNAME *)_classPtr;
-    return (device->begin(port));
+    return (device->begin(port) == SHTC3_Status_Nominal);
   }
 
   // Initialize the sensor. ===> Adapt this to match the sensor type <===
@@ -121,7 +111,7 @@ public:
     }
     else
     {
-      _customInitializePtr(sensorAddress, port, _classPtr); // Call the custom initialize function. You could set _rh and _temp here
+      _customInitializePtr(sensorAddress, port, _classPtr); // Call the custom initialize function
       return (true);
     }
   }
@@ -149,7 +139,10 @@ public:
     switch (sense)
     {
     case 0:
-      return ("VOC Index");
+      return ("Humidity (%)");
+      break;
+    case 1:
+      return ("Temperature (C)");
       break;
     default:
       return (NULL);
@@ -165,7 +158,23 @@ public:
     switch (sense)
     {
     case 0:
-      sprintf(reading, "%d", device->getVOCindex(_rh, _temp));
+      if (_rh == false)
+      {
+        device->update();
+        _temp = true;
+      }
+      _rh = false;
+      OLS_sprintf.OLS_etoa((double)device->toPercent(), reading); // Get the humidity
+      return (true);
+      break;
+    case 1:
+      if (_temp == false)
+      {
+        device->update();
+        _rh = true;
+      }
+      _temp = false;
+      OLS_sprintf.OLS_etoa((double)device->toDegC(), reading); // Get the temperature
       return (true);
       break;
     default:
@@ -197,12 +206,6 @@ public:
   {
     switch (setting)
     {
-    case 0:
-      return ("Relative Humidity (%)");
-      break;
-    case 1:
-      return ("Temperature (C)");
-      break;
     default:
       return (NULL);
       break;
@@ -215,12 +218,6 @@ public:
   {
     switch (setting)
     {
-    case 0:
-      *type = SFE_QUAD_SETTING_TYPE_FLOAT;
-      break;
-    case 1:
-      *type = SFE_QUAD_SETTING_TYPE_FLOAT;
-      break;
     default:
       return (false);
       break;
@@ -234,12 +231,6 @@ public:
     CLASSNAME *device = (CLASSNAME *)_classPtr;
     switch (setting)
     {
-    case 0:
-      _rh = value->FLOAT;
-      break;
-    case 1:
-      _temp = value->FLOAT;
-      break;
     default:
       return (false);
       break;
@@ -270,12 +261,6 @@ public:
   {
     switch (configItem)
     {
-    case 0:
-      return ("RH");
-      break;
-    case 1:
-      return ("Temp");
-      break;
     default:
       return (NULL);
       break;
@@ -288,12 +273,6 @@ public:
   {
     switch (configItem)
     {
-    case 0:
-      *type = SFE_QUAD_SETTING_TYPE_FLOAT;
-      break;
-    case 1:
-      *type = SFE_QUAD_SETTING_TYPE_FLOAT;
-      break;
     default:
       return (false);
       break;
@@ -307,12 +286,6 @@ public:
     CLASSNAME *device = (CLASSNAME *)_classPtr;
     switch (configItem)
     {
-    case 0:
-      value->FLOAT = _rh;
-      break;
-    case 1:
-      value->FLOAT = _temp;
-      break;
     default:
       return (false);
       break;

@@ -212,9 +212,23 @@ bool SFE_QUAD_Sensors::detectSensors(void)
     return (false);
   }
 
-  // Begin by detecting any multiplexers with addresses 0x70 to 0x75 only
+  // Begin by checking for a SHTC3 on the main branch
+  bool shtc3OnMain = false;
+  SFE_QUAD_Sensor *tryThisSensorType;
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_SHTC3)
+  tryThisSensorType = sensorFactory(Sensor_SHTC3);
+  if (tryThisSensorType != NULL)
+    if (tryThisSensorType->_classPtr != NULL) // Check if sensor can be included
+      if (tryThisSensorType->detectSensor(0x70, *_i2cPort)) // Check if the device is detected
+      {
+        shtc3OnMain = true;
+        //if (_printDebug)
+        //  _debugPort->println(F("detectSensors: SHTC3 found on main branch"));
+      }
+#endif
+
+  // Next, detect any multiplexers with addresses 0x70 to 0x75 only
   // Leave 0x76 and 0x77 for the MS5637 / MS8607 / BME280
-  // TO DO: Add detection of the SHTC3 here (address 0x70)
   bool *muxAddrs = new bool[6];
   if (muxAddrs == NULL)
   {
@@ -232,7 +246,15 @@ bool SFE_QUAD_Sensors::detectSensors(void)
   }
   for (uint8_t muxAddr = 0x70; muxAddr <= 0x75; muxAddr++)
   {
-    if (thisMux->begin(muxAddr, *_i2cPort))
+    if (shtc3OnMain && (muxAddr == 0x70))
+    {
+      if (_printDebug)
+      {
+        _debugPort->println(F("detectSensors: SHTC3 found on main branch. Skipping mux detection for 0x70"));
+      }
+      muxAddrs[muxAddr - 0x70] = false;
+    }
+    else if (thisMux->begin(muxAddr, *_i2cPort))
     {
       if (_printDebug)
       {
@@ -255,7 +277,8 @@ bool SFE_QUAD_Sensors::detectSensors(void)
     // Select the mux
     if ((muxAddr >= 0x70) && (muxAddrs[muxAddr - 0x70]))
     {
-      thisMux->begin(muxAddr, *_i2cPort);
+      if (!(shtc3OnMain && (muxAddr == 0x70)))
+        thisMux->begin(muxAddr, *_i2cPort);
     }
 
     for (uint8_t muxPort = 0; muxPort <= 7; muxPort++)
@@ -263,7 +286,8 @@ bool SFE_QUAD_Sensors::detectSensors(void)
       // Set the mux port
       if ((muxAddr >= 0x70) && (muxAddrs[muxAddr - 0x70]))
       {
-        thisMux->setPort(muxPort);
+        if (!(shtc3OnMain && (muxAddr == 0x70)))
+          thisMux->setPort(muxPort);
       }
 
       if (((muxAddr == 0x6F) && (muxPort == 0)) || ((muxAddr >= 0x70) && (muxAddrs[muxAddr - 0x70])))
@@ -272,7 +296,7 @@ bool SFE_QUAD_Sensors::detectSensors(void)
         for (uint16_t type = 0; type < (uint16_t)SFE_QUAD_Sensor_Number_Of_Sensors; type++)
         {
           // Create a new sensor with the desired type
-          SFE_QUAD_Sensor *tryThisSensorType = sensorFactory((SFEQUADSensorType)type);
+          tryThisSensorType = sensorFactory((SFEQUADSensorType)type);
 
           if (tryThisSensorType != NULL)
           {

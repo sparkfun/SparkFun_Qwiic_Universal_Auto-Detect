@@ -159,6 +159,14 @@ jobs:
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SGP40_Arduino_Library/main/src/sensirion_voc_algorithm.h
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SGP40_Arduino_Library/main/src/sensirion_voc_algorithm.cpp
 
+      - name: Update SHTC3
+        run: |
+          cd ./src/src/
+          mkdir -p SHTC3
+          cd SHTC3
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SHTC3_Arduino_Library/master/src/SparkFun_SHTC3.h
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SHTC3_Arduino_Library/master/src/SparkFun_SHTC3.cpp
+
       - name: Update UBLOX_GNSS
         run: |
           cd ./src/src/
