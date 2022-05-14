@@ -261,6 +261,9 @@ public:
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_SCD30)
     Sensor_SCD30,
 #endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_SCD40)
+    Sensor_SCD40,
+#endif
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_SDP3X)
     Sensor_SDP3X,
 #endif
@@ -338,6 +341,10 @@ public:
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_SCD30)
     if (type == Sensor_SCD30)
       return new SFE_QUAD_Sensor_SCD30;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_SCD40)
+    if (type == Sensor_SCD40)
+      return new SFE_QUAD_Sensor_SCD40;
 #endif
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_SDP3X)
     if (type == Sensor_SDP3X)
