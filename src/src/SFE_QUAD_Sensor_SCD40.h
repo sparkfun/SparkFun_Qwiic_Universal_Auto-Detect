@@ -269,14 +269,20 @@ public:
     switch (setting)
     {
     case 0:
+      device->stopPeriodicMeasurement();
       _autoCalibrate = value->BOOL;
       device->setAutomaticSelfCalibrationEnabled(_autoCalibrate);
+      device->startPeriodicMeasurement();
       break;
     case 1:
+      device->stopPeriodicMeasurement();
       device->setSensorAltitude(value->UINT16_T);
+      device->startPeriodicMeasurement();
       break;
     case 2:
+      device->stopPeriodicMeasurement();
       device->setTemperatureOffset(value->FLOAT);
+      device->startPeriodicMeasurement();
       break;
     default:
       return (false);
@@ -352,14 +358,20 @@ public:
     switch (configItem)
     {
     case 0:
+      device->stopPeriodicMeasurement();
       value->BOOL = device->getAutomaticSelfCalibrationEnabled();
       _autoCalibrate = value->BOOL;
+      device->startPeriodicMeasurement();
       break;
     case 1:
+      device->stopPeriodicMeasurement();
       value->UINT16_T = device->getSensorAltitude();
+      device->startPeriodicMeasurement();
       break;
     case 2:
+      device->stopPeriodicMeasurement();
       value->FLOAT = device->getTemperatureOffset();
+      device->startPeriodicMeasurement();
       break;
     default:
       return (false);
@@ -375,13 +387,19 @@ public:
     switch (configItem)
     {
     case 0:
+      device->stopPeriodicMeasurement();
       device->setAutomaticSelfCalibrationEnabled(value->BOOL);
+      device->startPeriodicMeasurement();
       break;
     case 1:
+      device->stopPeriodicMeasurement();
       device->setSensorAltitude(value->UINT16_T);
+      device->startPeriodicMeasurement();
       break;
     case 2:
+      device->stopPeriodicMeasurement();
       device->setTemperatureOffset(value->FLOAT);
+      device->startPeriodicMeasurement();
       break;
     default:
       return (false);
