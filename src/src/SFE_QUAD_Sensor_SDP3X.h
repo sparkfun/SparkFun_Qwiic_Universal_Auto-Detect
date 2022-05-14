@@ -160,7 +160,7 @@ public:
     switch (sense)
     {
     case 0:
-      if (_temperature = -9999)
+      if (_temperature == -9999)
       {
         device->readMeasurement(&_pressure, &_temperature);
       }
@@ -169,7 +169,7 @@ public:
       return (true);
       break;
     case 1:
-      if (_pressure = -9999)
+      if (_pressure == -9999)
       {
         device->readMeasurement(&_pressure, &_temperature);
       }
