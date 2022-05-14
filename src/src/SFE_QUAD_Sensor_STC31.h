@@ -1,7 +1,7 @@
-#ifndef SPARKFUN_QUAD_SENSOR_HEADER_SHTC3_H // <=== Update this with the new sensor type
-#define SPARKFUN_QUAD_SENSOR_HEADER_SHTC3_H // <=== Update this with the new sensor type
+#ifndef SPARKFUN_QUAD_SENSOR_HEADER_STC31_H // <=== Update this with the new sensor type
+#define SPARKFUN_QUAD_SENSOR_HEADER_STC31_H // <=== Update this with the new sensor type
 
-#include "SHTC3/SparkFun_SHTC3.h" // <=== Update this with the new sensor library header file
+#include "STC31/SparkFun_STC3x_Arduino_Library.h" // <=== Update this with the new sensor library header file
 
 #ifdef CLASSNAME
 #undef CLASSNAME
@@ -22,37 +22,45 @@
 #undef SENSOR_I2C_ADDRESSES
 #endif
 
-#define CLASSNAME SHTC3 // <=== Update this with the new sensor type
+#define CLASSNAME STC3x // <=== Update this with the new sensor type
 
-#define CLASSTITLE SFE_QUAD_Sensor_SHTC3 // <=== Update this with the new sensor type
+#define CLASSTITLE SFE_QUAD_Sensor_STC31 // <=== Update this with the new sensor type
 
 #define SENSE_COUNT 2 // <=== Update this with the number of things this sensor can sense
 
-#define SETTING_COUNT 0// <=== Update this with the number of things that can be set on this sensor
+#define SETTING_COUNT 7 // <=== Update this with the number of things that can be set on this sensor
 
-#define CONFIGURATION_ITEM_COUNT 0 // <=== Update this with the number of things that can be configured on this sensor
+#define CONFIGURATION_ITEM_COUNT 4 // <=== Update this with the number of things that can be configured on this sensor
 
-#define SENSOR_I2C_ADDRESSES const uint8_t sensorI2cAddresses[] = {0x70} // <=== Update this with the I2C addresses for this sensor
+#define SENSOR_I2C_ADDRESSES const uint8_t sensorI2cAddresses[] = {0x29, 0x2A, 0x2B, 0x2C} // <=== Update this with the I2C addresses for this sensor
 
 class CLASSTITLE : public SFE_QUAD_Sensor
 {
 public:
-  bool _rh;
-  bool _temp;
+  float _rh;
+  float _temp;
+  uint16_t _press;
+  STC3X_binary_gas_type_e _binaryGas;
+  bool _co2;
+  bool _validTemp;
 
   CLASSTITLE(void)
   {
     _sensorAddress = 0;
     _muxAddress = 0;
     _muxPort = 0;
-    _classPtr = new CLASSNAME;
+    _classPtr = new CLASSNAME(STC3x_SENSOR_STC31);
     _next = NULL;
     _logSense = new bool[SENSE_COUNT + 1];
     for (size_t i = 0; i <= SENSE_COUNT; i++)
       _logSense[i] = true;
     _customInitializePtr = NULL;
-    _rh = false;
-    _temp = false;
+    _rh = 50.0;
+    _temp = 25.0;
+    _press = 1000;
+    _binaryGas = STC3X_BINARY_GAS_CO2_AIR_25;
+    _co2 = false;
+    _validTemp = false;
   }
 
   void deleteSensorStorage(void)
@@ -88,7 +96,7 @@ public:
     if (port.endTransmission() == 0)
     {
       CLASSNAME *device = (CLASSNAME *)_classPtr;
-      return (device->begin(port) == SHTC3_Status_Nominal);
+      return (device->begin(sensorAddress, port));
     }
     else
       return (false);
@@ -98,7 +106,7 @@ public:
   bool beginSensor(uint8_t sensorAddress, TwoWire &port)
   {
     CLASSNAME *device = (CLASSNAME *)_classPtr;
-    return (device->begin(port) == SHTC3_Status_Nominal);
+    return (device->begin(sensorAddress, port));
   }
 
   // Initialize the sensor. ===> Adapt this to match the sensor type <===
@@ -107,6 +115,10 @@ public:
     if (_customInitializePtr == NULL) // Has a custom initialize function been defined?
     {
       CLASSNAME *device = (CLASSNAME *)_classPtr;
+      device->setBinaryGas(_binaryGas);
+      //device->setTemperature(_temp);
+      device->setRelativeHumidity(_rh);
+      device->setPressure(_press);
       return (true);
     }
     else
@@ -139,7 +151,7 @@ public:
     switch (sense)
     {
     case 0:
-      return ("Humidity (%)");
+      return ("CO2 (%)");
       break;
     case 1:
       return ("Temperature (C)");
@@ -158,23 +170,23 @@ public:
     switch (sense)
     {
     case 0:
-      if (_rh == false)
+      if (_co2 == false)
       {
-        device->update();
-        _temp = true;
+        device->measureGasConcentration();
+        _validTemp = true;
       }
-      _rh = false;
-      OLS_sprintf.OLS_etoa((double)device->toPercent(), reading); // Get the humidity
+      _co2 = false;
+      OLS_sprintf.OLS_etoa((double)device->getCO2(), reading); // Get the CO2 concentration
       return (true);
       break;
     case 1:
-      if (_temp == false)
+      if (_validTemp == false)
       {
-        device->update();
-        _rh = true;
+        device->measureGasConcentration();
+        _co2 = true;
       }
-      _temp = false;
-      OLS_sprintf.OLS_etoa((double)device->toDegC(), reading); // Get the temperature
+      _validTemp = false;
+      OLS_sprintf.OLS_etoa((double)device->getTemperature(), reading); // Get the temperature
       return (true);
       break;
     default:
@@ -206,6 +218,27 @@ public:
   {
     switch (setting)
     {
+    case 0:
+      return ("Set binary gas to CO2 in N2.  Range: 0 to 100 vol%");
+      break;
+    case 1:
+      return ("Set binary gas to CO2 in Air. Range: 0 to 100 vol%");
+      break;
+    case 2:
+      return ("Set binary gas to CO2 in N2.  Range: 0 to 25 vol%");
+      break;
+    case 3:
+      return ("Set binary gas to CO2 in Air. Range: 0 to 25 vol%");
+      break;
+    case 4:
+      return ("Ambient temperature (C)");
+      break;
+    case 5:
+      return ("Relative humidity (%)");
+      break;
+    case 6:
+      return ("Ambient pressure (mbar)");
+      break;
     default:
       return (NULL);
       break;
@@ -218,6 +251,27 @@ public:
   {
     switch (setting)
     {
+    case 0:
+      *type = SFE_QUAD_SETTING_TYPE_NONE;
+      break;
+    case 1:
+      *type = SFE_QUAD_SETTING_TYPE_NONE;
+      break;
+    case 2:
+      *type = SFE_QUAD_SETTING_TYPE_NONE;
+      break;
+    case 3:
+      *type = SFE_QUAD_SETTING_TYPE_NONE;
+      break;
+    case 4:
+      *type = SFE_QUAD_SETTING_TYPE_FLOAT;
+      break;
+    case 5:
+      *type = SFE_QUAD_SETTING_TYPE_FLOAT;
+      break;
+    case 6:
+      *type = SFE_QUAD_SETTING_TYPE_UINT16_T;
+      break;
     default:
       return (false);
       break;
@@ -231,6 +285,34 @@ public:
     CLASSNAME *device = (CLASSNAME *)_classPtr;
     switch (setting)
     {
+    case 0:
+      _binaryGas = STC3X_BINARY_GAS_CO2_N2_100;
+      device->setBinaryGas(_binaryGas);
+      break;
+    case 1:
+      _binaryGas = STC3X_BINARY_GAS_CO2_AIR_100;
+      device->setBinaryGas(_binaryGas);
+      break;
+    case 2:
+      _binaryGas = STC3X_BINARY_GAS_CO2_N2_25;
+      device->setBinaryGas(_binaryGas);
+      break;
+    case 3:
+      _binaryGas = STC3X_BINARY_GAS_CO2_AIR_25;
+      device->setBinaryGas(_binaryGas);
+      break;
+    case 4:
+      _temp = value->FLOAT;
+      device->setTemperature(_temp);
+      break;
+    case 5:
+      _rh = value->FLOAT;
+      device->setRelativeHumidity(_rh);
+      break;
+    case 6:
+      _press = value->UINT16_T;
+      device->setPressure(_press);
+      break;
     default:
       return (false);
       break;
@@ -261,6 +343,18 @@ public:
   {
     switch (configItem)
     {
+    case 0:
+      return ("Binary_gas");
+      break;
+    case 1:
+      return ("Temp");
+      break;
+    case 2:
+      return ("RH");
+      break;
+    case 3:
+      return ("Press");
+      break;
     default:
       return (NULL);
       break;
@@ -273,6 +367,18 @@ public:
   {
     switch (configItem)
     {
+    case 0:
+      *type = SFE_QUAD_SETTING_TYPE_UINT8_T;
+      break;
+    case 1:
+      *type = SFE_QUAD_SETTING_TYPE_FLOAT;
+      break;
+    case 2:
+      *type = SFE_QUAD_SETTING_TYPE_FLOAT;
+      break;
+    case 3:
+      *type = SFE_QUAD_SETTING_TYPE_UINT16_T;
+      break;
     default:
       return (false);
       break;
@@ -286,6 +392,18 @@ public:
     CLASSNAME *device = (CLASSNAME *)_classPtr;
     switch (configItem)
     {
+    case 0:
+      value->UINT8_T = (uint8_t)_binaryGas;
+      break;
+    case 1:
+      value->FLOAT = _temp;
+      break;
+    case 2:
+      value->FLOAT = _rh;
+      break;
+    case 3:
+      value->UINT16_T = _press;
+      break;
     default:
       return (false);
       break;
@@ -299,6 +417,22 @@ public:
     CLASSNAME *device = (CLASSNAME *)_classPtr;
     switch (configItem)
     {
+    case 0:
+      _binaryGas = (STC3X_binary_gas_type_e)value->UINT8_T;
+      device->setBinaryGas(_binaryGas);
+      break;
+    case 1:
+      _temp = value->FLOAT;
+      //device->setTemperature(_temp);
+      break;
+    case 2:
+      _rh = value->FLOAT;;
+      device->setRelativeHumidity(_rh);
+      break;
+    case 3:
+      _press = value->UINT16_T;
+      device->setPressure(_press);
+      break;
     default:
       return (false);
       break;
