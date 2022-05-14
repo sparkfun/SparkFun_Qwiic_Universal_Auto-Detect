@@ -24,6 +24,7 @@
 //#define INCLUDE_SFE_QUAD_SENSOR_NAU7802
 //#define INCLUDE_SFE_QUAD_SENSOR_QWIICBUTTON
 //#define INCLUDE_SFE_QUAD_SENSOR_SCD30
+//#define INCLUDE_SFE_QUAD_SENSOR_SCD40
 //#define INCLUDE_SFE_QUAD_SENSOR_SDP3X
 //#define INCLUDE_SFE_QUAD_SENSOR_SGP30
 //#define INCLUDE_SFE_QUAD_SENSOR_SGP40
@@ -275,6 +276,9 @@ public:
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_STC31)
     Sensor_STC31,
 #endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_TMP117)
+    Sensor_TMP117,
+#endif
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_UBLOX_GNSS)
     Sensor_UBLOX_GNSS,
 #endif
@@ -354,6 +358,10 @@ public:
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_STC31)
     if (type == Sensor_STC31)
       return new SFE_QUAD_Sensor_STC31;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_TMP117)
+    if (type == Sensor_TMP117)
+      return new SFE_QUAD_Sensor_TMP117;
 #endif
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_UBLOX_GNSS)
     if (type == Sensor_UBLOX_GNSS)

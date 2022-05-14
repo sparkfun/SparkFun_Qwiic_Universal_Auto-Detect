@@ -175,6 +175,15 @@ jobs:
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_STC3x_Arduino_Library/main/src/SparkFun_STC3x_Arduino_Library.h
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_STC3x_Arduino_Library/main/src/SparkFun_STC3x_Arduino_Library.cpp
 
+      - name: Update TMP117
+        run: |
+          cd ./src/src/
+          mkdir -p TMP117
+          cd TMP117
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_TMP117_Arduino_Library/master/src/SparkFun_TMP117.h
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_TMP117_Arduino_Library/master/src/SparkFun_TMP117.cpp
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_TMP117_Arduino_Library/master/src/SparkFun_TMP117_Registers.h
+
       - name: Update UBLOX_GNSS
         run: |
           cd ./src/src/

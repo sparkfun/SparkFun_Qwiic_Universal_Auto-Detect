@@ -55,6 +55,9 @@
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_STC31)
 #include "src/SFE_QUAD_Sensor_STC31.h"
 #endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_TMP117)
+#include "src/SFE_QUAD_Sensor_TMP117.h"
+#endif
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_UBLOX_GNSS)
 #include "src/SFE_QUAD_Sensor_UBLOX_GNSS.h"
 #endif
