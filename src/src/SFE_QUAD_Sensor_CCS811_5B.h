@@ -84,8 +84,14 @@ public:
   // Detect the sensor. ===> Adapt this to match the sensor type <===
   bool detectSensor(uint8_t sensorAddress, TwoWire &port)
   {
-    CLASSNAME *device = (CLASSNAME *)_classPtr;
-    return (device->begin(port));
+    port.beginTransmission(sensorAddress); // Scan the sensor address first
+    if (port.endTransmission() == 0)
+    {
+      CLASSNAME *device = (CLASSNAME *)_classPtr;
+      return (device->begin(port));
+    }
+    else
+      return (false);
   }
 
   // Begin the sensor. ===> Adapt this to match the sensor type <===
