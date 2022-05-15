@@ -210,6 +210,16 @@ jobs:
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_VCNL4040_Arduino_Library/master/src/SparkFun_VCNL4040_Arduino_Library.h
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_VCNL4040_Arduino_Library/master/src/SparkFun_VCNL4040_Arduino_Library.cpp
 
+      - name: Update VEML6075
+        run: |
+          cd ./src/src/
+          mkdir -p VEML6075
+          cd VEML6075
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_VEML6075_Arduino_Library/master/src/SparkFun_VEML6075_Arduino_Library.h
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_VEML6075_Arduino_Library/master/src/SparkFun_VEML6075_Arduino_Library.cpp
+          # SparkFun_VEML6075_Arduino_Library.cpp uses #include <SparkFun_VEML6075_Arduino_Library.h>. We need to replace the < and > with double quotes
+          sed -i 's/<SparkFun_VEML6075_Arduino_Library.h>/'\"'SparkFun_VEML6075_Arduino_Library.h'\"'/g' SparkFun_VEML6075_Arduino_Library.cpp
+
       - name: Add and Commit
         uses: EndBug/add-and-commit@v9
         with:        
