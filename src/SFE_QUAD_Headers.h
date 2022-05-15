@@ -19,6 +19,9 @@
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_LPS25HB)
 #include "src/SFE_QUAD_Sensor_LPS25HB.h"
 #endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MAX17048)
+#include "src/SFE_QUAD_Sensor_MAX17048.h"
+#endif
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MCP9600)
 #include "src/SFE_QUAD_Sensor_MCP9600.h"
 #endif

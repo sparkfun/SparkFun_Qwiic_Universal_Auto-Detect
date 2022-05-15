@@ -240,6 +240,9 @@ public:
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_LPS25HB)
     Sensor_LPS25HB,
 #endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MAX17048)
+    Sensor_MAX17048,
+#endif
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MCP9600)
     Sensor_MCP9600,
 #endif
@@ -325,6 +328,10 @@ public:
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_LPS25HB)
     if (type == Sensor_LPS25HB)
       return new SFE_QUAD_Sensor_LPS25HB;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MAX17048)
+    if (type == Sensor_MAX17048)
+      return new SFE_QUAD_Sensor_MAX17048;
 #endif
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MCP9600)
     if (type == Sensor_MCP9600)

@@ -71,6 +71,14 @@ jobs:
           # SparkFun_LPS25HB_Arduino_Library.cpp uses #include <SparkFun_LPS25HB_Arduino_Library.h>. We need to replace the < and > with double quotes
           sed -i 's/<SparkFun_LPS25HB_Arduino_Library.h>/'\"'SparkFun_LPS25HB_Arduino_Library.h'\"'/g' SparkFun_LPS25HB_Arduino_Library.cpp
 
+      - name: Update MAX17048
+        run: |
+          cd ./src/src/
+          mkdir -p MAX17048
+          cd MAX17048
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_MAX1704x_Fuel_Gauge_Arduino_Library/main/src/SparkFun_MAX1704x_Fuel_Gauge_Arduino_Library.h
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_MAX1704x_Fuel_Gauge_Arduino_Library/main/src/SparkFun_MAX1704x_Fuel_Gauge_Arduino_Library.cpp
+
       - name: Update MCP9600
         run: |
           cd ./src/src/
