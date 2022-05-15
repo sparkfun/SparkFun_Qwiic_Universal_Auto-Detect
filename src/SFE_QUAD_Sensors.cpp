@@ -342,6 +342,18 @@ bool SFE_QUAD_Sensors::detectSensors(void)
                     _debugPort->println(muxPort);
                   }
                 }
+                // If this is a VEML7700, check if we have already found a VEML6075. Skip it if we have
+                else if ((strcmp(tryThisSensorType->getSensorName(), "VEML7700") == 0)
+                  && ((sensorExists("VEML6075", 0x10, 0, 0) != NULL) || (sensorExists("VEML6075", 0x10, muxAddr == 0x6F ? 0 : muxAddr, muxPort) != NULL)))
+                {
+                  if (_printDebug)
+                  {
+                    _debugPort->print(F("detectSensors: skipping VEML7700 detection for muxAddr 0x"));
+                    _debugPort->print(muxAddr == 0x6F ? 0 : muxAddr, HEX);
+                    _debugPort->print(F(" muxPort 0x"));
+                    _debugPort->println(muxPort);
+                  }
+                }
                 else
                 {
                   if (tryThisSensorType->detectSensor(tryThisAddress, *_i2cPort)) // Check if the device is detected
