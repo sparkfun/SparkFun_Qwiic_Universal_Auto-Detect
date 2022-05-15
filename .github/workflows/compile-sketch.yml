@@ -202,6 +202,14 @@ jobs:
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_u-blox_GNSS_Arduino_Library/main/src/u-blox_config_keys.h
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_u-blox_GNSS_Arduino_Library/main/src/u-blox_structs.h
 
+      - name: Update VCNL4040
+        run: |
+          cd ./src/src/
+          mkdir -p VCNL4040
+          cd VCNL4040
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_VCNL4040_Arduino_Library/master/src/SparkFun_VCNL4040_Arduino_Library.h
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_VCNL4040_Arduino_Library/master/src/SparkFun_VCNL4040_Arduino_Library.cpp
+
       - name: Add and Commit
         uses: EndBug/add-and-commit@v9
         with:        

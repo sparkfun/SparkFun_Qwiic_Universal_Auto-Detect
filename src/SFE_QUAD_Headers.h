@@ -64,5 +64,8 @@
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_UBLOX_GNSS)
 #include "src/SFE_QUAD_Sensor_UBLOX_GNSS.h"
 #endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_VCNL4040)
+#include "src/SFE_QUAD_Sensor_VCNL4040.h"
+#endif
 
 #endif

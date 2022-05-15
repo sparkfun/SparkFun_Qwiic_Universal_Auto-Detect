@@ -285,6 +285,9 @@ public:
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_UBLOX_GNSS)
     Sensor_UBLOX_GNSS,
 #endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_VCNL4040)
+    Sensor_VCNL4040,
+#endif
     SFE_QUAD_Sensor_Number_Of_Sensors // Must be last. <=== Add new sensors _above this line_ to preserve the existing enum values
   };
 
@@ -373,6 +376,10 @@ public:
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_UBLOX_GNSS)
     if (type == Sensor_UBLOX_GNSS)
       return new SFE_QUAD_Sensor_UBLOX_GNSS;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_VCNL4040)
+    if (type == Sensor_VCNL4040)
+      return new SFE_QUAD_Sensor_VCNL4040;
 #endif
     return NULL;
   }
