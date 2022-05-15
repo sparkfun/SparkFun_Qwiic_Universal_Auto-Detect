@@ -70,5 +70,8 @@
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_VEML6075)
 #include "src/SFE_QUAD_Sensor_VEML6075.h"
 #endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_VEML7700)
+#include "src/SFE_QUAD_Sensor_VEML7700.h"
+#endif
 
 #endif

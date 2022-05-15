@@ -220,6 +220,14 @@ jobs:
           # SparkFun_VEML6075_Arduino_Library.cpp uses #include <SparkFun_VEML6075_Arduino_Library.h>. We need to replace the < and > with double quotes
           sed -i 's/<SparkFun_VEML6075_Arduino_Library.h>/'\"'SparkFun_VEML6075_Arduino_Library.h'\"'/g' SparkFun_VEML6075_Arduino_Library.cpp
 
+      - name: Update VEML7700
+        run: |
+          cd ./src/src/
+          mkdir -p VEML7700
+          cd VEML7700
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_VEML7700_Arduino_Library/main/src/SparkFun_VEML7700_Arduino_Library.h
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_VEML7700_Arduino_Library/main/src/SparkFun_VEML7700_Arduino_Library.cpp
+
       - name: Add and Commit
         uses: EndBug/add-and-commit@v9
         with:        
