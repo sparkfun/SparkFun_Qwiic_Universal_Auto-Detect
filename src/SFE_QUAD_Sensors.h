@@ -294,6 +294,9 @@ public:
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_VEML7700)
     Sensor_VEML7700,
 #endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_VL53L1X)
+    Sensor_VL53L1X,
+#endif
     SFE_QUAD_Sensor_Number_Of_Sensors // Must be last. <=== Add new sensors _above this line_ to preserve the existing enum values
   };
 
@@ -394,6 +397,10 @@ public:
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_VEML7700)
     if (type == Sensor_VEML7700)
       return new SFE_QUAD_Sensor_VEML7700;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_VL53L1X)
+    if (type == Sensor_VL53L1X)
+      return new SFE_QUAD_Sensor_VL53L1X(*_i2cPort);
 #endif
     return NULL;
   }

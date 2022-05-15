@@ -228,6 +228,24 @@ jobs:
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_VEML7700_Arduino_Library/main/src/SparkFun_VEML7700_Arduino_Library.h
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_VEML7700_Arduino_Library/main/src/SparkFun_VEML7700_Arduino_Library.cpp
 
+      - name: Update VL53L1X
+        run: |
+          cd ./src/src/
+          mkdir -p VL53L1X
+          cd VL53L1X
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_VL53L1X_Arduino_Library/master/src/SparkFun_VL53L1X.cpp
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_VL53L1X_Arduino_Library/master/src/SparkFun_VL53L1X.cpp
+          mkdir -p st_src
+          cd st_src
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_VL53L1X_Arduino_Library/master/src/st_src/ComponentObject.h
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_VL53L1X_Arduino_Library/master/src/st_src/vl53l1_error_codes.h
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_VL53L1X_Arduino_Library/master/src/st_src/vl53l1x_class.h
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_VL53L1X_Arduino_Library/master/src/st_src/vl53l1x_class.cpp
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_VL53L1X_Arduino_Library/master/src/st_src/RangeSensor.h
+          sed -i 's/<st_src/ComponentObject.h>/'\"'ComponentObject.h'\"'/g' RangeSensor.h
+
+st_src/ComponentObject.h
+
       - name: Add and Commit
         uses: EndBug/add-and-commit@v9
         with:        
