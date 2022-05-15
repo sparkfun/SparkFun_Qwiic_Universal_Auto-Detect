@@ -83,7 +83,7 @@ public:
     if (port.endTransmission() == 0)
     {
       CLASSNAME *device = (CLASSNAME *)_classPtr;
-      return (device->begin(port));
+      return (device->begin(port) == VEML6075_ERROR_SUCCESS);
     }
     else
       return (false);
@@ -93,7 +93,7 @@ public:
   bool beginSensor(uint8_t sensorAddress, TwoWire &port)
   {
     CLASSNAME *device = (CLASSNAME *)_classPtr;
-    return (device->begin(port));
+    return (device->begin(port) == VEML6075_ERROR_SUCCESS);
   }
 
   // Initialize the sensor. ===> Adapt this to match the sensor type <===
