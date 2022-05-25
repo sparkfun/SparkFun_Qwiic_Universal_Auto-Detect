@@ -1871,6 +1871,167 @@ bool SFE_QUAD_Sensors__SD::endStorage(void)
 
 #endif
 
+// SdFat Support
+
+#ifdef SFE_QUAD_SENSORS_SDFAT
+
+SFE_QUAD_Sensors__SdFat::~SFE_QUAD_Sensors__SdFat(void)
+{
+  if (_theStorageName != NULL) // Clear the previous file name (if any)
+    delete _theStorageName;
+}
+
+bool SFE_QUAD_Sensors__SdFat::beginStorage(int csPin, const char *theFileName)
+{
+  _csPin = csPin; // Store the chip select pin number
+
+  if (_theStorageName != NULL) // Clear the previous file name (if any)
+  {
+    delete[] _theStorageName;
+    _theStorageName = NULL;
+  }
+
+  _theStorageName = new char[strlen(theFileName) + 1]; // Store the file name
+
+  if (_theStorageName == NULL)
+  {
+    if (_printDebug)
+      _debugPort->println(F("SFE_QUAD_Sensors__SdFat::beginStorage: failed to allocate memory for _theStorageName!"));
+    return (false);
+  }
+
+  memset(_theStorageName, 0, strlen(theFileName) + 1); // Clear the memory
+
+  strcat(_theStorageName, theFileName);
+
+  if (!sd.begin(SFE_QUAD_SD_CONFIG))
+  {
+    if (_printDebug)
+      _debugPort->println(F("SFE_QUAD_Sensors__SdFat::beginStorage: sd.begin failed!"));
+    return (false);
+  }
+
+  //Change to root directory. All new file creation will be in root.
+  if (sd.chdir() == false)
+  {
+    if (_printDebug)
+      _debugPort->println(F("SFE_QUAD_Sensors__SdFat::beginStorage: sd.chdir failed!"));
+    return (false);
+  }
+
+  if (_printDebug)
+    _debugPort->println(F("SFE_QUAD_Sensors__SdFat::beginStorage: success"));
+
+  return (true);
+}
+
+bool SFE_QUAD_Sensors__SdFat::writeConfigurationToStorage(bool append)
+{
+  if ((_theStorageName == NULL) || (_csPin == -1))
+  {
+    if (_printDebug)
+      _debugPort->println(F("writeConfigurationToStorage: file name or CS pin not found. Did you forget to call beginStorage?"));
+    return (false);
+  }
+
+  // O_CREAT - create the file if it does not exist
+  // O_APPEND - seek to the end of the file prior to each write
+  // O_WRITE - open for write
+
+  bool fileOpen;
+  if (append)
+    fileOpen = _theStorage.open(_theStorageName, O_CREAT | O_APPEND | O_WRITE);
+  else
+    fileOpen = _theStorage.open(_theStorageName, O_CREAT | O_WRITE);
+
+  if (!fileOpen)
+  {
+    if (_printDebug)
+      _debugPort->println(F("writeConfigurationToStorage: failed to open the file!"));
+    return (false);
+  }
+
+  _theStorage.print(configuration); // Write the configuration to file
+
+  _theStorage.sync();
+  _theStorage.close();
+
+  if (_printDebug)
+    _debugPort->println(F("writeConfigurationToStorage: complete"));
+
+  return (true);
+}
+
+bool SFE_QUAD_Sensors__SdFat::readConfigurationFromStorage(void)
+{
+  if ((_theStorageName == NULL) || (_csPin == -1))
+  {
+    if (_printDebug)
+      _debugPort->println(F("readConfigurationFromStorage: file name or CS pin not found. Did you forget to call beginStorage?"));
+    return (false);
+  }
+
+  bool fileOpen;
+  fileOpen = _theStorage.open(_theStorageName, O_READ);
+
+  if (!fileOpen)
+  {
+    if (_printDebug)
+      _debugPort->println(F("readConfigurationFromStorage: failed to open the file!"));
+    return (false);
+  }
+
+  if (configuration != NULL) // Delete the old configuration
+  {
+    delete[] configuration;
+    configuration = NULL;
+  }
+
+  configuration = new char[_theStorage.size() + 1];
+
+  if (configuration == NULL)
+  {
+    if (_printDebug)
+      _debugPort->println(F("readConfigurationFromStorage: failed to allocate memory for configuration!"));
+    _theStorage.close();
+    return (false);
+  }
+
+  memset(configuration, 0, _theStorage.size() + 1); // Clear the memory
+
+  // Go though the file, reading a character at a time and writing it to configuration
+
+  char c[2];
+  c[0] = 0;
+  c[1] = 0;
+
+  while (_theStorage.available())
+  {
+    c[0] = _theStorage.read();
+    strcat(configuration, c);
+  }
+
+  // if (_printDebug)
+  // {
+  //   _debugPort->println(F("readConfigurationFromStorage: configuration :"));
+  //   _debugPort->print(configuration);
+  // }
+
+  _theStorage.close();
+
+  if (_printDebug)
+    _debugPort->println(F("readConfigurationFromStorage: complete"));
+
+  return (true);
+}
+
+bool SFE_QUAD_Sensors__SdFat::endStorage(void)
+{
+  return (true);
+}
+
+#endif
+
 // LittleFS Support
 
 #ifdef SFE_QUAD_SENSORS_LITTLEFS
