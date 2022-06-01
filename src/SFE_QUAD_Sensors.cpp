@@ -1597,6 +1597,8 @@ bool SFE_QUAD_Sensors::applySensorConfiguration(void)
       if (_printDebug)
       {
         _debugPort->print(F("applySensorConfiguration: configuration line : "));
+        _debugPort->print(lineNumber);
+        _debugPort->print(F(" : "));
         _debugPort->println(line);
       }
 
@@ -1637,7 +1639,7 @@ bool SFE_QUAD_Sensors::applySensorConfiguration(void)
               thisSensor->_logSense[sense] = 1;
           }
           if (_printDebug)
-            _debugPort->println(F("applySensorConfiguration: using logging settings."));
+            _debugPort->println(F("applySensorConfiguration: using logging settings"));
         }
         else
         {
@@ -1651,7 +1653,10 @@ bool SFE_QUAD_Sensors::applySensorConfiguration(void)
               if (thisConfigItem == configItem)
               {
                 if (_printDebug)
-                  _debugPort->println(F("applySensorConfiguration: Match found! Using line."));
+                {
+                  _debugPort->println(F("applySensorConfiguration: using line : "));
+                  _debugPort->print(lineNumber);
+                }
 
                 SFE_QUAD_Sensor::SFE_QUAD_Sensor_Setting_Type_e type;
                 thisSensor->getConfigurationItemType(configItem, &type);
@@ -1698,17 +1703,8 @@ bool SFE_QUAD_Sensors::applySensorConfiguration(void)
       {
         if (_printDebug)
         {
-          _debugPort->print(F("applySensorConfiguration: failed to parse line : "));
-          _debugPort->print(lineNumber);
-          _debugPort->println(F(" : "));
-          _debugPort->print(line);
-        }
-        if (lineNumber == 0)
-        {
-          // If we can't read the first line of the configuration, give up
-          if (_printDebug)
-            _debugPort->println(F("applySensorConfiguration: giving up on configuration"));
-          return (false);
+          _debugPort->print(F("applySensorConfiguration: no matching sensor for line : "));
+          _debugPort->println(lineNumber);
         }
       }
     }
@@ -1942,7 +1938,9 @@ bool SFE_QUAD_Sensors__SdFat::writeConfigurationToStorage(bool append)
   if (append)
     fileOpen = _theStorage.open(_theStorageName, O_CREAT | O_APPEND | O_WRITE);
   else
-    fileOpen = _theStorage.open(_theStorageName, O_CREAT | O_WRITE);
+  {
+    fileOpen = _theStorage.open(_theStorageName, O_CREAT | O_WRONLY | O_TRUNC);
+  }
 
   if (!fileOpen)
   {
