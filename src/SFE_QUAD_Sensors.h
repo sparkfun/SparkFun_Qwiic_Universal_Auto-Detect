@@ -492,11 +492,6 @@ public:
   bool readConfigurationFromStorage(void);               // Read theFileName, copy the contents into configuration
   bool endStorage(void);                                 // End the storage (if required)
 
-private:
-
-  char *_theStorageName = NULL; // The name of the settings file - set by beginStorage
-  int _csPin = -1;              // The SPI Chip Select pin - set by beginStorage
-
 #ifndef SFE_QUAD_SD_FAT_TYPE
 #define SFE_QUAD_SD_FAT_TYPE 3 // SD_FAT_TYPE = 0 for SdFat/File, 1 for FAT16/FAT32, 2 for exFAT, 3 for FAT16/FAT32 and exFAT.
 #endif
@@ -505,15 +500,26 @@ private:
 
 #if SFE_QUAD_SD_FAT_TYPE == 1
   SdFat32 sd;
-  File32 _theStorage;             // SdFat File
 #elif SFE_QUAD_SD_FAT_TYPE == 2
   SdExFat sd;
-  ExFile _theStorage;             // SdFat File
 #elif SFE_QUAD_SD_FAT_TYPE == 3
   SdFs sd;
-  FsFile _theStorage;             // SdFat File
 #else // SD_FAT_TYPE == 0
   SdFat sd;
+#endif  // SD_FAT_TYPE
+
+private:
+
+  char *_theStorageName = NULL; // The name of the settings file - set by beginStorage
+  int _csPin = -1;              // The SPI Chip Select pin - set by beginStorage
+
+#if SFE_QUAD_SD_FAT_TYPE == 1
+  File32 _theStorage;             // SdFat File
+#elif SFE_QUAD_SD_FAT_TYPE == 2
+  ExFile _theStorage;             // SdFat File
+#elif SFE_QUAD_SD_FAT_TYPE == 3
+  FsFile _theStorage;             // SdFat File
+#else // SD_FAT_TYPE == 0
   File _theStorage;             // SdFat File
 #endif  // SD_FAT_TYPE
 
