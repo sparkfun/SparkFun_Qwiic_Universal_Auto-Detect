@@ -272,12 +272,12 @@ bool SFE_QUAD_Sensors::detectSensors(void)
   }
   // QWIICMUX.begin disables the mux ports. We do not need to do it here.
 
-  if (_printDebug)
-  {
-    _debugPort->print(F("detectSensors: mux detection took (ms): "));
-    _debugPort->println(millis() - detectStart);
-    detectStart = millis();
-  }
+  // if (_printDebug)
+  // {
+  //   _debugPort->print(F("detectSensors: mux detection took (ms): "));
+  //   _debugPort->println(millis() - detectStart);
+  //   detectStart = millis();
+  // }
 
   // Check the main branch for any sensors, then check each port on each mux
   // Use a fake muxAddr of 0x6F to indicate the main branch. Replace this with zero below.
@@ -398,14 +398,14 @@ bool SFE_QUAD_Sensors::detectSensors(void)
                 }
               }
 
-              if (_printDebug && (muxAddr == 0x6F))
-              {
-                _debugPort->print(F("detectSensors: main branch detection of "));
-                _debugPort->print(tryThisSensorType->getSensorName());
-                _debugPort->print(F(" took (ms): "));
-                _debugPort->println(millis() - detectStart);
-                detectStart = millis();
-              }
+              // if (_printDebug && (muxAddr == 0x6F))
+              // {
+              //   _debugPort->print(F("detectSensors: main branch detection of "));
+              //   _debugPort->print(tryThisSensorType->getSensorName());
+              //   _debugPort->print(F(" took (ms): "));
+              //   _debugPort->println(millis() - detectStart);
+              //   detectStart = millis();
+              // }
             }
 
             else
