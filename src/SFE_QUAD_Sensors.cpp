@@ -1654,8 +1654,8 @@ bool SFE_QUAD_Sensors::applySensorConfiguration(void)
               {
                 if (_printDebug)
                 {
-                  _debugPort->println(F("applySensorConfiguration: using line : "));
-                  _debugPort->print(lineNumber);
+                  _debugPort->print(F("applySensorConfiguration: using line : "));
+                  _debugPort->println(lineNumber);
                 }
 
                 SFE_QUAD_Sensor::SFE_QUAD_Sensor_Setting_Type_e type;
@@ -1938,9 +1938,7 @@ bool SFE_QUAD_Sensors__SdFat::writeConfigurationToStorage(bool append)
   if (append)
     fileOpen = _theStorage.open(_theStorageName, O_CREAT | O_APPEND | O_WRITE);
   else
-  {
     fileOpen = _theStorage.open(_theStorageName, O_CREAT | O_WRONLY | O_TRUNC);
-  }
 
   if (!fileOpen)
   {
