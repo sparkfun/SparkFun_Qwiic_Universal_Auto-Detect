@@ -1,7 +1,7 @@
 #ifndef SPARKFUN_QUAD_SENSORS_H
 #define SPARKFUN_QUAD_SENSORS_H
 
-// SparkFun OpenLog Sensors
+// SparkFun Qwiic Universal Auto-Detect Sensors
 
 // To include all sensors, uncomment #define INCLUDE_SFE_QUAD_SENSOR_ALL
 
