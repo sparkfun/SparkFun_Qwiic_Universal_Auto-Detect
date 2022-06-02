@@ -65,16 +65,20 @@ public:
   SFE_QUAD_Menu(void);
   ~SFE_QUAD_Menu(void);
 
-  bool setMenuPort(Stream &port);
+  void setMenuPort(Stream &port);
   bool addMenuItem(const char *itemName, SFE_QUAD_Menu_Item::SFE_QUAD_Menu_Variable_Type_e variableType);
-  bool addMenuItem(const char *itemName, void (*codePointer)());
-  bool addMenuItem(const char *itemName, SFE_QUAD_Menu_Item::SFE_QUAD_Menu_Variable_Type_e variableType, SFE_QUAD_Menu_Item::SFE_QUAD_Menu_Every_Type_t theVariable);
-  bool addMenuItem(const char *itemName, SFE_QUAD_Menu_Item::SFE_QUAD_Menu_Variable_Type_e variableType, SFE_QUAD_Menu_Item::SFE_QUAD_Menu_Every_Type_t theVariable, SFE_QUAD_Menu_Item::SFE_QUAD_Menu_Every_Type_t minVal, SFE_QUAD_Menu_Item::SFE_QUAD_Menu_Every_Type_t maxVal);
+  bool addMenuItem(const char *itemName, void (*codePointer)()); // CODE
+  bool getMenuItemVariable(const char *itemName, SFE_QUAD_Menu_Item::SFE_QUAD_Menu_Every_Type_t *theValue);
+  bool getMenuItemVariable(const char *itemName, char *theValue); // TEXT
+  bool setMenuItemVariable(const char *itemName, const SFE_QUAD_Menu_Item::SFE_QUAD_Menu_Every_Type_t *theValue);
+  bool setMenuItemVariable(const char *itemName, const char *theValue); // TEXT
+  bool setMenuItemVariableMin(const char *itemName, const SFE_QUAD_Menu_Item::SFE_QUAD_Menu_Every_Type_t *minVal);
+  bool setMenuItemVariableMax(const char *itemName, const SFE_QUAD_Menu_Item::SFE_QUAD_Menu_Every_Type_t *maxVal);
   bool openMenu(void);
-  bool writeMenuVariablesToStream(Stream &aStream);
-  bool readMenuVariablesFromStream(Stream &aStream);
-  uint8_t getMenuItemNameMaxLen(void);
-  bool getMenuItemVariable(const char *itemName, SFE_QUAD_Menu_Item::SFE_QUAD_Menu_Every_Type_t *theVariable);
+  bool writeMenuVariables(Print *pr);
+  bool readMenuVariables(void); // FIX ME!
+  size_t getMenuItemNameMaxLen(void);
+  SFE_QUAD_Menu_Item *menuItemExists(const char *itemName);
 
   SFE_QUAD_Menu_Item *_head; // The head of the linked list of sensors
   Stream *_menuPort; // The Serial port (Stream) used for the menu

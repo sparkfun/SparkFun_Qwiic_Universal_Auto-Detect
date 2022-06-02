@@ -131,13 +131,20 @@ void setup()
   theMenu.addMenuItem("Set RTC using NTP over WiFi", setRTC);
   theMenu.addMenuItem("WiFi settings", SFE_QUAD_Menu_Item::SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_START);
   theMenu.addMenuItem("WiFi SSID", SFE_QUAD_Menu_Item::SFE_QUAD_MENU_VARIABLE_TYPE_TEXT);
+  theMenu.setMenuItemVariable("WiFi SSID", "T-Rex");
   theMenu.addMenuItem("WiFi password", SFE_QUAD_Menu_Item::SFE_QUAD_MENU_VARIABLE_TYPE_TEXT);
+  theMenu.setMenuItemVariable("WiFi password", "Has Big Teeth");
   theMenu.addMenuItem("", SFE_QUAD_Menu_Item::SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END);
   theMenu.addMenuItem("Logging settings", SFE_QUAD_Menu_Item::SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_START);
   theMenu.addMenuItem("Logging interval (ms)", SFE_QUAD_Menu_Item::SFE_QUAD_MENU_VARIABLE_TYPE_ULONG);
+  SFE_QUAD_Menu_Item::SFE_QUAD_Menu_Every_Type_t defaultValue;
+  defaultValue.ULONG = 1000;
+  theMenu.setMenuItemVariable("Logging interval (ms)", &defaultValue);
   theMenu.addMenuItem("", SFE_QUAD_Menu_Item::SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END);
   theMenu.addMenuItem("Write the logger configuration to file", writeLoggerConfig);
-  theMenu.addMenuItem("Read the logger configuration from file", readLoggerConfig);  
+  theMenu.addMenuItem("Read the logger configuration from file", readLoggerConfig);
+
+  readLoggerConfig(); // Read any existing values from file
   
   serialQUAD.println(F("Press any key to open the menu"));
 
@@ -339,7 +346,27 @@ void setRTC(void)
 
 void writeLoggerConfig(void)
 {
-  
+// Define the log file type - use the same type as the Qwiic Universal Auto-Detect library
+#if SFE_QUAD_SD_FAT_TYPE == 1
+  File32 newFile;
+#elif SFE_QUAD_SD_FAT_TYPE == 2
+  ExFile newFile;
+#elif SFE_QUAD_SD_FAT_TYPE == 3
+  FsFile newFile;
+#else // SD_FAT_TYPE == 0
+  File newFile;
+#endif  // SD_FAT_TYPE
+
+  bool success = newFile.open(loggerConfigurationFileName, O_CREAT | O_WRONLY | O_TRUNC) == true;
+
+  if (success)
+  {
+    success = theMenu.writeMenuVariables(&newFile);
+    newFile.close();
+  }
+
+  if (!success)
+    theMenu._menuPort->println(F("writeLoggerConfig failed!"));
 }
 
 void readLoggerConfig(void)
