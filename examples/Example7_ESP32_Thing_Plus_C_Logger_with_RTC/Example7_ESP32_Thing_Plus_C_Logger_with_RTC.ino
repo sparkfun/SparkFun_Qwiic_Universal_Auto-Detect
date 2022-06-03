@@ -144,6 +144,7 @@ void setup()
   theMenu.setMenuItemVariable("WiFi SSID", "T-Rex");
   theMenu.addMenuItem("WiFi password", SFE_QUAD_MENU_VARIABLE_TYPE_TEXT);
   theMenu.setMenuItemVariable("WiFi password", "Has Big Teeth");
+  theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END);
   theMenu.addMenuItem("Logging settings", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_START);
   theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
@@ -154,9 +155,11 @@ void setup()
   SFE_QUAD_Menu_Every_Type_t defaultValue;
   defaultValue.ULONG = 1000;
   theMenu.setMenuItemVariable("Logging interval (ms)", &defaultValue);
+  theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END);
   theMenu.addMenuItem("Write the logger configuration to file", writeLoggerConfig);
   theMenu.addMenuItem("Read the logger configuration from file", readLoggerConfig);
+  theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
 
   readLoggerConfig(); // Read any existing values from file
   

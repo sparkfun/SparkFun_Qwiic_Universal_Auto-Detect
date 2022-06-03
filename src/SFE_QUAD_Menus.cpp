@@ -338,10 +338,18 @@ bool SFE_QUAD_Menu::setMenuItemVariable(const char *itemName, const SFE_QUAD_Men
   SFE_QUAD_Menu_Item *itemExists = menuItemExists(itemName);
 
   if (itemExists == NULL)
+  {
+    if (_debugPort != NULL)
+      _debugPort->println(F("setMenuItemVariable: item does not exist"));
     return (false);
+  }
 
   if (itemExists->_theVariable == NULL)
+  {
+    if (_debugPort != NULL)
+      _debugPort->println(F("setMenuItemVariable: _theVariable is NULL"));
     return (false);
+  }
 
   switch (itemExists->_variableType)
   {
@@ -542,30 +550,28 @@ bool SFE_QUAD_Menu::setMenuItemVariableMax(const char *itemName, const SFE_QUAD_
 
 bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
 {
-  SFE_QUAD_Menu_Item *menuItemPtr = start; // Make a copy of start
-
-  if (menuItemPtr == NULL) // Default to _head
-  {
-    if (_debugPort != NULL)
-      _debugPort->println(F("openMenu: starting at _head"));
-    menuItemPtr = _head;
-  }
-
-  if (menuItemPtr == NULL)
-    return (false);
-
   if (_menuPort == NULL) // Check the menu port has been defined
     return (false);
 
   while (_menuPort->available()) // Clear the menu serial buffer
     _menuPort->read();
 
+  SFE_QUAD_Menu_Item *menuItemPtr; // This will hold a copy of start
+
   while (1)
   {
+    menuItemPtr = start;     // Go back to the start
+    if (menuItemPtr == NULL) // Default to _head
+      menuItemPtr = _head;
+
+    if (menuItemPtr == NULL)
+      return (false);
+
     size_t maxItemNameLen = getMenuItemNameMaxLen();
     uint32_t menuItems = 1;
     int subMenuLevel = 0;
     bool keepGoing = true;
+    bool menuEndSeen = false;
 
     while (keepGoing) // Print the menu
     {
@@ -582,13 +588,16 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
       }
       else if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_NONE) // Not a menu item. Just text
       {
-        _menuPort->println(menuItemPtr->_itemName);
+        if ((subMenuLevel == 0) and (!menuEndSeen)) // Stay on this menu level
+          _menuPort->println(menuItemPtr->_itemName);
       }
       else if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END)
       {
         subMenuLevel--;
+        if (subMenuLevel < 0)
+          menuEndSeen = true;
       }
-      else if (subMenuLevel == 0) // Stay on this menu level
+      else if ((subMenuLevel == 0) and (!menuEndSeen)) // Stay on this menu level
       {
         _menuPort->print(menuItems);
         _menuPort->print(F("\t: "));
@@ -609,11 +618,11 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
         }
         else if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_TEXT)
         {
+          _menuPort->print(F(" : "));
           if (menuItemPtr->_theVariable->TEXT != NULL)
-          {
-            _menuPort->print(F(" : "));
             _menuPort->println(menuItemPtr->_theVariable->TEXT);
-          }
+          else
+            _menuPort->println();
         }
         else
         {
@@ -662,13 +671,14 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
     if (menuChoice == 0)
       return (false);
 
-    menuItemPtr = start; // Go back to the start
+    menuItemPtr = start;     // Go back to the start
     if (menuItemPtr == NULL) // Default to _head
       menuItemPtr = _head;
 
     menuItems = 1;
     subMenuLevel = 0;
     keepGoing = true;
+    menuEndSeen = false;
 
     while (keepGoing)
     {
@@ -683,8 +693,10 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
       else if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END)
       {
         subMenuLevel--;
+        if (subMenuLevel < 0)
+          menuEndSeen = true;
       }
-      else if (subMenuLevel == 0) // Stay on this menu level
+      else if ((subMenuLevel == 0) and (!menuEndSeen)) // Stay on this menu level
       {
         if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_START)
         {
@@ -693,6 +705,7 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
             if (menuItemPtr->_next == NULL) // Sanity check
               return (false);
             openMenu(menuItemPtr->_next); // Point to the next item and open the sub menu
+            keepGoing = false;
           }
           else
             subMenuLevel++;
@@ -1182,13 +1195,21 @@ size_t SFE_QUAD_Menu::getMenuItemNameMaxLen(void)
 SFE_QUAD_Menu_Item *SFE_QUAD_Menu::menuItemExists(const char *itemName)
 {
   SFE_QUAD_Menu_Item *menuItemPtr = _head; // Start at the head
-  while (menuItemPtr->_next != NULL)       // Keep going until we reach the end of the list
+
+  if (menuItemPtr == NULL)
+    return (NULL);
+
+  while (1) // Keep going until we reach the end of the list
   {
     if (strcmp(menuItemPtr->_itemName, itemName) == 0)
       return (menuItemPtr);
-    menuItemPtr = menuItemPtr->_next;
+    if (menuItemPtr->_next != NULL)
+      menuItemPtr = menuItemPtr->_next;
+    else
+      return (NULL);
   }
-  return (NULL);
+
+  return (NULL); // Keep the compiler happy
 }
 
 void SFE_QUAD_Menu_sprintf::printDouble(double value, Print *pr)
