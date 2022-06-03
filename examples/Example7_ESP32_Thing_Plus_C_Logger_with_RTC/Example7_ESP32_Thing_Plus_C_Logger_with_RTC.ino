@@ -85,6 +85,8 @@ void setup()
   mySensors.setMenuPort(serialQUAD); // Use serialQUAD for the logging menu
   theMenu.setMenuPort(serialQUAD); // Use serialQUAD for the menu
 
+  theMenu.setDebugPort(serialQUAD); // Uncomment this line to enable menu debug messages on serialQUAD
+
   while (theMenu._menuPort->available()) // Clear the menu serial buffer
     theMenu._menuPort->read();
 
@@ -122,6 +124,10 @@ void setup()
   }
 
   // Create the menu - using unique menu item names
+  theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  theMenu.addMenuItem("Menu", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  theMenu.addMenuItem("====", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   theMenu.addMenuItem("Open the sensor logging menu", loggingMenu);
   theMenu.addMenuItem("Open the sensor settings menu", settingMenu);
   theMenu.addMenuItem("Write the sensor settings to file", writeConfigurationToStorage);
@@ -129,18 +135,26 @@ void setup()
   theMenu.addMenuItem("Stop logging", stopLogging);
   theMenu.addMenuItem("Open new log file", newLogFile);
   theMenu.addMenuItem("Set RTC using NTP over WiFi", setRTC);
-  theMenu.addMenuItem("WiFi settings", SFE_QUAD_Menu_Item::SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_START);
-  theMenu.addMenuItem("WiFi SSID", SFE_QUAD_Menu_Item::SFE_QUAD_MENU_VARIABLE_TYPE_TEXT);
+  theMenu.addMenuItem("WiFi settings", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_START);
+  theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  theMenu.addMenuItem("WiFi Menu", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  theMenu.addMenuItem("=========", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  theMenu.addMenuItem("WiFi SSID", SFE_QUAD_MENU_VARIABLE_TYPE_TEXT);
   theMenu.setMenuItemVariable("WiFi SSID", "T-Rex");
-  theMenu.addMenuItem("WiFi password", SFE_QUAD_Menu_Item::SFE_QUAD_MENU_VARIABLE_TYPE_TEXT);
+  theMenu.addMenuItem("WiFi password", SFE_QUAD_MENU_VARIABLE_TYPE_TEXT);
   theMenu.setMenuItemVariable("WiFi password", "Has Big Teeth");
-  theMenu.addMenuItem("", SFE_QUAD_Menu_Item::SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END);
-  theMenu.addMenuItem("Logging settings", SFE_QUAD_Menu_Item::SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_START);
-  theMenu.addMenuItem("Logging interval (ms)", SFE_QUAD_Menu_Item::SFE_QUAD_MENU_VARIABLE_TYPE_ULONG);
-  SFE_QUAD_Menu_Item::SFE_QUAD_Menu_Every_Type_t defaultValue;
+  theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END);
+  theMenu.addMenuItem("Logging settings", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_START);
+  theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  theMenu.addMenuItem("Logging Menu", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  theMenu.addMenuItem("============", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  theMenu.addMenuItem("Logging interval (ms)", SFE_QUAD_MENU_VARIABLE_TYPE_ULONG);
+  SFE_QUAD_Menu_Every_Type_t defaultValue;
   defaultValue.ULONG = 1000;
   theMenu.setMenuItemVariable("Logging interval (ms)", &defaultValue);
-  theMenu.addMenuItem("", SFE_QUAD_Menu_Item::SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END);
+  theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END);
   theMenu.addMenuItem("Write the logger configuration to file", writeLoggerConfig);
   theMenu.addMenuItem("Read the logger configuration from file", readLoggerConfig);
 
@@ -163,7 +177,7 @@ void loop()
 {
   static unsigned long lastRead;
 
-  SFE_QUAD_Menu_Item::SFE_QUAD_Menu_Every_Type_t loggingInterval;
+  SFE_QUAD_Menu_Every_Type_t loggingInterval;
   theMenu.getMenuItemVariable("Logging interval (ms)", &loggingInterval);
   if (millis() > (lastRead + (unsigned long)loggingInterval.ULONG))
   {
