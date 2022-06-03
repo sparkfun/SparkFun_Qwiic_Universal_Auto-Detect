@@ -96,6 +96,7 @@ public:
   Stream *_menuPort;                  // The Serial port (Stream) used for the menu
   Stream *_debugPort;                 // The Serial port (Stream) used for the debug messages
   unsigned long _menuTimeout = 10000; // Default timeout for the menus
+  void setMenuTimeout(unsigned long newTimeout) { _menuTimeout = newTimeout; }
 
   SFE_QUAD_Menu_sprintf _sprintf; // Provide access to the common sprintf(%f) and sprintf(%e) functions
 };

@@ -107,7 +107,8 @@ bool SFE_QUAD_Menu::addMenuItem(const char *itemName, SFE_QUAD_Menu_Variable_Typ
     {
       menuItemPtr = menuItemPtr->_next;
     }
-    menuItemPtr = new SFE_QUAD_Menu_Item;
+    menuItemPtr->_next = new SFE_QUAD_Menu_Item;
+    menuItemPtr = menuItemPtr->_next;
   }
 
   if (menuItemPtr == NULL) // Check new was successful
@@ -130,19 +131,19 @@ bool SFE_QUAD_Menu::addMenuItem(const char *itemName, SFE_QUAD_Menu_Variable_Typ
 
   strcpy(menuItemPtr->_itemName, itemName); // Copy the name
 
-  if (_debugPort != NULL)
-  {
-    _debugPort->print(F("addMenuItem: _itemName is "));
-    _debugPort->println(menuItemPtr->_itemName);
-  }
+  // if (_debugPort != NULL)
+  // {
+  //   _debugPort->print(F("addMenuItem: _itemName is "));
+  //   _debugPort->println(menuItemPtr->_itemName);
+  // }
 
   menuItemPtr->_variableType = variableType; // Record the type
 
-  if (_debugPort != NULL)
-  {
-    _debugPort->print(F("addMenuItem: _variableType is "));
-    _debugPort->println((int)menuItemPtr->_variableType);
-  }
+  // if (_debugPort != NULL)
+  // {
+  //   _debugPort->print(F("addMenuItem: _variableType is "));
+  //   _debugPort->println((int)menuItemPtr->_variableType);
+  // }
 
   menuItemPtr->_theVariable = new SFE_QUAD_Menu_Every_Type_t; // Create storage for the variable
 
@@ -178,7 +179,8 @@ bool SFE_QUAD_Menu::addMenuItem(const char *itemName, void (*codePointer)())
     {
       menuItemPtr = menuItemPtr->_next;
     }
-    menuItemPtr = new SFE_QUAD_Menu_Item;
+    menuItemPtr->_next = new SFE_QUAD_Menu_Item;
+    menuItemPtr = menuItemPtr->_next;
   }
 
   if (menuItemPtr == NULL) // Check new was successful
@@ -195,19 +197,19 @@ bool SFE_QUAD_Menu::addMenuItem(const char *itemName, void (*codePointer)())
 
   strcpy(menuItemPtr->_itemName, itemName); // Copy the name
 
-  if (_debugPort != NULL)
-  {
-    _debugPort->print(F("addMenuItem: _itemName is "));
-    _debugPort->println(menuItemPtr->_itemName);
-  }
+  // if (_debugPort != NULL)
+  // {
+  //   _debugPort->print(F("addMenuItem: _itemName is "));
+  //   _debugPort->println(menuItemPtr->_itemName);
+  // }
 
   menuItemPtr->_variableType = SFE_QUAD_MENU_VARIABLE_TYPE_CODE; // Record the type
 
-  if (_debugPort != NULL)
-  {
-    _debugPort->print(F("addMenuItem: _variableType is "));
-    _debugPort->println((int)menuItemPtr->_variableType);
-  }
+  // if (_debugPort != NULL)
+  // {
+  //   _debugPort->print(F("addMenuItem: _variableType is "));
+  //   _debugPort->println((int)menuItemPtr->_variableType);
+  // }
 
   menuItemPtr->_theVariable = new SFE_QUAD_Menu_Every_Type_t; // Create storage for the variable
 
@@ -567,11 +569,11 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
 
     while (keepGoing) // Print the menu
     {
-      if (_debugPort != NULL)
-      {
-        _debugPort->println(F("openMenu: _variableType is "));
-        _debugPort->println((int)menuItemPtr->_variableType);
-      }
+      // if (_debugPort != NULL)
+      // {
+      //   _debugPort->print(F("openMenu: _variableType is "));
+      //   _debugPort->println((int)menuItemPtr->_variableType);
+      // }
       if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_UNKNOWN) // This should be impossible?
       {
         // Do nothing
