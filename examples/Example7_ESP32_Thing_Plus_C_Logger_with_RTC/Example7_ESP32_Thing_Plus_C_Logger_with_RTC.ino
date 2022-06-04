@@ -123,7 +123,9 @@ void setup()
     serialQUAD.println(F("Failed to open sensor data log file"));
   }
 
-  // Create the menu - using unique menu item names
+  // Create the menu - using unique menu item names.
+  // You can duplicate NONE or SUB_MENU_START items (e.g. "Wifi Menu") but all other items must be unique
+
   theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   theMenu.addMenuItem("Menu", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   theMenu.addMenuItem("====", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
@@ -135,7 +137,7 @@ void setup()
   theMenu.addMenuItem("Stop logging", stopLogging);
   theMenu.addMenuItem("Open new log file", newLogFile);
   theMenu.addMenuItem("Set RTC using NTP over WiFi", setRTC);
-  theMenu.addMenuItem("WiFi settings", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_START);
+  theMenu.addMenuItem("WiFi Menu", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_START);
   theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   theMenu.addMenuItem("WiFi Menu", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   theMenu.addMenuItem("=========", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
@@ -146,7 +148,7 @@ void setup()
   theMenu.setMenuItemVariable("WiFi password", "Has Big Teeth");
   theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END);
-  theMenu.addMenuItem("Logging settings", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_START);
+  theMenu.addMenuItem("Logging Menu", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_START);
   theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   theMenu.addMenuItem("Logging Menu", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   theMenu.addMenuItem("============", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);

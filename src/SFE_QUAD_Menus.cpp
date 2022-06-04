@@ -118,7 +118,7 @@ bool SFE_QUAD_Menu::addMenuItem(const char *itemName, SFE_QUAD_Menu_Variable_Typ
     return (false);
   }
 
-  menuItemPtr->_itemName = new char[strlen(itemName + 1)]; // Add space for the null
+  menuItemPtr->_itemName = new char[strlen(itemName) + 1]; // Add space for the null
 
   if (menuItemPtr->_itemName == NULL)
   {
@@ -128,6 +128,8 @@ bool SFE_QUAD_Menu::addMenuItem(const char *itemName, SFE_QUAD_Menu_Variable_Typ
     menuItemPtr = NULL;
     return (false);
   }
+
+  memset(menuItemPtr->_itemName, 0, strlen(itemName) + 1);
 
   strcpy(menuItemPtr->_itemName, itemName); // Copy the name
 
@@ -186,7 +188,7 @@ bool SFE_QUAD_Menu::addMenuItem(const char *itemName, void (*codePointer)())
   if (menuItemPtr == NULL) // Check new was successful
     return (false);
 
-  menuItemPtr->_itemName = new char[strlen(itemName + 1)]; // Add space for the null
+  menuItemPtr->_itemName = new char[strlen(itemName) + 1]; // Add space for the null
 
   if (menuItemPtr->_itemName == NULL)
   {
@@ -194,6 +196,8 @@ bool SFE_QUAD_Menu::addMenuItem(const char *itemName, void (*codePointer)())
     menuItemPtr = NULL;
     return (false);
   }
+
+  memset(menuItemPtr->_itemName, 0, strlen(itemName) + 1);
 
   strcpy(menuItemPtr->_itemName, itemName); // Copy the name
 
@@ -319,6 +323,7 @@ bool SFE_QUAD_Menu::getMenuItemVariable(const char *itemName, char *theValue, si
   case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT:
     if (strlen(itemExists->_theVariable->TEXT) < maxLen) // Is theValue large enough (including the null)?
     {
+      memset(theValue, 0, maxLen);
       strcpy(theValue, itemExists->_theVariable->TEXT);
       return (true);
     }
@@ -417,6 +422,9 @@ bool SFE_QUAD_Menu::setMenuItemVariable(const char *itemName, const char *theVal
     if (itemExists->_theVariable->TEXT != NULL)
       delete[] itemExists->_theVariable->TEXT;
     itemExists->_theVariable->TEXT = new char[strlen(theValue) + 1]; // Add space for the null
+    if (itemExists->_theVariable->TEXT == NULL)
+      return (false);
+    memset(itemExists->_theVariable->TEXT, 0, strlen(theValue) + 1);
     strcpy(itemExists->_theVariable->TEXT, theValue);
     return (true);
     break;
@@ -591,8 +599,12 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
         if ((subMenuLevel == 0) and (!menuEndSeen)) // Stay on this menu level
           _menuPort->println(menuItemPtr->_itemName);
       }
-      else if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END)
+      else if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END) // Back out of a sub menu
       {
+        // If we are in the main menu, there should be as many SUB_MENU_STARTs as there are SUB_MENU_ENDs
+        // and subMenuLevel should never go below zero. But if it does, we know we are in a recursive call
+        // to a sub menu and have backed out to the menu above. menuEndSeen stops the next sub menu from
+        // being printed (when subMenuLevel is zero again).
         subMenuLevel--;
         if (subMenuLevel < 0)
           menuEndSeen = true;
@@ -628,7 +640,7 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
         {
           _menuPort->print(F(" : "));
           if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_BOOL)
-            _menuPort->println(menuItemPtr->_theVariable->BOOL == true ? F("Yes") : F("No"));
+            _menuPort->println(menuItemPtr->_theVariable->BOOL == true ? F("Yes") : F("No")); // TO DO: provide a way to let "Enabled" / "Disabled" to be used instead?
           else if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_FLOAT)
             _menuPort->println(menuItemPtr->_theVariable->FLOAT);
           else if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_DOUBLE)
@@ -667,12 +679,13 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
     _menuPort->println(F("Enter a number, or enter 0 to exit:"));
 
     uint32_t menuChoice = getMenuChoice(_menuTimeout); // Get menu choice with timeout
+    _menuPort->println();
 
     if (menuChoice == 0)
       return (false);
 
     menuItemPtr = start;     // Go back to the start
-    if (menuItemPtr == NULL) // Default to _head
+    if (menuItemPtr == NULL) // Default to _head if required
       menuItemPtr = _head;
 
     menuItems = 1;
@@ -704,7 +717,7 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
           {
             if (menuItemPtr->_next == NULL) // Sanity check
               return (false);
-            openMenu(menuItemPtr->_next); // Point to the next item and open the sub menu
+            openMenu(menuItemPtr->_next); // Point to the next item and open the sub menu as a recursive call to this function
             keepGoing = false;
           }
           else
@@ -725,7 +738,8 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
           {
             if (menuItemPtr->_theVariable->TEXT == NULL) // Sanity check
               return (false);
-            getValueText(menuItemPtr->_theVariable->TEXT, _menuTimeout);
+            _menuPort->println(F("Enter the value (text):"));
+            getValueText(&menuItemPtr->_theVariable->TEXT, _menuTimeout); // Do this on a new line - to support deletes etc.
           }
         }
         else
@@ -749,9 +763,11 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
                 _menuPort->print(menuItemPtr->_maxVal->FLOAT);
                 _menuPort->print(F(")"));
               }
-              _menuPort->print(F(" : "));
+              _menuPort->println(F(" : "));
               double tempDbl;
-              if (getValueDouble(&tempDbl, _menuTimeout))
+              bool success = getValueDouble(&tempDbl, _menuTimeout);
+              _menuPort->println();
+              if (success)
               {
                 bool valOK = true;
                 if (menuItemPtr->_minVal != NULL)
@@ -761,10 +777,10 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
                 if (valOK)
                   menuItemPtr->_theVariable->FLOAT = (float)tempDbl;
                 else
-                  _menuPort->println(F("\r\nInvalid value"));
+                  _menuPort->println(F("Invalid value"));
               }
               else
-                _menuPort->println(F("\r\nInvalid value"));
+                _menuPort->println(F("Invalid value"));
             }
             else if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_DOUBLE)
             {
@@ -781,9 +797,11 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
                 _sprintf.printDouble(menuItemPtr->_maxVal->DOUBLE, _menuPort);
                 _menuPort->print(F(")"));
               }
-              _menuPort->print(F(" : "));
+              _menuPort->println(F(" : "));
               double tempDbl;
-              if (getValueDouble(&tempDbl, _menuTimeout))
+              bool success = getValueDouble(&tempDbl, _menuTimeout);
+              _menuPort->println();
+              if (success)
               {
                 bool valOK = true;
                 if (menuItemPtr->_minVal != NULL)
@@ -793,10 +811,10 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
                 if (valOK)
                   menuItemPtr->_theVariable->DOUBLE = tempDbl;
                 else
-                  _menuPort->println(F("\r\nInvalid value"));
+                  _menuPort->println(F("Invalid value"));
               }
               else
-                _menuPort->println(F("\r\nInvalid value"));
+                _menuPort->println(F("Invalid value"));
             }
             else if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_INT)
             {
@@ -813,9 +831,11 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
                 _menuPort->print(menuItemPtr->_maxVal->INT);
                 _menuPort->print(F(")"));
               }
-              _menuPort->print(F(" : "));
+              _menuPort->println(F(" : "));
               double tempDbl;
-              if (getValueDouble(&tempDbl, _menuTimeout))
+              bool success = getValueDouble(&tempDbl, _menuTimeout);
+              _menuPort->println();
+              if (success)
               {
                 bool valOK = true;
                 if (menuItemPtr->_minVal != NULL)
@@ -825,10 +845,10 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
                 if (valOK)
                   menuItemPtr->_theVariable->INT = (int)tempDbl;
                 else
-                  _menuPort->println(F("\r\nInvalid value"));
+                  _menuPort->println(F("Invalid value"));
               }
               else
-                _menuPort->println(F("\r\nInvalid value"));
+                _menuPort->println(F("Invalid value"));
             }
             else if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_UINT8_T)
             {
@@ -845,9 +865,11 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
                 _menuPort->print(menuItemPtr->_maxVal->UINT8_T);
                 _menuPort->print(F(")"));
               }
-              _menuPort->print(F(" : "));
+              _menuPort->println(F(" : "));
               double tempDbl;
-              if (getValueDouble(&tempDbl, _menuTimeout))
+              bool success = getValueDouble(&tempDbl, _menuTimeout);
+              _menuPort->println();
+              if (success)
               {
                 bool valOK = true;
                 if (menuItemPtr->_minVal != NULL)
@@ -857,10 +879,10 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
                 if (valOK)
                   menuItemPtr->_theVariable->UINT8_T = (uint8_t)tempDbl;
                 else
-                  _menuPort->println(F("\r\nInvalid value"));
+                  _menuPort->println(F("Invalid value"));
               }
               else
-                _menuPort->println(F("\r\nInvalid value"));
+                _menuPort->println(F("Invalid value"));
             }
             else if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_UINT16_T)
             {
@@ -877,9 +899,11 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
                 _menuPort->print(menuItemPtr->_maxVal->UINT16_T);
                 _menuPort->print(F(")"));
               }
-              _menuPort->print(F(" : "));
+              _menuPort->println(F(" : "));
               double tempDbl;
-              if (getValueDouble(&tempDbl, _menuTimeout))
+              bool success = getValueDouble(&tempDbl, _menuTimeout);
+              _menuPort->println();
+              if (success)
               {
                 bool valOK = true;
                 if (menuItemPtr->_minVal != NULL)
@@ -889,10 +913,10 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
                 if (valOK)
                   menuItemPtr->_theVariable->UINT16_T = (uint16_t)tempDbl;
                 else
-                  _menuPort->println(F("\r\nInvalid value"));
+                  _menuPort->println(F("Invalid value"));
               }
               else
-                _menuPort->println(F("\r\nInvalid value"));
+                _menuPort->println(F("Invalid value"));
             }
             else if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_UINT32_T)
             {
@@ -909,9 +933,11 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
                 _menuPort->print(menuItemPtr->_maxVal->UINT32_T);
                 _menuPort->print(F(")"));
               }
-              _menuPort->print(F(" : "));
+              _menuPort->println(F(" : "));
               double tempDbl;
-              if (getValueDouble(&tempDbl, _menuTimeout))
+              bool success = getValueDouble(&tempDbl, _menuTimeout);
+              _menuPort->println();
+              if (success)
               {
                 bool valOK = true;
                 if (menuItemPtr->_minVal != NULL)
@@ -921,10 +947,10 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
                 if (valOK)
                   menuItemPtr->_theVariable->UINT32_T = (uint32_t)tempDbl;
                 else
-                  _menuPort->println(F("\r\nInvalid value"));
+                  _menuPort->println(F("Invalid value"));
               }
               else
-                _menuPort->println(F("\r\nInvalid value"));
+                _menuPort->println(F("Invalid value"));
             }
             else if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_ULONG)
             {
@@ -941,9 +967,11 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
                 _menuPort->print(menuItemPtr->_maxVal->ULONG);
                 _menuPort->print(F(")"));
               }
-              _menuPort->print(F(" : "));
+              _menuPort->println(F(" : "));
               double tempDbl;
-              if (getValueDouble(&tempDbl, 10000))
+              bool success = getValueDouble(&tempDbl, _menuTimeout);
+              _menuPort->println();
+              if (success)
               {
                 bool valOK = true;
                 if (menuItemPtr->_minVal != NULL)
@@ -953,10 +981,10 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
                 if (valOK)
                   menuItemPtr->_theVariable->ULONG = (unsigned long)tempDbl;
                 else
-                  _menuPort->println(F("\r\nInvalid value"));
+                  _menuPort->println(F("Invalid value"));
               }
               else
-                _menuPort->println(F("\r\nInvalid value"));
+                _menuPort->println(F("Invalid value"));
             }
           }
         }
@@ -978,40 +1006,34 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
   return (false); // This is just to keep the compiler happy. The while (1) prevents the code from getting here
 }
 
+// Get a positive integer. Return zero if unsuccessful. (Menus always start at 1.)
 uint32_t SFE_QUAD_Menu::getMenuChoice(unsigned long timeout)
 {
   if (_menuPort == NULL)
     return (0);
 
-  unsigned long startTime = millis();
-  bool keepGoing = true;
+  char *tempValue = NULL; // getValueText will create memory for tempValue
+
+  if (!getValueText(&tempValue, timeout))
+  {
+    delete[] tempValue;
+    return (0);
+  }
+
   uint32_t choice = 0;
 
-  while (_menuPort->available()) // Clear the menu serial buffer
-    _menuPort->read();
-
-  while (keepGoing && (millis() < (startTime + timeout)))
+  for (size_t i = 0; i < strlen(tempValue); i++)
   {
-    if (_menuPort->available())
-    {
-      startTime = millis(); // Update startTime each time we get a character
-      char c = _menuPort->read();
+    char c = tempValue[i];
 
-      if ((c >= '0') && (c <= '9'))
-      {
-        choice *= 10;
-        choice += c - '0';
-      }
-      else if ((c == '\r') || (c == '\n'))
-        keepGoing = false;
+    if ((c >= '0') && (c <= '9'))
+    {
+      choice *= 10;
+      choice += c - '0';
     }
   }
 
-  while (_menuPort->available()) // Clear the menu serial buffer
-    _menuPort->read();
-
-  if (keepGoing) // Did we time out?
-    return (0);
+  delete[] tempValue;
 
   return (choice);
 }
@@ -1021,8 +1043,14 @@ bool SFE_QUAD_Menu::getValueDouble(double *value, unsigned long timeout)
   if (_menuPort == NULL)
     return (false);
 
-  unsigned long startTime = millis();
-  bool keepGoing = true;
+  char *tempValue = NULL; // getValueText will create memory for tempValue
+
+  if (!getValueText(&tempValue, timeout))
+  {
+    delete[] tempValue;
+    return (false);
+  }
+
   *value = 0.0;
   int dp = 0;
   double posNeg = 1.0;
@@ -1030,61 +1058,52 @@ bool SFE_QUAD_Menu::getValueDouble(double *value, unsigned long timeout)
   int expPosNeg = 1;
   bool expSeen = false;
 
-  while (_menuPort->available()) // Clear the menu serial buffer
-    _menuPort->read();
-
-  while (keepGoing && (millis() < (startTime + timeout)))
+  for (size_t i = 0; i < strlen(tempValue); i++)
   {
-    if (_menuPort->available())
-    {
-      startTime = millis(); // Update startTime each time we get a character
-      char c = _menuPort->read();
+    char c = tempValue[i];
 
-      if ((c == '\r') || (c == '\n'))
-        keepGoing = false;
-      else if ((dp == 0) && (expSeen == false)) // If a decimal point has not been seen and an 'e' has not been seen
+    if ((dp == 0) && (expSeen == false)) // If a decimal point has not been seen and an 'e' has not been seen
+    {
+      if (c == '-')
       {
-        if (c == '-')
-        {
-          posNeg = -1.0;
-        }
-        else if ((c >= '0') && (c <= '9'))
-        {
-          *value = *value * 10.0;
-          *value = *value + (posNeg * (double)(c - '0'));
-        }
-        else if (c == '.')
-        {
-          dp = -1;
-        }
-        else if ((c == 'e') || (c == 'E'))
-        {
-          expSeen = true;
-        }
+        posNeg = -1.0;
       }
-      else if ((dp != 0) && (expSeen == false)) // If a decimal point has been seen and an 'e' has not been seen
+      else if ((c >= '0') && (c <= '9'))
       {
-        if ((c >= '0') && (c <= '9'))
-        {
-          *value = *value + (posNeg * ((double)(c - '0')) * pow(10, dp));
-          dp -= 1;
-        }
-        else if ((c == 'e') || (c == 'E'))
-        {
-          expSeen = true;
-        }
+        *value = *value * 10.0;
+        *value = *value + (posNeg * (double)(c - '0'));
       }
-      else // if (expSeen == true) // If an 'e' has been seen
+      else if (c == '.')
       {
-        if (c == '-')
-        {
-          expPosNeg = -1;
-        }
-        else if ((c >= '0') && (c <= '9'))
-        {
-          exp *= 10;
-          exp += expPosNeg * ((int)(c - '0'));
-        }
+        dp = -1;
+      }
+      else if ((c == 'e') || (c == 'E'))
+      {
+        expSeen = true;
+      }
+    }
+    else if ((dp != 0) && (expSeen == false)) // If a decimal point has been seen and an 'e' has not been seen
+    {
+      if ((c >= '0') && (c <= '9'))
+      {
+        *value = *value + (posNeg * ((double)(c - '0')) * pow(10, dp));
+        dp -= 1;
+      }
+      else if ((c == 'e') || (c == 'E'))
+      {
+        expSeen = true;
+      }
+    }
+    else // if (expSeen == true) // If an 'e' has been seen
+    {
+      if (c == '-')
+      {
+        expPosNeg = -1;
+      }
+      else if ((c >= '0') && (c <= '9'))
+      {
+        exp *= 10;
+        exp += expPosNeg * ((int)(c - '0'));
       }
     }
   }
@@ -1092,33 +1111,36 @@ bool SFE_QUAD_Menu::getValueDouble(double *value, unsigned long timeout)
   if (expSeen == true)
     *value = (*value) * pow(10, exp);
 
-  while (_menuPort->available()) // Clear the menu serial buffer
-    _menuPort->read();
-
-  if (keepGoing) // Did we time out?
-    return (false);
+  delete[] tempValue;
 
   return (true);
 }
 
-bool SFE_QUAD_Menu::getValueText(char *value, unsigned long timeout)
+bool SFE_QUAD_Menu::getValueText(char **value, unsigned long timeout)
 {
   if (_menuPort == NULL)
     return (false);
 
   unsigned long startTime = millis();
   bool keepGoing = true;
-  int numChars = 0;
-  const int maxChars = 128;
-  char *tempValue = new char[maxChars + 1];
+  uint16_t numChars = 0;
   char c[2];
   c[0] = 0;
   c[1] = 0;
+  char *tempValue = new char[_maxTextChars + 1]; // Include space for the null
 
   if (tempValue == NULL)
     return (false);
 
-  memset(tempValue, 0, maxChars + 1);
+  memset(tempValue, 0, _maxTextChars + 1);
+
+  // If *value is not NULL, copy the existing text into tempValue so we can edit it
+  if (*value != NULL)
+  {
+    strcpy(tempValue, *value);
+    _menuPort->print(tempValue);
+    numChars = strlen(tempValue);
+  }
 
   while (_menuPort->available()) // Clear the menu serial buffer
     _menuPort->read();
@@ -1138,10 +1160,18 @@ bool SFE_QUAD_Menu::getValueText(char *value, unsigned long timeout)
         {
           numChars--;
           tempValue[numChars] = 0;
+          // Is there a truly universal way to handle backspaces? Let's try...
+          _menuPort->write('\r');
+          for (uint16_t i = 0; i < numChars + 1; i++)
+            _menuPort->write(' ');
+          _menuPort->write('\r');
+          for (uint16_t i = 0; i < numChars; i++)
+            _menuPort->write(tempValue[i]);
         }
       }
-      else if ((c[0] >= ' ') && (c[0] <= '~') && (numChars < maxChars))
+      else if ((c[0] >= ' ') && (c[0] <= '~') && (numChars < _maxTextChars))
       {
+        _menuPort->write(c[0]); // Print the character so the user can see it
         strcat(tempValue, (const char *)c);
         numChars++;
       }
@@ -1152,17 +1182,22 @@ bool SFE_QUAD_Menu::getValueText(char *value, unsigned long timeout)
     _menuPort->read();
 
   if (keepGoing) // Did we time out?
+  {
+    delete[] tempValue;
+    return (false);
+  }
+
+  if (*value != NULL)
+    delete[] *value;
+
+  *value = new char[numChars + 1];
+
+  if (*value == NULL)
     return (false);
 
-  if (value != NULL)
-    delete[] value;
+  memset(*value, 0, numChars + 1);
 
-  value = new char[numChars + 1];
-
-  if (value == NULL)
-    return (false);
-
-  strcpy(value, tempValue);
+  strcpy(*value, tempValue);
 
   delete[] tempValue;
 

@@ -86,7 +86,7 @@ public:
   bool openMenu(SFE_QUAD_Menu_Item *start = NULL);
   uint32_t getMenuChoice(unsigned long timeout);
   bool getValueDouble(double *value, unsigned long timeout);
-  bool getValueText(char *value, unsigned long timeout);
+  bool getValueText(char **value, unsigned long timeout);
   bool writeMenuVariables(Print *pr);
   bool readMenuVariables(void); // FIX ME!
   size_t getMenuItemNameMaxLen(void);
@@ -97,6 +97,8 @@ public:
   Stream *_debugPort;                 // The Serial port (Stream) used for the debug messages
   unsigned long _menuTimeout = 10000; // Default timeout for the menus
   void setMenuTimeout(unsigned long newTimeout) { _menuTimeout = newTimeout; }
+  uint16_t _maxTextChars = 32; // Maximum number of chars that can be entered into a text field etc.
+  void setMaxTextChars(uint16_t newMax) { _maxTextChars = newMax; }
 
   SFE_QUAD_Menu_sprintf _sprintf; // Provide access to the common sprintf(%f) and sprintf(%e) functions
 };
