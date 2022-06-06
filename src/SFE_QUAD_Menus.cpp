@@ -265,6 +265,7 @@ bool SFE_QUAD_Menu::getMenuItemVariable(const char *itemName, SFE_QUAD_Menu_Ever
   case SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END:
   case SFE_QUAD_MENU_VARIABLE_TYPE_CODE:
   case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT:
+  case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT_EDIT:
     return (false);
     break;
   case SFE_QUAD_MENU_VARIABLE_TYPE_BOOL:
@@ -321,6 +322,7 @@ bool SFE_QUAD_Menu::getMenuItemVariable(const char *itemName, char *theValue, si
   switch (itemExists->_variableType)
   {
   case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT:
+  case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT_EDIT:
     if (strlen(itemExists->_theVariable->TEXT) < maxLen) // Is theValue large enough (including the null)?
     {
       memset(theValue, 0, maxLen);
@@ -363,6 +365,7 @@ bool SFE_QUAD_Menu::setMenuItemVariable(const char *itemName, const SFE_QUAD_Men
   case SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END:
   case SFE_QUAD_MENU_VARIABLE_TYPE_CODE:
   case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT:
+  case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT_EDIT:
     return (false);
     break;
   case SFE_QUAD_MENU_VARIABLE_TYPE_BOOL:
@@ -419,6 +422,7 @@ bool SFE_QUAD_Menu::setMenuItemVariable(const char *itemName, const char *theVal
   switch (itemExists->_variableType)
   {
   case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT:
+  case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT_EDIT:
     if (itemExists->_theVariable->TEXT != NULL)
       delete[] itemExists->_theVariable->TEXT;
     itemExists->_theVariable->TEXT = new char[strlen(theValue) + 1]; // Add space for the null
@@ -456,6 +460,7 @@ bool SFE_QUAD_Menu::setMenuItemVariableMin(const char *itemName, const SFE_QUAD_
   case SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END:
   case SFE_QUAD_MENU_VARIABLE_TYPE_CODE:
   case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT:
+  case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT_EDIT:
   case SFE_QUAD_MENU_VARIABLE_TYPE_BOOL:
     return (false);
     break;
@@ -516,6 +521,7 @@ bool SFE_QUAD_Menu::setMenuItemVariableMax(const char *itemName, const SFE_QUAD_
   case SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END:
   case SFE_QUAD_MENU_VARIABLE_TYPE_CODE:
   case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT:
+  case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT_EDIT:
   case SFE_QUAD_MENU_VARIABLE_TYPE_BOOL:
     return (false);
     break;
@@ -628,7 +634,7 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
         {
           _menuPort->println();
         }
-        else if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_TEXT)
+        else if ((menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_TEXT) || (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_TEXT_EDIT))
         {
           _menuPort->print(F(" : "));
           if (menuItemPtr->_theVariable->TEXT != NULL)
@@ -732,14 +738,14 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
             menuItemPtr->_theVariable->CODE(); // Run the code
           }
         }
-        else if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_TEXT)
+        else if ((menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_TEXT) || (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_TEXT_EDIT))
         {
           if (menuItems == menuChoice)
           {
             if (menuItemPtr->_theVariable->TEXT == NULL) // Sanity check
               return (false);
             _menuPort->println(F("Enter the value (text):"));
-            getValueText(&menuItemPtr->_theVariable->TEXT, _menuTimeout); // Do this on a new line - to support deletes etc.
+            getValueText(&menuItemPtr->_theVariable->TEXT, _menuTimeout, menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_TEXT_EDIT); // Do this on a new line - to support deletes etc.
           }
         }
         else
@@ -1116,7 +1122,10 @@ bool SFE_QUAD_Menu::getValueDouble(double *value, unsigned long timeout)
   return (true);
 }
 
-bool SFE_QUAD_Menu::getValueText(char **value, unsigned long timeout)
+// Allow the user to enter a text value using a very simple serial / terminal 'editor' - with support for backspace
+// We want to be able to change the pointer to the text - so we need to pass in a pointer to that pointer
+// (value itself will be restored when the function returns)
+bool SFE_QUAD_Menu::getValueText(char * *value, unsigned long timeout, bool useExistingText)
 {
   if (_menuPort == NULL)
     return (false);
@@ -1134,8 +1143,8 @@ bool SFE_QUAD_Menu::getValueText(char **value, unsigned long timeout)
 
   memset(tempValue, 0, _maxTextChars + 1);
 
-  // If *value is not NULL, copy the existing text into tempValue so we can edit it
-  if (*value != NULL)
+  // If *value is not NULL, and useExistingText is true, copy the existing text into tempValue so we can edit it
+  if ((*value != NULL) && (useExistingText))
   {
     strcpy(tempValue, *value);
     _menuPort->print(tempValue);
@@ -1154,7 +1163,7 @@ bool SFE_QUAD_Menu::getValueText(char **value, unsigned long timeout)
 
       if ((c[0] == '\r') || (c[0] == '\n'))
         keepGoing = false;
-      else if (c[0] == 8) // Check for BS
+      else if (c[0] == 8) // Check for backspace (BS)
       {
         if (numChars > 0)
         {
@@ -1187,7 +1196,7 @@ bool SFE_QUAD_Menu::getValueText(char **value, unsigned long timeout)
     return (false);
   }
 
-  if (*value != NULL)
+  if (*value != NULL) // Change the text which value is pointing at
     delete[] *value;
 
   *value = new char[numChars + 1];
@@ -1204,14 +1213,325 @@ bool SFE_QUAD_Menu::getValueText(char **value, unsigned long timeout)
   return (true);
 }
 
+// For each variable, print its name, type and value to pr
 bool SFE_QUAD_Menu::writeMenuVariables(Print *pr)
 {
-  return (false);
+  SFE_QUAD_Menu_Item *menuItemPtr = _head; // Start at the head
+
+  if (_head == NULL)
+    return (false);
+
+  bool keepGoing = true;
+
+  while (keepGoing)
+  {
+    switch (menuItemPtr->_variableType)
+    {
+      case SFE_QUAD_MENU_VARIABLE_TYPE_UNKNOWN:
+      case SFE_QUAD_MENU_VARIABLE_TYPE_NONE:
+      case SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END:
+      case SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_START:
+      case SFE_QUAD_MENU_VARIABLE_TYPE_CODE:
+        // Do nothing
+        break;
+      case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT:
+      case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT_EDIT:
+        if (menuItemPtr->_theVariable->TEXT != NULL) // Sanity check
+        {
+          pr->print(menuItemPtr->_itemName);
+          pr->print(F(","));
+          pr->print((int)menuItemPtr->_variableType);
+          pr->print(F(","));
+          pr->println(menuItemPtr->_theVariable->TEXT);
+        }
+        break;
+      case SFE_QUAD_MENU_VARIABLE_TYPE_BOOL:
+        pr->print(menuItemPtr->_itemName);
+        pr->print(F(","));
+        pr->print((int)menuItemPtr->_variableType);
+        pr->print(F(","));
+        pr->println(menuItemPtr->_theVariable->BOOL);
+        break;
+      case SFE_QUAD_MENU_VARIABLE_TYPE_FLOAT:
+        pr->print(menuItemPtr->_itemName);
+        pr->print(F(","));
+        pr->print((int)menuItemPtr->_variableType);
+        pr->print(F(","));
+        _sprintf.printDouble((double)menuItemPtr->_theVariable->FLOAT, pr);
+        pr->println();
+        break;
+      case SFE_QUAD_MENU_VARIABLE_TYPE_DOUBLE:
+        pr->print(menuItemPtr->_itemName);
+        pr->print(F(","));
+        pr->print((int)menuItemPtr->_variableType);
+        pr->print(F(","));
+        _sprintf.printDouble(menuItemPtr->_theVariable->DOUBLE, pr);
+        pr->println();
+        break;
+      case SFE_QUAD_MENU_VARIABLE_TYPE_INT:
+        pr->print(menuItemPtr->_itemName);
+        pr->print(F(","));
+        pr->print((int)menuItemPtr->_variableType);
+        pr->print(F(","));
+        pr->println(menuItemPtr->_theVariable->INT);
+        break;
+      case SFE_QUAD_MENU_VARIABLE_TYPE_UINT8_T:
+        pr->print(menuItemPtr->_itemName);
+        pr->print(F(","));
+        pr->print((int)menuItemPtr->_variableType);
+        pr->print(F(","));
+        pr->println(menuItemPtr->_theVariable->UINT8_T);
+        break;
+      case SFE_QUAD_MENU_VARIABLE_TYPE_UINT16_T:
+        pr->print(menuItemPtr->_itemName);
+        pr->print(F(","));
+        pr->print((int)menuItemPtr->_variableType);
+        pr->print(F(","));
+        pr->println(menuItemPtr->_theVariable->UINT16_T);
+        break;
+      case SFE_QUAD_MENU_VARIABLE_TYPE_UINT32_T:
+        pr->print(menuItemPtr->_itemName);
+        pr->print(F(","));
+        pr->print((int)menuItemPtr->_variableType);
+        pr->print(F(","));
+        pr->println(menuItemPtr->_theVariable->UINT32_T);
+        break;
+      case SFE_QUAD_MENU_VARIABLE_TYPE_ULONG:
+        pr->print(menuItemPtr->_itemName);
+        pr->print(F(","));
+        pr->print((int)menuItemPtr->_variableType);
+        pr->print(F(","));
+        pr->println(menuItemPtr->_theVariable->ULONG);
+        break;
+      default:
+        // Do nothing
+        break;
+    }
+
+    if (menuItemPtr->_next == NULL) // Have we reached the end of the menu?
+      keepGoing = false;
+    else
+      menuItemPtr = menuItemPtr->_next; // Point to the next menu item
+  }
+  return (true);
 }
 
-bool SFE_QUAD_Menu::readMenuVariables(void)
+bool SFE_QUAD_Menu::readMenuVariables(File *file)
 {
-  return (false);
+  size_t maxLineLen = getMenuItemNameMaxLen();
+  maxLineLen += 7; // Add two commas, two digit type, \r, \n and space for a null
+  maxLineLen += (size_t)_maxTextChars; // Add two commas, two digit type and space for a null
+  char *line = new char[maxLineLen];
+
+  if (line == NULL)
+  {
+    if (_debugPort != NULL)
+    {
+      _debugPort->print(F("readMenuVariables: could not allocate "));
+      _debugPort->print(maxLineLen);
+      _debugPort->println(F(" bytes for line"));
+    }
+    return (false);
+  }
+
+  while (file->available())
+  {
+    int n = file->fgets(line, maxLineLen);
+    if (n <= 0)
+    {
+      if (_debugPort != NULL)
+        _debugPort->println(F("readMenuVariables: fgets failed"));
+    }
+    if ((line[n-1] != '\n') && (n == (maxLineLen - 1)))
+    {
+      if (_debugPort != NULL)
+        _debugPort->println(F("readMenuVariables: line too long"));
+    }
+
+    if (_debugPort != NULL)
+    {
+      _debugPort->print(F("readMenuVariables: line: "));
+      _debugPort->print(line);
+    }
+
+    char *charPtr = strchr(line, ','); // Find the end of the item name
+
+    if (charPtr == NULL)
+    {
+      if (_debugPort != NULL)
+        _debugPort->println(F("readMenuVariables: name not parsed"));
+      delete[] line;
+      return (false);
+    }
+
+    *charPtr = '\0'; // Replace the comma with a null so strcmp will work
+
+    SFE_QUAD_Menu_Item *exists = menuItemExists(line);
+
+    if (exists != NULL)
+    {
+      int variableType;
+
+      int ret = sscanf(charPtr + 1, "%d,", &variableType); // Extract the item type
+
+      if (ret != 1)
+      {
+        if (_debugPort != NULL)
+          _debugPort->println(F("readMenuVariables: item type not parsed"));
+        delete[] line;
+        return (false);
+      }
+
+      charPtr = strchr(charPtr + 1, ','); // Find the end of the item type (we know it exists)
+      charPtr++; // Point to the start of the variable value
+
+      if (variableType == exists->_variableType) // Sanity check
+      {
+        switch (variableType)
+        {
+          case SFE_QUAD_MENU_VARIABLE_TYPE_UNKNOWN:
+          case SFE_QUAD_MENU_VARIABLE_TYPE_NONE:
+          case SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END:
+          case SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_START:
+          case SFE_QUAD_MENU_VARIABLE_TYPE_CODE:
+            // Do nothing
+            break;
+          case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT:
+          case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT_EDIT:
+          {
+            char *charPtr2 = strchr(charPtr, '\n'); // Find the \n
+            if (charPtr2 != NULL)
+              *charPtr2 = '\0'; // Change the \n to null so setMenuItemVariable does not add it
+            charPtr2 = strchr(charPtr, '\r'); // Find the \r - if there is one (fgets may have stripped it?)
+            if (charPtr2 != NULL)
+              *charPtr2 = '\0'; // Change the \r to null so setMenuItemVariable does not add it
+            setMenuItemVariable(line, charPtr); // Copy the TEXT into the matching menu item
+          }
+            break;
+          case SFE_QUAD_MENU_VARIABLE_TYPE_BOOL:
+          {
+            int theBool;
+            ret = sscanf(charPtr, "%d", &theBool);
+            if (ret == 1)
+              exists->_theVariable->BOOL = (bool)theBool;
+          }
+            break;
+          case SFE_QUAD_MENU_VARIABLE_TYPE_FLOAT:
+          {
+            int preDP;
+            char postDP[_sprintf._prec + 1];
+            ret = sscanf(charPtr, "%d.%[^,]", &preDP, postDP); // Extract the data either side of the decimal point
+            if (ret == 2)
+            {
+              if (preDP >= 0)
+                exists->_theVariable->FLOAT = (float)preDP + ((float)atol(postDP) / pow(10, strlen(postDP)));
+              else
+                exists->_theVariable->FLOAT = (float)preDP - ((float)atol(postDP) / pow(10, strlen(postDP)));
+            }
+          }
+            break;
+          case SFE_QUAD_MENU_VARIABLE_TYPE_DOUBLE:
+          {
+            int preDP;
+            char postDP[_sprintf._prec + 1];
+            ret = sscanf(charPtr, "%d.%[^,]", &preDP, postDP); // Extract the data either side of the decimal point
+            if (ret == 2)
+            {
+              if (preDP >= 0)
+                exists->_theVariable->DOUBLE = (double)preDP + ((double)atol(postDP) / pow(10, strlen(postDP)));
+              else
+                exists->_theVariable->DOUBLE = (double)preDP - ((double)atol(postDP) / pow(10, strlen(postDP)));
+            }
+          }
+            break;
+          case SFE_QUAD_MENU_VARIABLE_TYPE_INT:
+          {
+            int64_t theInt = 0;
+            bool minus = *charPtr == '-';
+            if (minus)
+              charPtr++;
+            while ((*charPtr >= '0') && (*charPtr <= '9'))
+            {
+              theInt *= 10;
+              theInt += (int64_t)((*charPtr) - '0');
+              charPtr++;
+            }
+            if (minus)
+              theInt *= -1;
+            exists->_theVariable->INT = (int)theInt;
+          }
+            break;
+          case SFE_QUAD_MENU_VARIABLE_TYPE_UINT8_T:
+          {
+            uint64_t theInt = 0;
+            while ((*charPtr >= '0') && (*charPtr <= '9'))
+            {
+              theInt *= 10;
+              theInt += (uint64_t)((*charPtr) - '0');
+              charPtr++;
+            }
+            exists->_theVariable->UINT8_T = (uint8_t)theInt;
+          }
+            break;
+          case SFE_QUAD_MENU_VARIABLE_TYPE_UINT16_T:
+          {
+            uint64_t theInt = 0;
+            while ((*charPtr >= '0') && (*charPtr <= '9'))
+            {
+              theInt *= 10;
+              theInt += (uint64_t)((*charPtr) - '0');
+              charPtr++;
+            }
+            exists->_theVariable->UINT16_T = (uint16_t)theInt;
+          }
+            break;
+          case SFE_QUAD_MENU_VARIABLE_TYPE_UINT32_T:
+          {
+            uint64_t theInt = 0;
+            while ((*charPtr >= '0') && (*charPtr <= '9'))
+            {
+              theInt *= 10;
+              theInt += (uint64_t)((*charPtr) - '0');
+              charPtr++;
+            }
+            exists->_theVariable->UINT32_T = (uint32_t)theInt;
+          }
+            break;
+          case SFE_QUAD_MENU_VARIABLE_TYPE_ULONG:
+          {
+            uint64_t theInt = 0;
+            while ((*charPtr >= '0') && (*charPtr <= '9'))
+            {
+              theInt *= 10;
+              theInt += (uint64_t)((*charPtr) - '0');
+              charPtr++;
+            }
+            exists->_theVariable->ULONG = (unsigned long)theInt;
+          }
+            break;
+          default:
+            // Do nothing
+            break;
+        }
+      }
+      else
+      {
+        if (_debugPort != NULL)
+          _debugPort->println(F("readMenuVariables: variable type mismatch!"));
+      }
+    }
+    else
+    {
+      if (_debugPort != NULL)
+      {
+        _debugPort->print(F("readMenuVariables: no match found for item: "));
+        _debugPort->println(line);
+      }
+    }
+  }
+
+  delete[] line;
+  return (true);
 }
 
 size_t SFE_QUAD_Menu::getMenuItemNameMaxLen(void)

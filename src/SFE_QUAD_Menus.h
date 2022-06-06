@@ -13,6 +13,7 @@ typedef enum
   SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END,
   SFE_QUAD_MENU_VARIABLE_TYPE_CODE,
   SFE_QUAD_MENU_VARIABLE_TYPE_TEXT,
+  SFE_QUAD_MENU_VARIABLE_TYPE_TEXT_EDIT,
   SFE_QUAD_MENU_VARIABLE_TYPE_BOOL,
   SFE_QUAD_MENU_VARIABLE_TYPE_FLOAT,
   SFE_QUAD_MENU_VARIABLE_TYPE_DOUBLE,
@@ -86,9 +87,9 @@ public:
   bool openMenu(SFE_QUAD_Menu_Item *start = NULL);
   uint32_t getMenuChoice(unsigned long timeout);
   bool getValueDouble(double *value, unsigned long timeout);
-  bool getValueText(char **value, unsigned long timeout);
+  bool getValueText(char * *value, unsigned long timeout, bool useExistingText = false);
   bool writeMenuVariables(Print *pr);
-  bool readMenuVariables(void); // FIX ME!
+  bool readMenuVariables(File *st);
   size_t getMenuItemNameMaxLen(void);
   SFE_QUAD_Menu_Item *menuItemExists(const char *itemName);
 
@@ -96,9 +97,9 @@ public:
   Stream *_menuPort;                  // The Serial port (Stream) used for the menu
   Stream *_debugPort;                 // The Serial port (Stream) used for the debug messages
   unsigned long _menuTimeout = 10000; // Default timeout for the menus
-  void setMenuTimeout(unsigned long newTimeout) { _menuTimeout = newTimeout; }
+  void setMenuTimeout(unsigned long newTimeout) { if (newTimeout > 0) { _menuTimeout = newTimeout; } }
   uint16_t _maxTextChars = 32; // Maximum number of chars that can be entered into a text field etc.
-  void setMaxTextChars(uint16_t newMax) { _maxTextChars = newMax; }
+  void setMaxTextChars(uint16_t newMax) { if (newMax >= 32) { _maxTextChars = newMax; } }
 
   SFE_QUAD_Menu_sprintf _sprintf; // Provide access to the common sprintf(%f) and sprintf(%e) functions
 };

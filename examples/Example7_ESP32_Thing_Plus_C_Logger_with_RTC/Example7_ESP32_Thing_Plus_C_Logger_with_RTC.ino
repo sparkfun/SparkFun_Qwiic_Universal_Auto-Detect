@@ -22,6 +22,8 @@
 
 #define serialQUAD Serial // Use Serial for the Logger and Qwiic Universal Auto-Detect menus
 
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+// Use SdFat for sensor data storage - and to hold the menu configuration
 
 #include <SdFat.h> // Include SdFat.h to enable support for SFE_QUAD_Sensors__SdFat. Do this before #include "SFE_QUAD_Sensors.h"
 
@@ -29,15 +31,21 @@
 
 SFE_QUAD_Sensors__SdFat mySensors;
 
+const char sensorConfigurationFileName[] = "Sensor_Config.csv"; //The sensor configuration will be stored in this file
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+// Include menu support
+
 #include "SFE_QUAD_Menus.h"
 
 SFE_QUAD_Menu theMenu;
 
-const char sensorConfigurationFileName[] = "Sensor_Config.csv"; //The sensor configuration will be stored in this file
 const char loggerConfigurationFileName[] = "Logger_Config.csv"; //The logger configuration will be stored in this file
 
-const int sd_cs = 5; //Define the microSD chip select pin (e.g. pin 5 on the Thing Plus C)
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+// Thing Plus C hardware specifics
 
+const int sd_cs = 5; //Define the microSD chip select pin (e.g. pin 5 on the Thing Plus C)
 
 int qwiicPower = 0; //Thing Plus C digital pin 0 is connected to the v-reg that controls the Qwiic power. It is also connected to the BOOT button.
 
@@ -45,8 +53,10 @@ int qwiicPower = 0; //Thing Plus C digital pin 0 is connected to the v-reg that 
 #define LED_BUILTIN 13 // The Thing Plus C STAT LED is connected to digital pin 13
 #endif
 
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+// The sensor data log file
 
-// Define the log file type - use the same type as the Qwiic Universal Auto-Detect library
+// Define the SdFat log file type - use the same type as the Qwiic Universal Auto-Detect library
 #if SFE_QUAD_SD_FAT_TYPE == 1
   File32 sensorDataFile; //File that all sensor data is written to
 #elif SFE_QUAD_SD_FAT_TYPE == 2
@@ -60,6 +70,7 @@ int qwiicPower = 0; //Thing Plus C digital pin 0 is connected to the v-reg that 
 char sensorDataFileName[30] = ""; // This will hold the name of the sensorDataFile
 bool onlineDataLogging; //This flag indicates if we are logging data to sensorDataFile
 
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 void setup()
 {
@@ -78,30 +89,30 @@ void setup()
 
   Wire.begin();
 
-  mySensors.setWirePort(Wire); // Tell the class which Wire port to use
+  // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+  // Detect, initialize and configure the sensors
+
+  mySensors.setWirePort(Wire); // Tell the sensors instance which Wire port to use
 
   //mySensors.enableDebugging(serialQUAD); // Uncomment this line to enable debug messages on serialQUAD
 
   mySensors.setMenuPort(serialQUAD); // Use serialQUAD for the logging menu
-  theMenu.setMenuPort(serialQUAD); // Use serialQUAD for the menu
-
-  theMenu.setDebugPort(serialQUAD); // Uncomment this line to enable menu debug messages on serialQUAD
-
-  while (theMenu._menuPort->available()) // Clear the menu serial buffer
-    theMenu._menuPort->read();
-
+  
   mySensors.detectSensors(); // Detect which sensors are connected
 
   mySensors.beginSensors(); // Begin all the sensors
 
   mySensors.initializeSensors(); // Initialize all the sensors
 
-  if (!mySensors.beginStorage(sd_cs, (const char *)sensorConfigurationFileName))
+  if (!mySensors.beginStorage(sd_cs, (const char *)sensorConfigurationFileName)) // Begin SdFat storage
     serialQUAD.println(F("beginStorage failed! You will not be able to read or write the sensor configuration..."));
 
   // Read the configuration file and configure the sensors
-  readConfigurationFromStorage();
+  readSensorConfigurationFromStorage();
 
+  // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+  // Open the log file
+  
   // mySensors.beginStorage has done the sd.begin for us
   // Open the next available log file
   onlineDataLogging = false;
@@ -123,6 +134,16 @@ void setup()
     serialQUAD.println(F("Failed to open sensor data log file"));
   }
 
+  // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+  // Create the menu
+  
+  theMenu.setDebugPort(serialQUAD); // Uncomment this line to enable menu debug messages on serialQUAD
+
+  theMenu.setMenuPort(serialQUAD); // Use serialQUAD for the menu
+
+  while (theMenu._menuPort->available()) // Clear the menu serial buffer
+    theMenu._menuPort->read();
+
   // Create the menu - using unique menu item names.
   // You can duplicate NONE or SUB_MENU_START items (e.g. "Wifi Menu") but all other items must be unique
 
@@ -130,25 +151,35 @@ void setup()
   theMenu.addMenuItem("Menu", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   theMenu.addMenuItem("====", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
-  theMenu.addMenuItem("Open the sensor logging menu", loggingMenu);
-  theMenu.addMenuItem("Open the sensor settings menu", settingMenu);
-  theMenu.addMenuItem("Write the sensor settings to file", writeConfigurationToStorage);
-  theMenu.addMenuItem("Read the sensor settings from file", readConfigurationFromStorage);
+  theMenu.addMenuItem("Open the sensor logging menu", openSensorLoggingMenu);
+  theMenu.addMenuItem("Open the sensor settings menu", openSensorSettingMenu);
+  theMenu.addMenuItem("Write the sensor settings to file", writeSensorConfigurationToStorage);
+  theMenu.addMenuItem("Read the sensor settings from file", readSensorConfigurationFromStorage);
+  theMenu.addMenuItem("Write the logger configuration to file", writeLoggerConfig);
+  theMenu.addMenuItem("Read the logger configuration from file", readLoggerConfig);
   theMenu.addMenuItem("Stop logging", stopLogging);
   theMenu.addMenuItem("Open new log file", newLogFile);
   theMenu.addMenuItem("Set RTC using NTP over WiFi", setRTC);
-  theMenu.addMenuItem("WiFi Menu", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_START);
+
+  // WiFi sub-menu: set the WiFi SSID and password
+  theMenu.addMenuItem("WiFi Menu", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_START); // Start of the WiFi sub-menu
   theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   theMenu.addMenuItem("WiFi Menu", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   theMenu.addMenuItem("=========", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  // The Arduino IDE Serial Monitor does not support backspace so - by default - we need to clear text values when editing them.
+  // The user enters the entire text value each time.
+  // If the user is using a terminal emulator which supports backspace (e.g. Tera Term) then
+  // changing the WiFi SSID type to SFE_QUAD_MENU_VARIABLE_TYPE_TEXT_EDIT will allow the existing text to be edited.
   theMenu.addMenuItem("WiFi SSID", SFE_QUAD_MENU_VARIABLE_TYPE_TEXT);
-  theMenu.setMenuItemVariable("WiFi SSID", "T-Rex");
-  theMenu.addMenuItem("WiFi password", SFE_QUAD_MENU_VARIABLE_TYPE_TEXT);
-  theMenu.setMenuItemVariable("WiFi password", "Has Big Teeth");
+  theMenu.setMenuItemVariable("WiFi SSID", "T-Rex"); // Set the default SSID - this will be updated by readLoggerConfig
+  theMenu.addMenuItem("WiFi password", SFE_QUAD_MENU_VARIABLE_TYPE_TEXT); // Same for the password. Change to SFE_QUAD_MENU_VARIABLE_TYPE_TEXT_EDIT if required.
+  theMenu.setMenuItemVariable("WiFi password", "Has Big Teeth"); // Set the default password - this will be updated by readLoggerConfig
   theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
-  theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END);
-  theMenu.addMenuItem("Logging Menu", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_START);
+  theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END); // End of the WiFi sub-menu
+  
+  // Logging sub-menu: set the logging interval etc.
+  theMenu.addMenuItem("Logging Menu", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_START); // Start of the logging sub-menu
   theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   theMenu.addMenuItem("Logging Menu", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   theMenu.addMenuItem("============", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
@@ -156,17 +187,20 @@ void setup()
   theMenu.addMenuItem("Logging interval (ms)", SFE_QUAD_MENU_VARIABLE_TYPE_ULONG);
   SFE_QUAD_Menu_Every_Type_t defaultValue;
   defaultValue.ULONG = 1000;
-  theMenu.setMenuItemVariable("Logging interval (ms)", &defaultValue);
+  theMenu.setMenuItemVariable("Logging interval (ms)", &defaultValue); // Set the default logging interval - this will be updated by readLoggerConfig
   theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
-  theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END);
-  theMenu.addMenuItem("Write the logger configuration to file", writeLoggerConfig);
-  theMenu.addMenuItem("Read the logger configuration from file", readLoggerConfig);
+  theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END); // End of the logging sub-menu
+  
   theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
 
-  readLoggerConfig(); // Read any existing values from file
+  readLoggerConfig(); // Read any existing menu values from file. Do this _after_ the menu has been created.
   
   serialQUAD.println(F("Press any key to open the menu"));
+  serialQUAD.println();
 
+  // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+  // Print and write the sensor helper text
+  
   mySensors.getSensorNames(); // Print the sensor names helper
   serialQUAD.println(mySensors.readings);
   if (onlineDataLogging)
@@ -178,13 +212,19 @@ void setup()
     sensorDataFile.println(mySensors.readings);
 }
 
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
 void loop()
 {
+
+  // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+  // Logging interval - read the sensors every loggingInterval milliseconds
+  
   static unsigned long lastRead;
 
   SFE_QUAD_Menu_Every_Type_t loggingInterval;
-  theMenu.getMenuItemVariable("Logging interval (ms)", &loggingInterval);
-  if (millis() > (lastRead + (unsigned long)loggingInterval.ULONG))
+  theMenu.getMenuItemVariable("Logging interval (ms)", &loggingInterval); // Get the logging interval from theMenu
+  if (millis() > (lastRead + (unsigned long)loggingInterval.ULONG)) // Is it time to read the sensors?
   {
     lastRead = millis(); // Update the time of the last read
     
@@ -201,11 +241,17 @@ void loop()
     }
   }
 
+  // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+  // Menu
+  
   if (theMenu._menuPort->available()) // Has the user pressed a key?
   {
-    theMenu.openMenu();
+    theMenu.openMenu(); // If so, open the menu
   }
 
+  // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+  // Stop logging button
+  
   if (digitalRead(qwiicPower) == LOW) // Check if the user has pressed the stop logging button
   {
     if (onlineDataLogging)
@@ -217,10 +263,12 @@ void loop()
   }
 }
 
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
 //Returns next available log file name
 bool findNextAvailableLog(char *newFileName, const char *fileLeader, bool reuseEmpty)
 {
-// Define the log file type - use the same type as the Qwiic Universal Auto-Detect library
+// Define the SdFat log file type - use the same type as the Qwiic Universal Auto-Detect library
 #if SFE_QUAD_SD_FAT_TYPE == 1
   File32 newFile;
 #elif SFE_QUAD_SD_FAT_TYPE == 2
@@ -280,10 +328,12 @@ bool findNextAvailableLog(char *newFileName, const char *fileLeader, bool reuseE
   return (true);
 }
 
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
 // Open the sensor logging menu. Afterwards, open a new log file and write the helper text to it - it may have changed
-void loggingMenu(void)
+void openSensorLoggingMenu(void)
 {
-  mySensors.loggingMenu();
+  mySensors.loggingMenu(); // Open the _sensors_ logging menu
 
   newLogFile(); // Open a new log file - the sense names may have changed
   
@@ -298,26 +348,41 @@ void loggingMenu(void)
     sensorDataFile.println(mySensors.readings);
 }
 
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
 // Open the sensor setting menu
-void settingMenu(void)
+void openSensorSettingMenu(void)
 {
-  mySensors.settingMenu();
+  mySensors.settingMenu(); // Open the _sensors_ setting menu
 }
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 // Read the configuration file and configure the sensors
-void readConfigurationFromStorage(void)
+void readSensorConfigurationFromStorage(void)
 {
-  mySensors.readConfigurationFromStorage();
-  mySensors.applySensorConfiguration();
+  bool success = mySensors.readConfigurationFromStorage();
+  success &= mySensors.applySensorConfiguration();
+  if (success)
+    serialQUAD.println(F("Sensor configuration read from storage"));
+  else
+    serialQUAD.println(F("Unable to read sensor configuration from storage"));
 }
 
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
 // Write the sensor configuration to microSD
-void writeConfigurationToStorage(void)
+void writeSensorConfigurationToStorage(void)
 {
-  mySensors.getSensorConfiguration();
-  if (mySensors.writeConfigurationToStorage(false)) // Set append to false - overwrite the configuration
+  bool success = mySensors.getSensorConfiguration();
+  success &= mySensors.writeConfigurationToStorage(false); // Set append to false - overwrite the configuration
+  if (success)
     serialQUAD.println(F("Sensor configuration written to file"));
+  else
+    serialQUAD.println(F("Unable to write sensor configuration to file"));
 }
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 // Stop logging - close the log file
 void stopLogging(void)
@@ -329,6 +394,8 @@ void stopLogging(void)
     serialQUAD.println(F("Log file closed"));
   }
 }
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 // Open a new log file
 void newLogFile(void)
@@ -358,10 +425,14 @@ void newLogFile(void)
   }
 }
 
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
 void setRTC(void)
 {
   
 }
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 void writeLoggerConfig(void)
 {
@@ -384,11 +455,37 @@ void writeLoggerConfig(void)
     newFile.close();
   }
 
-  if (!success)
-    theMenu._menuPort->println(F("writeLoggerConfig failed!"));
+  if (success)
+    theMenu._menuPort->println(F("Logger configuration written to file"));
+  else
+    theMenu._menuPort->println(F("Unable to write logger configuration to file"));
 }
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 void readLoggerConfig(void)
 {
-  
+// Define the log file type - use the same type as the Qwiic Universal Auto-Detect library
+#if SFE_QUAD_SD_FAT_TYPE == 1
+  File32 newFile;
+#elif SFE_QUAD_SD_FAT_TYPE == 2
+  ExFile newFile;
+#elif SFE_QUAD_SD_FAT_TYPE == 3
+  FsFile newFile;
+#else // SD_FAT_TYPE == 0
+  File newFile;
+#endif  // SD_FAT_TYPE
+
+  bool success = newFile.open(loggerConfigurationFileName, O_READ) == true;
+
+  if (success)
+  {
+    success = theMenu.readMenuVariables(&newFile);
+    newFile.close();
+  }
+
+  if (success)
+    theMenu._menuPort->println(F("Logger configuration read from file"));
+  else
+    theMenu._menuPort->println(F("Unable to read logger configuration from file"));  
 }
