@@ -112,6 +112,8 @@ void setup()
 
   // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
   // Open the log file
+
+  serialQUAD.println(F("Finding the next available log file..."));
   
   // mySensors.beginStorage has done the sd.begin for us
   // Open the next available log file
@@ -143,7 +145,7 @@ void setup()
   // The user enters the entire text value each time.
   // If the user is using a terminal emulator which supports backspace (e.g. Tera Term) then
   // setting supportsBackspace to true will allow the existing text to be edited.
-  theMenu.setMenuPort(serialQUAD); // Use serialQUAD for the menu
+  theMenu.setMenuPort(serialQUAD); // Use serialQUAD for the menu - with no backspace support
   //theMenu.setMenuPort(serialQUAD, true); // Use serialQUAD for the menu - on a terminal emulator which supports backspace
 
   while (theMenu._menuPort->available()) // Clear the menu serial buffer
@@ -189,10 +191,15 @@ void setup()
   SFE_QUAD_Menu_Every_Type_t defaultValue;
   defaultValue.ULONG = 1000;
   theMenu.setMenuItemVariable("Logging interval (ms)", &defaultValue); // Set the default logging interval - this will be updated by readLoggerConfig
+  defaultValue.ULONG = 10;
+  theMenu.setMenuItemVariableMin("Logging interval (ms)", &defaultValue); // Set the minimum logging interval - this will be updated by readLoggerConfig
+  defaultValue.ULONG = 3600000;
+  theMenu.setMenuItemVariableMax("Logging interval (ms)", &defaultValue); // Set the maximum logging interval - this will be updated by readLoggerConfig
   theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END); // End of the logging sub-menu
   
   theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  // End of the menu
 
   readLoggerConfig(); // Read any existing menu values from file. Do this _after_ the menu has been created.
   
