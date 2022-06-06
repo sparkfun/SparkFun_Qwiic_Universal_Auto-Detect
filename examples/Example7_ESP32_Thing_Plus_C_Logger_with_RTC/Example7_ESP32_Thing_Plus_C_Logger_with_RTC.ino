@@ -71,6 +71,13 @@ char sensorDataFileName[30] = ""; // This will hold the name of the sensorDataFi
 bool onlineDataLogging; //This flag indicates if we are logging data to sensorDataFile
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+// ESP32 WiFi and RTC
+
+#include <WiFi.h>
+#include "time.h"
+#include "sntp.h"
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 void setup()
 {
@@ -176,8 +183,27 @@ void setup()
   theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   theMenu.addMenuItem("WiFi SSID", SFE_QUAD_MENU_VARIABLE_TYPE_TEXT);
   theMenu.setMenuItemVariable("WiFi SSID", "T-Rex"); // Set the default SSID - this will be updated by readLoggerConfig
-  theMenu.addMenuItem("WiFi password", SFE_QUAD_MENU_VARIABLE_TYPE_TEXT); // Same for the password. Change to SFE_QUAD_MENU_VARIABLE_TYPE_TEXT_EDIT if required.
+  theMenu.addMenuItem("WiFi password", SFE_QUAD_MENU_VARIABLE_TYPE_TEXT);
   theMenu.setMenuItemVariable("WiFi password", "Has Big Teeth"); // Set the default password - this will be updated by readLoggerConfig
+  theMenu.addMenuItem("NTP Server 1", SFE_QUAD_MENU_VARIABLE_TYPE_TEXT);
+  theMenu.setMenuItemVariable("NTP Server 1", "pool.ntp.org");
+  theMenu.addMenuItem("NTP Server 2", SFE_QUAD_MENU_VARIABLE_TYPE_TEXT);
+  theMenu.setMenuItemVariable("NTP Server 2", "time.nist.gov");
+  theMenu.addMenuItem("GMT Offset (sec)", SFE_QUAD_MENU_VARIABLE_TYPE_LONG);
+  SFE_QUAD_Menu_Every_Type_t defaultValue;
+  defaultValue.LONG = 3600;
+  theMenu.setMenuItemVariable("GMT Offset (sec)", &defaultValue); // Set the default GMT offset (time zone) - this will be updated by readLoggerConfig
+  theMenu.addMenuItem("Daylight Offset (sec)", SFE_QUAD_MENU_VARIABLE_TYPE_INT);
+  defaultValue.INT = 3600;
+  theMenu.setMenuItemVariable("Daylight Offset (sec)", &defaultValue); // Set the default daylight offset - this will be updated by readLoggerConfig
+  theMenu.addMenuItem("TimeZone Rule", SFE_QUAD_MENU_VARIABLE_TYPE_TEXT);
+  // A list of rules for your zone can be obtained from: https://github.com/esp8266/Arduino/blob/master/cores/esp8266/TZ.h
+  theMenu.setMenuItemVariable("TimeZone Rule", "GMT0BST,M3.5.0/1,M10.5.0"); // TimeZone rule for Europe/London
+  //theMenu.setMenuItemVariable("TimeZone Rule", "CET-1CEST,M3.5.0,M10.5.0/3"); // TimeZone rule for Europe/Rome including daylight adjustment rules
+  //theMenu.setMenuItemVariable("TimeZone Rule", "MST7MDT,M3.2.0,M11.1.0"); // TimeZone rule for America/Denver
+  theMenu.addMenuItem("Use TimeZone Rule", SFE_QUAD_MENU_VARIABLE_TYPE_BOOL);
+  defaultValue.BOOL = 1;
+  theMenu.setMenuItemVariable("Use TimeZone Rule", &defaultValue);
   theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END); // End of the WiFi sub-menu
   
@@ -188,13 +214,15 @@ void setup()
   theMenu.addMenuItem("============", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   theMenu.addMenuItem("Logging interval (ms)", SFE_QUAD_MENU_VARIABLE_TYPE_ULONG);
-  SFE_QUAD_Menu_Every_Type_t defaultValue;
   defaultValue.ULONG = 1000;
   theMenu.setMenuItemVariable("Logging interval (ms)", &defaultValue); // Set the default logging interval - this will be updated by readLoggerConfig
   defaultValue.ULONG = 10;
   theMenu.setMenuItemVariableMin("Logging interval (ms)", &defaultValue); // Set the minimum logging interval - this will be updated by readLoggerConfig
   defaultValue.ULONG = 3600000;
   theMenu.setMenuItemVariableMax("Logging interval (ms)", &defaultValue); // Set the maximum logging interval - this will be updated by readLoggerConfig
+  theMenu.addMenuItem("Log Local Time", SFE_QUAD_MENU_VARIABLE_TYPE_BOOL);
+  defaultValue.BOOL = 1;
+  theMenu.setMenuItemVariable("Log Local Time", &defaultValue);
   theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END); // End of the logging sub-menu
   
@@ -208,17 +236,33 @@ void setup()
 
   // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
   // Print and write the sensor helper text
+
+  SFE_QUAD_Menu_Every_Type_t logLocalTime;
+  theMenu.getMenuItemVariable("Log Local Time", &logLocalTime);    
   
   mySensors.getSensorNames(); // Print the sensor names helper
+  if (logLocalTime.BOOL)
+    serialQUAD.print(F("Local Time,"));
   serialQUAD.println(mySensors.readings);
   if (onlineDataLogging)
+  {
+    if (logLocalTime.BOOL)
+      sensorDataFile.print(F("Local Time,"));
     sensorDataFile.println(mySensors.readings);
+  }
 
   mySensors.getSenseNames(); // Print the sense names helper
+  if (logLocalTime.BOOL)
+    serialQUAD.print(F("YYYY/MM/DD HH:MM:SS,"));
   serialQUAD.println(mySensors.readings);
   if (onlineDataLogging)
+  {
+    if (logLocalTime.BOOL)
+      sensorDataFile.print(F("YYYY/MM/DD HH:MM:SS,"));
     sensorDataFile.println(mySensors.readings);
-}
+  }
+    
+} // /setup()
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
@@ -232,17 +276,25 @@ void loop()
 
   SFE_QUAD_Menu_Every_Type_t loggingInterval;
   theMenu.getMenuItemVariable("Logging interval (ms)", &loggingInterval); // Get the logging interval from theMenu
-  if (millis() > (lastRead + (unsigned long)loggingInterval.ULONG)) // Is it time to read the sensors?
+  if (millis() > (lastRead + loggingInterval.ULONG)) // Is it time to read the sensors?
   {
     lastRead = millis(); // Update the time of the last read
     
     mySensors.getSensorReadings(); // Read everything from all sensors
   
-    serialQUAD.println(mySensors.readings);
+    SFE_QUAD_Menu_Every_Type_t logLocalTime;
+    theMenu.getMenuItemVariable("Log Local Time", &logLocalTime);
+
+    if (logLocalTime.BOOL)
+      printLocalTime(serialQUAD); // Print local time if desired
+    
+    serialQUAD.println(mySensors.readings); // Print the sensor readings
     
     if (onlineDataLogging)
     {
       digitalWrite(LED_BUILTIN, HIGH);
+      if (logLocalTime.BOOL)
+        printLocalTime(sensorDataFile); // Write local time to the file if desired
       sensorDataFile.println(mySensors.readings); // Write the data to file
       sensorDataFile.sync(); // This will help prevent data loss if the power is removed during logging
       digitalWrite(LED_BUILTIN, LOW);
@@ -269,7 +321,8 @@ void loop()
       serialQUAD.println(F("Log file closed"));
     }
   }
-}
+  
+} // /loop()
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
@@ -334,7 +387,7 @@ bool findNextAvailableLog(char *newFileName, const char *fileLeader, bool reuseE
   }
 
   return (true);
-}
+} // /findNextAvailableLog
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
@@ -435,13 +488,6 @@ void newLogFile(void)
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-void setRTC(void)
-{
-  
-}
-
-// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
 void writeLoggerConfig(void)
 {
 // Define the log file type - use the same type as the Qwiic Universal Auto-Detect library
@@ -496,4 +542,100 @@ void readLoggerConfig(void)
     theMenu._menuPort->println(F("Logger configuration read from file"));
   else
     theMenu._menuPort->println(F("Unable to read logger configuration from file"));  
+}
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+// Connect to WiFi and be ready to set RTC using NTP
+// Code taken mostly from Espressif's SimpleTime example
+void setRTC(void)
+{
+  // set notification call-back function
+  sntp_set_time_sync_notification_cb( timeavailable );
+
+  /**
+   * NTP server address could be aquired via DHCP,
+   *
+   * NOTE: This call should be made BEFORE esp32 aquires IP address via DHCP,
+   * otherwise SNTP option 42 would be rejected by default.
+   * NOTE: configTime() function call if made AFTER DHCP-client run
+   * will OVERRIDE aquired NTP server address
+   */
+  sntp_servermode_dhcp(1);    // (optional)
+
+  SFE_QUAD_Menu_Every_Type_t useTimeZoneRule;
+  theMenu.getMenuItemVariable("Use TimeZone Rule", &useTimeZoneRule); // Find out if we are using the TimeZone Rule (or GMT and daylight offsets)
+
+  char ntpServer1[20];
+  theMenu.getMenuItemVariable("NTP Server 1", ntpServer1, 20);
+  char ntpServer2[20];
+  theMenu.getMenuItemVariable("NTP Server 2", ntpServer2, 20);
+
+  if (useTimeZoneRule.BOOL)
+  {
+    /**
+     * A more convenient approach to handle TimeZones with daylightOffset 
+     * would be to specify a environmnet variable with TimeZone definition including daylight adjustmnet rules.
+     * A list of rules for your zone could be obtained from https://github.com/esp8266/Arduino/blob/master/cores/esp8266/TZ.h
+     */
+    char time_zone[50];
+    theMenu.getMenuItemVariable("TimeZone Rule", time_zone, 50);
+    
+    configTzTime(time_zone, ntpServer1, ntpServer2);    
+  }
+  else
+  {
+    /**
+     * This will set configured ntp servers and constant TimeZone/daylightOffset
+     * should be OK if your time zone does not need to adjust daylightOffset twice a year,
+     * in such a case time adjustment won't be handled automagicaly.
+     */
+
+    SFE_QUAD_Menu_Every_Type_t menu_offset;
+    theMenu.getMenuItemVariable("GMT Offset (sec)", &menu_offset);
+    long gmtOffset_sec = menu_offset.LONG;
+    theMenu.getMenuItemVariable("Daylight Offset (sec)", &menu_offset);
+    int daylightOffset_sec = menu_offset.LONG;
+
+    configTime(gmtOffset_sec, daylightOffset_sec, ntpServer1, ntpServer2);    
+  }
+
+  //connect to WiFi
+
+  char ssid[32];
+  theMenu.getMenuItemVariable("WiFi SSID", ssid, 32);
+  char password[32];
+  theMenu.getMenuItemVariable("WiFi password", password, 32);
+
+  serialQUAD.printf("Connecting to %s ", ssid);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+      delay(500);
+      serialQUAD.print(".");
+  }
+  serialQUAD.println(" CONNECTED");  
+}
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+// Callback function (get's called when time adjusts via NTP)
+void timeavailable(struct timeval *t)
+{
+  serialQUAD.println("Got time adjustment from NTP!");
+  printLocalTime();
+}
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+void printLocalTime(Print *pr)
+{
+  struct tm timeinfo;
+  if(getLocalTime(&timeinfo))
+  {
+    pr->print(&timeinfo, "%Y/%B/%d %H:%M:%S,");
+  }
+  else
+  {
+    pr->print(F(","));
+  }
 }

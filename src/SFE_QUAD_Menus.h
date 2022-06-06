@@ -22,6 +22,7 @@ typedef enum
   SFE_QUAD_MENU_VARIABLE_TYPE_UINT16_T,
   SFE_QUAD_MENU_VARIABLE_TYPE_UINT32_T,
   SFE_QUAD_MENU_VARIABLE_TYPE_ULONG,
+  SFE_QUAD_MENU_VARIABLE_TYPE_LONG,
   SFE_QUAD_MENU_VARIABLE_TYPE_UNKNOWN // Must be last
 } SFE_QUAD_Menu_Variable_Type_e;
 
@@ -38,6 +39,7 @@ typedef struct
   uint16_t UINT16_T;
   uint32_t UINT32_T;
   unsigned long ULONG;
+  long LONG;
 } SFE_QUAD_Menu_Every_Type_t;
 
 class SFE_QUAD_Menu_sprintf

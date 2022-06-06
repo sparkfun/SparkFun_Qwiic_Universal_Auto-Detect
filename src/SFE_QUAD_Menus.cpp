@@ -300,6 +300,10 @@ bool SFE_QUAD_Menu::getMenuItemVariable(const char *itemName, SFE_QUAD_Menu_Ever
     theValue->ULONG = itemExists->_theVariable->ULONG;
     return (true);
     break;
+  case SFE_QUAD_MENU_VARIABLE_TYPE_LONG:
+    theValue->LONG = itemExists->_theVariable->LONG;
+    return (true);
+    break;
   case SFE_QUAD_MENU_VARIABLE_TYPE_UNKNOWN:
   default:
     return (false);
@@ -398,6 +402,10 @@ bool SFE_QUAD_Menu::setMenuItemVariable(const char *itemName, const SFE_QUAD_Men
     itemExists->_theVariable->ULONG = theValue->ULONG;
     return (true);
     break;
+  case SFE_QUAD_MENU_VARIABLE_TYPE_LONG:
+    itemExists->_theVariable->LONG = theValue->LONG;
+    return (true);
+    break;
   case SFE_QUAD_MENU_VARIABLE_TYPE_UNKNOWN:
   default:
     return (false);
@@ -488,6 +496,10 @@ bool SFE_QUAD_Menu::setMenuItemVariableMin(const char *itemName, const SFE_QUAD_
     itemExists->_minVal->ULONG = minVal->ULONG;
     return (true);
     break;
+  case SFE_QUAD_MENU_VARIABLE_TYPE_LONG:
+    itemExists->_minVal->LONG = minVal->LONG;
+    return (true);
+    break;
   case SFE_QUAD_MENU_VARIABLE_TYPE_UNKNOWN:
   default:
     return (false);
@@ -546,6 +558,10 @@ bool SFE_QUAD_Menu::setMenuItemVariableMax(const char *itemName, const SFE_QUAD_
     break;
   case SFE_QUAD_MENU_VARIABLE_TYPE_ULONG:
     itemExists->_maxVal->ULONG = maxVal->ULONG;
+    return (true);
+    break;
+  case SFE_QUAD_MENU_VARIABLE_TYPE_LONG:
+    itemExists->_maxVal->LONG = maxVal->LONG;
     return (true);
     break;
   case SFE_QUAD_MENU_VARIABLE_TYPE_UNKNOWN:
@@ -659,6 +675,8 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
             _menuPort->println(menuItemPtr->_theVariable->UINT32_T);
           else if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_ULONG)
             _menuPort->println(menuItemPtr->_theVariable->ULONG);
+          else if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_LONG)
+            _menuPort->println(menuItemPtr->_theVariable->LONG);
           else
             _menuPort->println(F("???")); // This should never happen...
         }
@@ -981,6 +999,40 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
                   valOK &= tempDbl <= (double)menuItemPtr->_maxVal->ULONG;
                 if (valOK)
                   menuItemPtr->_theVariable->ULONG = (unsigned long)tempDbl;
+                else
+                  _menuPort->println(F("Invalid value"));
+              }
+              else
+                _menuPort->println(F("Invalid value"));
+            }
+            else if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_LONG)
+            {
+              _menuPort->print(F("Enter the value (long)"));
+              if (menuItemPtr->_minVal != NULL)
+              {
+                _menuPort->print(F(" (Min: "));
+                _menuPort->print(menuItemPtr->_minVal->LONG);
+                _menuPort->print(F(")"));
+              }
+              if (menuItemPtr->_maxVal != NULL)
+              {
+                _menuPort->print(F(" (Max: "));
+                _menuPort->print(menuItemPtr->_maxVal->LONG);
+                _menuPort->print(F(")"));
+              }
+              _menuPort->println(F(" : "));
+              double tempDbl;
+              bool success = getValueDouble(&tempDbl, _menuTimeout);
+              _menuPort->println();
+              if (success)
+              {
+                bool valOK = true;
+                if (menuItemPtr->_minVal != NULL)
+                  valOK &= tempDbl >= (double)menuItemPtr->_minVal->LONG;
+                if (menuItemPtr->_maxVal != NULL)
+                  valOK &= tempDbl <= (double)menuItemPtr->_maxVal->LONG;
+                if (valOK)
+                  menuItemPtr->_theVariable->LONG = (long)tempDbl;
                 else
                   _menuPort->println(F("Invalid value"));
               }
@@ -1369,6 +1421,24 @@ bool SFE_QUAD_Menu::writeMenuVariables(Print *pr)
         {
           pr->print(F(",max,"));
           pr->print(menuItemPtr->_maxVal->ULONG);
+        }
+        pr->println();
+        break;
+      case SFE_QUAD_MENU_VARIABLE_TYPE_LONG:
+        pr->print(menuItemPtr->_itemName);
+        pr->print(F(","));
+        pr->print((int)menuItemPtr->_variableType);
+        pr->print(F(","));
+        pr->print(menuItemPtr->_theVariable->LONG);
+        if (menuItemPtr->_minVal != NULL)
+        {
+          pr->print(F(",min,"));
+          pr->print(menuItemPtr->_minVal->LONG);
+        }
+        if (menuItemPtr->_maxVal != NULL)
+        {
+          pr->print(F(",max,"));
+          pr->print(menuItemPtr->_maxVal->LONG);
         }
         pr->println();
         break;
@@ -1801,6 +1871,67 @@ bool SFE_QUAD_Menu::readMenuVariables(File *file)
                   charPtr++;
                 }
                 exists->_maxVal->ULONG = (unsigned long)theInt;
+              }
+            }
+          }
+            break;
+          case SFE_QUAD_MENU_VARIABLE_TYPE_LONG:
+          {
+            int64_t theInt = 0;
+            bool minus = *charPtr == '-';
+            if (minus)
+              charPtr++;
+            while ((*charPtr >= '0') && (*charPtr <= '9'))
+            {
+              theInt *= 10;
+              theInt += (uint64_t)((*charPtr) - '0');
+              charPtr++;
+            }
+            if (minus)
+              theInt *= -1;
+            exists->_theVariable->LONG = (long)theInt;
+
+            if (*charPtr == ',')
+            {
+              charPtr = strstr(charPtr, "min,");
+              if (charPtr != NULL)
+              {
+                theInt = 0;
+                charPtr += 4;
+                minus = *charPtr == '-';
+                if (minus)
+                  charPtr++;
+                while ((*charPtr >= '0') && (*charPtr <= '9'))
+                {
+                  theInt *= 10;
+                  theInt += (int64_t)((*charPtr) - '0');
+                  charPtr++;
+                }
+                if (minus)
+                  theInt *= -1;
+                exists->_minVal->LONG = (long)theInt;
+              }
+            }
+
+            if (*charPtr == ',')
+            {
+              charPtr = strstr(charPtr, "max,");
+              if (charPtr != NULL)
+              {
+                theInt = 0;
+                charPtr += 4;
+                minus = *charPtr == '-';
+                if (minus)
+                  charPtr++;
+                while ((*charPtr >= '0') && (*charPtr <= '9'))
+                {
+                  theInt *= 10;
+                  theInt += (int64_t)((*charPtr) - '0');
+                  charPtr++;
+                }
+                if (minus)
+                  theInt *= -1;
+                exists->_maxVal->LONG = (long)theInt;
               }
             }
           }
