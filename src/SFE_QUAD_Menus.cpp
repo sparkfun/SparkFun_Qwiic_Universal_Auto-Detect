@@ -77,9 +77,10 @@ SFE_QUAD_Menu::~SFE_QUAD_Menu(void)
   }
 }
 
-void SFE_QUAD_Menu::setMenuPort(Stream &port)
+void SFE_QUAD_Menu::setMenuPort(Stream &port, bool supportsBackspace)
 {
   _menuPort = &port;
+  _supportsBackspace = supportsBackspace;
 }
 
 void SFE_QUAD_Menu::setDebugPort(Stream &port)
@@ -265,7 +266,6 @@ bool SFE_QUAD_Menu::getMenuItemVariable(const char *itemName, SFE_QUAD_Menu_Ever
   case SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END:
   case SFE_QUAD_MENU_VARIABLE_TYPE_CODE:
   case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT:
-  case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT_EDIT:
     return (false);
     break;
   case SFE_QUAD_MENU_VARIABLE_TYPE_BOOL:
@@ -322,7 +322,6 @@ bool SFE_QUAD_Menu::getMenuItemVariable(const char *itemName, char *theValue, si
   switch (itemExists->_variableType)
   {
   case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT:
-  case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT_EDIT:
     if (strlen(itemExists->_theVariable->TEXT) < maxLen) // Is theValue large enough (including the null)?
     {
       memset(theValue, 0, maxLen);
@@ -365,7 +364,6 @@ bool SFE_QUAD_Menu::setMenuItemVariable(const char *itemName, const SFE_QUAD_Men
   case SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END:
   case SFE_QUAD_MENU_VARIABLE_TYPE_CODE:
   case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT:
-  case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT_EDIT:
     return (false);
     break;
   case SFE_QUAD_MENU_VARIABLE_TYPE_BOOL:
@@ -422,7 +420,6 @@ bool SFE_QUAD_Menu::setMenuItemVariable(const char *itemName, const char *theVal
   switch (itemExists->_variableType)
   {
   case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT:
-  case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT_EDIT:
     if (itemExists->_theVariable->TEXT != NULL)
       delete[] itemExists->_theVariable->TEXT;
     itemExists->_theVariable->TEXT = new char[strlen(theValue) + 1]; // Add space for the null
@@ -460,7 +457,6 @@ bool SFE_QUAD_Menu::setMenuItemVariableMin(const char *itemName, const SFE_QUAD_
   case SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END:
   case SFE_QUAD_MENU_VARIABLE_TYPE_CODE:
   case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT:
-  case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT_EDIT:
   case SFE_QUAD_MENU_VARIABLE_TYPE_BOOL:
     return (false);
     break;
@@ -521,7 +517,6 @@ bool SFE_QUAD_Menu::setMenuItemVariableMax(const char *itemName, const SFE_QUAD_
   case SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END:
   case SFE_QUAD_MENU_VARIABLE_TYPE_CODE:
   case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT:
-  case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT_EDIT:
   case SFE_QUAD_MENU_VARIABLE_TYPE_BOOL:
     return (false);
     break;
@@ -634,7 +629,7 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
         {
           _menuPort->println();
         }
-        else if ((menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_TEXT) || (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_TEXT_EDIT))
+        else if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_TEXT)
         {
           _menuPort->print(F(" : "));
           if (menuItemPtr->_theVariable->TEXT != NULL)
@@ -738,14 +733,14 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
             menuItemPtr->_theVariable->CODE(); // Run the code
           }
         }
-        else if ((menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_TEXT) || (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_TEXT_EDIT))
+        else if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_TEXT)
         {
           if (menuItems == menuChoice)
           {
             if (menuItemPtr->_theVariable->TEXT == NULL) // Sanity check
               return (false);
             _menuPort->println(F("Enter the value (text):"));
-            getValueText(&menuItemPtr->_theVariable->TEXT, _menuTimeout, menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_TEXT_EDIT); // Do this on a new line - to support deletes etc.
+            getValueText(&menuItemPtr->_theVariable->TEXT, _menuTimeout); // Do this on a new line - to support deletes etc.
           }
         }
         else
@@ -1125,7 +1120,7 @@ bool SFE_QUAD_Menu::getValueDouble(double *value, unsigned long timeout)
 // Allow the user to enter a text value using a very simple serial / terminal 'editor' - with support for backspace
 // We want to be able to change the pointer to the text - so we need to pass in a pointer to that pointer
 // (value itself will be restored when the function returns)
-bool SFE_QUAD_Menu::getValueText(char * *value, unsigned long timeout, bool useExistingText)
+bool SFE_QUAD_Menu::getValueText(char * *value, unsigned long timeout)
 {
   if (_menuPort == NULL)
     return (false);
@@ -1143,8 +1138,8 @@ bool SFE_QUAD_Menu::getValueText(char * *value, unsigned long timeout, bool useE
 
   memset(tempValue, 0, _maxTextChars + 1);
 
-  // If *value is not NULL, and useExistingText is true, copy the existing text into tempValue so we can edit it
-  if ((*value != NULL) && (useExistingText))
+  // If *value is not NULL, and _supportsBackspace is true, copy the existing text into tempValue so we can edit it
+  if ((*value != NULL) && (_supportsBackspace))
   {
     strcpy(tempValue, *value);
     _menuPort->print(tempValue);
@@ -1235,7 +1230,6 @@ bool SFE_QUAD_Menu::writeMenuVariables(Print *pr)
         // Do nothing
         break;
       case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT:
-      case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT_EDIT:
         if (menuItemPtr->_theVariable->TEXT != NULL) // Sanity check
         {
           pr->print(menuItemPtr->_itemName);
@@ -1397,7 +1391,6 @@ bool SFE_QUAD_Menu::readMenuVariables(File *file)
             // Do nothing
             break;
           case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT:
-          case SFE_QUAD_MENU_VARIABLE_TYPE_TEXT_EDIT:
           {
             char *charPtr2 = strchr(charPtr, '\n'); // Find the \n
             if (charPtr2 != NULL)

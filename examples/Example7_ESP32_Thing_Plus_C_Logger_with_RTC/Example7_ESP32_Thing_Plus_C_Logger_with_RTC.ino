@@ -139,7 +139,12 @@ void setup()
   
   theMenu.setDebugPort(serialQUAD); // Uncomment this line to enable menu debug messages on serialQUAD
 
+  // The Arduino IDE Serial Monitor does not support backspace so - by default - we need to clear text values when editing them.
+  // The user enters the entire text value each time.
+  // If the user is using a terminal emulator which supports backspace (e.g. Tera Term) then
+  // setting supportsBackspace to true will allow the existing text to be edited.
   theMenu.setMenuPort(serialQUAD); // Use serialQUAD for the menu
+  //theMenu.setMenuPort(serialQUAD, true); // Use serialQUAD for the menu - on a terminal emulator which supports backspace
 
   while (theMenu._menuPort->available()) // Clear the menu serial buffer
     theMenu._menuPort->read();
@@ -167,10 +172,6 @@ void setup()
   theMenu.addMenuItem("WiFi Menu", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   theMenu.addMenuItem("=========", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
-  // The Arduino IDE Serial Monitor does not support backspace so - by default - we need to clear text values when editing them.
-  // The user enters the entire text value each time.
-  // If the user is using a terminal emulator which supports backspace (e.g. Tera Term) then
-  // changing the WiFi SSID type to SFE_QUAD_MENU_VARIABLE_TYPE_TEXT_EDIT will allow the existing text to be edited.
   theMenu.addMenuItem("WiFi SSID", SFE_QUAD_MENU_VARIABLE_TYPE_TEXT);
   theMenu.setMenuItemVariable("WiFi SSID", "T-Rex"); // Set the default SSID - this will be updated by readLoggerConfig
   theMenu.addMenuItem("WiFi password", SFE_QUAD_MENU_VARIABLE_TYPE_TEXT); // Same for the password. Change to SFE_QUAD_MENU_VARIABLE_TYPE_TEXT_EDIT if required.

@@ -73,7 +73,7 @@ public:
   SFE_QUAD_Menu(void);
   ~SFE_QUAD_Menu(void);
 
-  void setMenuPort(Stream &port);
+  void setMenuPort(Stream &port, bool supportsBackspace = false);
   void setDebugPort(Stream &port);
   bool addMenuItem(const char *itemName, SFE_QUAD_Menu_Variable_Type_e variableType);
   bool addMenuItem(const char *itemName, void (*codePointer)()); // CODE
@@ -87,7 +87,7 @@ public:
   bool openMenu(SFE_QUAD_Menu_Item *start = NULL);
   uint32_t getMenuChoice(unsigned long timeout);
   bool getValueDouble(double *value, unsigned long timeout);
-  bool getValueText(char * *value, unsigned long timeout, bool useExistingText = false);
+  bool getValueText(char * *value, unsigned long timeout);
   bool writeMenuVariables(Print *pr);
   bool readMenuVariables(File *st);
   size_t getMenuItemNameMaxLen(void);
@@ -100,6 +100,7 @@ public:
   void setMenuTimeout(unsigned long newTimeout) { if (newTimeout > 0) { _menuTimeout = newTimeout; } }
   uint16_t _maxTextChars = 32; // Maximum number of chars that can be entered into a text field etc.
   void setMaxTextChars(uint16_t newMax) { if (newMax >= 32) { _maxTextChars = newMax; } }
+  bool _supportsBackspace = false; // Flag to indicate if the serial menu supports backspace and so can edit existing text
 
   SFE_QUAD_Menu_sprintf _sprintf; // Provide access to the common sprintf(%f) and sprintf(%e) functions
 };
