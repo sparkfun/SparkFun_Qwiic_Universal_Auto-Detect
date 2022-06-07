@@ -77,6 +77,8 @@ bool onlineDataLogging; //This flag indicates if we are logging data to sensorDa
 #include "time.h"
 #include "sntp.h"
 
+const unsigned long wifiConnectTimeout = 10000; // Allow 10s for WiFi connection
+
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 void setup()
@@ -230,6 +232,8 @@ void setup()
   // End of the menu
 
   readLoggerConfig(); // Read any existing menu values from file. Do this _after_ the menu has been created.
+
+  setRTC(); // Try to set the RTC using NTP to prevent printLocalTime from slowing things down
   
   serialQUAD.println(F("Press any key to open the menu"));
   serialQUAD.println();
@@ -242,7 +246,7 @@ void setup()
   
   mySensors.getSensorNames(); // Print the sensor names helper
   if (logLocalTime.BOOL)
-    serialQUAD.print(F("Local Time,"));
+    serialQUAD.print(F("Local_Time,"));
   serialQUAD.println(mySensors.readings);
   if (onlineDataLogging)
   {
@@ -299,6 +303,10 @@ void loop()
       sensorDataFile.sync(); // This will help prevent data loss if the power is removed during logging
       digitalWrite(LED_BUILTIN, LOW);
     }
+  }
+  else
+  {
+    delay(10);
   }
 
   // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -580,7 +588,7 @@ void setRTC(void)
      */
     char time_zone[50];
     theMenu.getMenuItemVariable("TimeZone Rule", time_zone, 50);
-    
+
     configTzTime(time_zone, ntpServer1, ntpServer2);    
   }
   else
@@ -608,12 +616,24 @@ void setRTC(void)
   theMenu.getMenuItemVariable("WiFi password", password, 32);
 
   serialQUAD.printf("Connecting to %s ", ssid);
+
   WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-      delay(500);
-      serialQUAD.print(".");
+
+  unsigned long startTime = millis();
+  
+  while ((WiFi.status() != WL_CONNECTED) && (millis() < (startTime + wifiConnectTimeout)))
+  {
+    delay(500);
+    serialQUAD.print(".");
   }
-  serialQUAD.println(" CONNECTED");  
+
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    serialQUAD.println(" CONNECTED");
+    printLocalTime(serialQUAD); // Doing a getLocalTime immediately after the WiFi connects seems critical to NTP being successful?!
+  }
+  else
+    serialQUAD.println(" Connection failed! Please try again...");
 }
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -621,21 +641,25 @@ void setRTC(void)
 // Callback function (get's called when time adjusts via NTP)
 void timeavailable(struct timeval *t)
 {
-  serialQUAD.println("Got time adjustment from NTP!");
-  printLocalTime();
+  serialQUAD.print("Got time adjustment from NTP: ");
+  printLocalTime(serialQUAD);
+  serialQUAD.println();
+
+  WiFi.disconnect(true);
+  WiFi.mode(WIFI_OFF);
 }
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-void printLocalTime(Print *pr)
+void printLocalTime(Print &pr)
 {
   struct tm timeinfo;
   if(getLocalTime(&timeinfo))
   {
-    pr->print(&timeinfo, "%Y/%B/%d %H:%M:%S,");
+    pr.print(&timeinfo, "%Y/%m/%d %H:%M:%S,");
   }
   else
   {
-    pr->print(F(","));
+    pr.print(F(","));
   }
 }

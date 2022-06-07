@@ -1455,6 +1455,7 @@ bool SFE_QUAD_Menu::writeMenuVariables(Print *pr)
   return (true);
 }
 
+#ifndef SFE_QUAD_Menus_No_File
 bool SFE_QUAD_Menu::readMenuVariables(File *file)
 {
   size_t maxLineLen = getMenuItemNameMaxLen();
@@ -1960,6 +1961,7 @@ bool SFE_QUAD_Menu::readMenuVariables(File *file)
   delete[] line;
   return (true);
 }
+#endif
 
 size_t SFE_QUAD_Menu::getMenuItemNameMaxLen(void)
 {

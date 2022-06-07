@@ -3,7 +3,13 @@
 
 // SparkFun Qwiic Universal Auto-Detect Menus
 
+#include "Arduino.h"
+
+//#define SFE_QUAD_Menus_No_File // Useful for testing without SdFat - disables readMenuVariables
+
+#ifndef SFE_QUAD_Menus_No_File
 #include "SFE_QUAD_Sensors.h"
+#endif
 
 // Enum for the different variable types
 typedef enum
@@ -91,14 +97,16 @@ public:
   bool getValueDouble(double *value, unsigned long timeout);
   bool getValueText(char * *value, unsigned long timeout);
   bool writeMenuVariables(Print *pr);
+#ifndef SFE_QUAD_Menus_No_File
   bool readMenuVariables(File *st);
+#endif
   size_t getMenuItemNameMaxLen(void);
   SFE_QUAD_Menu_Item *menuItemExists(const char *itemName);
 
   SFE_QUAD_Menu_Item *_head;          // The head of the linked list of sensors
   Stream *_menuPort;                  // The Serial port (Stream) used for the menu
   Stream *_debugPort;                 // The Serial port (Stream) used for the debug messages
-  unsigned long _menuTimeout = 10000; // Default timeout for the menus
+  unsigned long _menuTimeout = 10000; // Default timeout for the menus (millis)
   void setMenuTimeout(unsigned long newTimeout) { if (newTimeout > 0) { _menuTimeout = newTimeout; } }
   uint16_t _maxTextChars = 32; // Maximum number of chars that can be entered into a text field etc.
   void setMaxTextChars(uint16_t newMax) { if (newMax >= 32) { _maxTextChars = newMax; } }
