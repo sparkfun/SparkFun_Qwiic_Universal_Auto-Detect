@@ -1492,6 +1492,7 @@ bool SFE_QUAD_Menu::readMenuVariables(File *file)
     {
       _debugPort->print(F("readMenuVariables: line: "));
       _debugPort->print(line);
+      _debugPort->write('\r'); // fgets strips the \r (and leaves only the \n)
     }
 
     char *charPtr = strchr(line, ','); // Find the end of the item name
