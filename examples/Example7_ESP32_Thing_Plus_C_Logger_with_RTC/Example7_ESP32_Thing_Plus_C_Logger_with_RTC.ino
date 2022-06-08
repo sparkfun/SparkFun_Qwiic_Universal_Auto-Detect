@@ -77,15 +77,17 @@ bool onlineDataLogging; //This flag indicates if we are logging data to sensorDa
 #include "time.h"
 #include "sntp.h"
 
-const unsigned long wifiConnectTimeout = 10000; // Allow 10s for WiFi connection
-
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 void setup()
 {
   serialQUAD.begin(115200);
   delay(1000);
-  serialQUAD.println(F("SparkFun Qwiic Universal Auto-Detect - ESP32 Thing Plus C Logger"));
+  serialQUAD.println(F("SparkFun Qwiic Universal Auto-Detect - ESP32 Thing Plus C Logger - with menus and RTC support"));
+  serialQUAD.println();
+  serialQUAD.println(F("A list of rules for your time zone can be obtained from:"));
+  serialQUAD.println(F("https://github.com/esp8266/Arduino/blob/master/cores/esp8266/TZ.h"));
+  serialQUAD.println();
 
   // Enable power for the Qwiic bus
   // The input pull-up is enough to enable the regulator
@@ -148,7 +150,7 @@ void setup()
   // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
   // Create the menu
   
-  theMenu.setDebugPort(serialQUAD); // Uncomment this line to enable menu debug messages on serialQUAD
+  //theMenu.setDebugPort(serialQUAD); // Uncomment this line to enable menu debug messages on serialQUAD
 
   // The Arduino IDE Serial Monitor does not support backspace so - by default - we need to clear text values when editing them.
   // The user enters the entire text value each time.
@@ -200,9 +202,9 @@ void setup()
   theMenu.setMenuItemVariable("Daylight Offset (sec)", &defaultValue); // Set the default daylight offset - this will be updated by readLoggerConfig
   theMenu.addMenuItem("TimeZone Rule", SFE_QUAD_MENU_VARIABLE_TYPE_TEXT);
   // A list of rules for your zone can be obtained from: https://github.com/esp8266/Arduino/blob/master/cores/esp8266/TZ.h
-  theMenu.setMenuItemVariable("TimeZone Rule", "GMT0BST,M3.5.0/1,M10.5.0"); // TimeZone rule for Europe/London
+  //theMenu.setMenuItemVariable("TimeZone Rule", "GMT0BST,M3.5.0/1,M10.5.0"); // TimeZone rule for Europe/London
   //theMenu.setMenuItemVariable("TimeZone Rule", "CET-1CEST,M3.5.0,M10.5.0/3"); // TimeZone rule for Europe/Rome including daylight adjustment rules
-  //theMenu.setMenuItemVariable("TimeZone Rule", "MST7MDT,M3.2.0,M11.1.0"); // TimeZone rule for America/Denver
+  theMenu.setMenuItemVariable("TimeZone Rule", "MST7MDT,M3.2.0,M11.1.0"); // TimeZone rule for America/Denver
   theMenu.addMenuItem("Use TimeZone Rule", SFE_QUAD_MENU_VARIABLE_TYPE_BOOL);
   defaultValue.BOOL = 1;
   theMenu.setMenuItemVariable("Use TimeZone Rule", &defaultValue);
@@ -233,8 +235,6 @@ void setup()
 
   readLoggerConfig(); // Read any existing menu values from file. Do this _after_ the menu has been created.
 
-  setRTC(); // Try to set the RTC using NTP to prevent printLocalTime from slowing things down
-  
   serialQUAD.println(F("Press any key to open the menu"));
   serialQUAD.println();
 
@@ -251,7 +251,7 @@ void setup()
   if (onlineDataLogging)
   {
     if (logLocalTime.BOOL)
-      sensorDataFile.print(F("Local Time,"));
+      sensorDataFile.print(F("Local_Time,"));
     sensorDataFile.println(mySensors.readings);
   }
 
@@ -468,6 +468,8 @@ void newLogFile(void)
   if (onlineDataLogging)
   {
     sensorDataFile.close();
+
+    serialQUAD.println(F("Finding the next available log file..."));
     
     if (findNextAvailableLog(sensorDataFileName, "dataLog", false)) // Do not reuse empty files - to save time
     {
@@ -615,6 +617,7 @@ void setRTC(void)
 
   WiFi.begin(ssid, password);
 
+  const unsigned long wifiConnectTimeout = 10000; // Allow 10s for WiFi connection
   unsigned long startTime = millis();
   
   while ((WiFi.status() != WL_CONNECTED) && (millis() < (startTime + wifiConnectTimeout)))
@@ -626,20 +629,13 @@ void setRTC(void)
   if (WiFi.status() == WL_CONNECTED)
   {
     serialQUAD.println(" CONNECTED");
-    printLocalTime(serialQUAD); // Doing a getLocalTime immediately after the WiFi connects seems critical to NTP being successful?!
+    struct tm timeinfo; // Doing a getLocalTime immediately after the WiFi connects seems critical to NTP being successful?!
+    getLocalTime(&timeinfo);
   }
   else
+  {
     serialQUAD.println(" Connection failed! Please try again...");
-}
-
-// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-// Callback function (get's called when time adjusts via NTP)
-void timeavailable(struct timeval *t)
-{
-  serialQUAD.print("Got time adjustment from NTP: ");
-  printLocalTime(serialQUAD);
-  serialQUAD.println();
+  }
 
   WiFi.disconnect(true);
   WiFi.mode(WIFI_OFF);
@@ -647,15 +643,24 @@ void timeavailable(struct timeval *t)
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
+// Callback function (gets called when time is adjusted via NTP)
+// (Does not get called if time is not adjusted...)
+void timeavailable(struct timeval *t)
+{
+  serialQUAD.println("Got time adjustment from NTP");
+}
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
 void printLocalTime(Print &pr)
 {
-  struct tm timeinfo;
-  if(getLocalTime(&timeinfo))
-  {
-    pr.print(&timeinfo, "%Y/%m/%d %H:%M:%S,");
-  }
-  else
-  {
-    pr.print(F(","));
-  }
+  // getLocalTime stalls for several seconds if the RTC has not been set (using NTP)
+  // Use gettimeofday instead (and manually convert to tm)
+  struct timeval tv;
+  struct timezone tz;
+  gettimeofday(&tv, &tz);
+  time_t t = (time_t)tv.tv_sec;
+  struct tm *timeinfo;
+  timeinfo = localtime(&t);
+  pr.print(timeinfo, "%Y/%m/%d %H:%M:%S,");
 }
