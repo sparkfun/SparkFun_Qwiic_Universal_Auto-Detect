@@ -31,16 +31,7 @@
 
 SFE_QUAD_Sensors__SdFat mySensors;
 
-const char sensorConfigurationFileName[] = "Sensor_Config.csv"; //The sensor configuration will be stored in this file
-
-// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-// Include menu support
-
-#include "SFE_QUAD_Menus.h"
-
-SFE_QUAD_Menu theMenu;
-
-const char loggerConfigurationFileName[] = "Logger_Config.csv"; //The logger configuration will be stored in this file
+const char loggerConfigurationFileName[] = "Logger_Config.csv"; //The combined logger configuration will be stored in this file
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 // Thing Plus C hardware specifics
@@ -105,7 +96,7 @@ void setup()
 
   mySensors.setWirePort(Wire); // Tell the sensors instance which Wire port to use
 
-  //mySensors.enableDebugging(serialQUAD); // Uncomment this line to enable debug messages on serialQUAD
+  mySensors.enableDebugging(serialQUAD); // Uncomment this line to enable debug messages on serialQUAD
 
   mySensors.setMenuPort(serialQUAD); // Use serialQUAD for the logging menu
   
@@ -115,11 +106,88 @@ void setup()
 
   mySensors.initializeSensors(); // Initialize all the sensors
 
-  if (!mySensors.beginStorage(sd_cs, (const char *)sensorConfigurationFileName)) // Begin SdFat storage
+  if (!mySensors.beginStorage(sd_cs, (const char *)loggerConfigurationFileName)) // Begin SdFat storage
     serialQUAD.println(F("beginStorage failed! You will not be able to read or write the sensor configuration..."));
 
-  // Read the configuration file and configure the sensors
-  readSensorConfigurationFromStorage();
+  // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+  // Create the menu
+
+  // The Arduino IDE Serial Monitor does not support backspace so - by default - we need to clear text values when editing them.
+  // The user enters the entire text value each time.
+  // If the user is using a terminal emulator which supports backspace (e.g. Tera Term) then
+  // setting supportsBackspace to true will allow the existing text to be edited.
+  //mySensors.theMenu.setMenuPort(serialQUAD, true); // Uncomment this line to use serialQUAD for the menu - on a terminal emulator which supports backspace
+
+  while (mySensors.theMenu._menuPort->available()) // Clear the menu serial buffer
+    mySensors.theMenu._menuPort->read();
+
+  // Create the menu - using unique menu item names.
+  // You can duplicate NONE or SUB_MENU_START items (e.g. "Wifi Menu") but all other items must be unique
+
+  mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  mySensors.theMenu.addMenuItem("Menu", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  mySensors.theMenu.addMenuItem("====", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  mySensors.theMenu.addMenuItem("Open the sensor logging menu", openSensorLoggingMenu);
+  mySensors.theMenu.addMenuItem("Open the sensor settings menu", openSensorSettingMenu);
+  mySensors.theMenu.addMenuItem("Write the logger configuration to file", writeLoggerConfig);
+  mySensors.theMenu.addMenuItem("Read the logger configuration from file", readLoggerConfig);
+  mySensors.theMenu.addMenuItem("Stop logging", stopLogging);
+  mySensors.theMenu.addMenuItem("Open new log file", newLogFile);
+  mySensors.theMenu.addMenuItem("Set RTC using NTP over WiFi", setRTC);
+
+  // WiFi sub-menu: set the WiFi SSID and password
+  mySensors.theMenu.addMenuItem("WiFi Menu", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_START); // Start of the WiFi sub-menu
+  mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  mySensors.theMenu.addMenuItem("WiFi Menu", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  mySensors.theMenu.addMenuItem("=========", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  mySensors.theMenu.addMenuItem("WiFi SSID", SFE_QUAD_MENU_VARIABLE_TYPE_TEXT);
+  mySensors.theMenu.setMenuItemVariable("WiFi SSID", "T-Rex"); // Set the default SSID - this will be updated by readLoggerConfig
+  mySensors.theMenu.addMenuItem("WiFi password", SFE_QUAD_MENU_VARIABLE_TYPE_TEXT);
+  mySensors.theMenu.setMenuItemVariable("WiFi password", "Has Big Teeth"); // Set the default password - this will be updated by readLoggerConfig
+  mySensors.theMenu.addMenuItem("NTP Server 1", SFE_QUAD_MENU_VARIABLE_TYPE_TEXT);
+  mySensors.theMenu.setMenuItemVariable("NTP Server 1", "pool.ntp.org");
+  mySensors.theMenu.addMenuItem("NTP Server 2", SFE_QUAD_MENU_VARIABLE_TYPE_TEXT);
+  mySensors.theMenu.setMenuItemVariable("NTP Server 2", "time.nist.gov");
+  mySensors.theMenu.addMenuItem("TimeZone Rule", SFE_QUAD_MENU_VARIABLE_TYPE_TEXT);
+  // A list of rules for your zone can be obtained from: https://github.com/esp8266/Arduino/blob/master/cores/esp8266/TZ.h
+  //mySensors.theMenu.setMenuItemVariable("TimeZone Rule", "GMT0BST,M3.5.0/1,M10.5.0"); // TimeZone rule for Europe/London
+  //mySensors.theMenu.setMenuItemVariable("TimeZone Rule", "CET-1CEST,M3.5.0,M10.5.0/3"); // TimeZone rule for Europe/Rome including daylight adjustment rules
+  mySensors.theMenu.setMenuItemVariable("TimeZone Rule", "MST7MDT,M3.2.0,M11.1.0"); // TimeZone rule for America/Denver
+  mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END); // End of the WiFi sub-menu
+  
+  // Logging sub-menu: set the logging interval etc.
+  mySensors.theMenu.addMenuItem("Logging Menu", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_START); // Start of the logging sub-menu
+  mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  mySensors.theMenu.addMenuItem("Logging Menu", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  mySensors.theMenu.addMenuItem("============", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  mySensors.theMenu.addMenuItem("Logging interval (ms)", SFE_QUAD_MENU_VARIABLE_TYPE_ULONG);
+  SFE_QUAD_Menu_Every_Type_t defaultValue;
+  defaultValue.ULONG = 1000;
+  mySensors.theMenu.setMenuItemVariable("Logging interval (ms)", &defaultValue); // Set the default logging interval - this will be updated by readLoggerConfig
+  defaultValue.ULONG = 10;
+  mySensors.theMenu.setMenuItemVariableMin("Logging interval (ms)", &defaultValue); // Set the minimum logging interval - this will be updated by readLoggerConfig
+  defaultValue.ULONG = 3600000;
+  mySensors.theMenu.setMenuItemVariableMax("Logging interval (ms)", &defaultValue); // Set the maximum logging interval - this will be updated by readLoggerConfig
+  mySensors.theMenu.addMenuItem("Log Local Time", SFE_QUAD_MENU_VARIABLE_TYPE_BOOL);
+  defaultValue.BOOL = 1;
+  mySensors.theMenu.setMenuItemVariable("Log Local Time", &defaultValue);
+  mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END); // End of the logging sub-menu
+  
+  mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  // End of the menu
+
+  serialQUAD.println(F("Press any key to open the menu"));
+  serialQUAD.println();
+
+  // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+  // Read the configuration file, configure the sensors and update the menu variables. Do this _after_ the menu has been created.
+
+  readLoggerConfig();
 
   // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
   // Open the log file
@@ -148,101 +216,10 @@ void setup()
   }
 
   // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-  // Create the menu
-  
-  //theMenu.setDebugPort(serialQUAD); // Uncomment this line to enable menu debug messages on serialQUAD
-
-  // The Arduino IDE Serial Monitor does not support backspace so - by default - we need to clear text values when editing them.
-  // The user enters the entire text value each time.
-  // If the user is using a terminal emulator which supports backspace (e.g. Tera Term) then
-  // setting supportsBackspace to true will allow the existing text to be edited.
-  theMenu.setMenuPort(serialQUAD); // Use serialQUAD for the menu - with no backspace support
-  //theMenu.setMenuPort(serialQUAD, true); // Use serialQUAD for the menu - on a terminal emulator which supports backspace
-
-  while (theMenu._menuPort->available()) // Clear the menu serial buffer
-    theMenu._menuPort->read();
-
-  // Create the menu - using unique menu item names.
-  // You can duplicate NONE or SUB_MENU_START items (e.g. "Wifi Menu") but all other items must be unique
-
-  theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
-  theMenu.addMenuItem("Menu", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
-  theMenu.addMenuItem("====", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
-  theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
-  theMenu.addMenuItem("Open the sensor logging menu", openSensorLoggingMenu);
-  theMenu.addMenuItem("Open the sensor settings menu", openSensorSettingMenu);
-  theMenu.addMenuItem("Write the sensor settings to file", writeSensorConfigurationToStorage);
-  theMenu.addMenuItem("Read the sensor settings from file", readSensorConfigurationFromStorage);
-  theMenu.addMenuItem("Write the logger configuration to file", writeLoggerConfig);
-  theMenu.addMenuItem("Read the logger configuration from file", readLoggerConfig);
-  theMenu.addMenuItem("Stop logging", stopLogging);
-  theMenu.addMenuItem("Open new log file", newLogFile);
-  theMenu.addMenuItem("Set RTC using NTP over WiFi", setRTC);
-
-  // WiFi sub-menu: set the WiFi SSID and password
-  theMenu.addMenuItem("WiFi Menu", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_START); // Start of the WiFi sub-menu
-  theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
-  theMenu.addMenuItem("WiFi Menu", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
-  theMenu.addMenuItem("=========", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
-  theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
-  theMenu.addMenuItem("WiFi SSID", SFE_QUAD_MENU_VARIABLE_TYPE_TEXT);
-  theMenu.setMenuItemVariable("WiFi SSID", "T-Rex"); // Set the default SSID - this will be updated by readLoggerConfig
-  theMenu.addMenuItem("WiFi password", SFE_QUAD_MENU_VARIABLE_TYPE_TEXT);
-  theMenu.setMenuItemVariable("WiFi password", "Has Big Teeth"); // Set the default password - this will be updated by readLoggerConfig
-  theMenu.addMenuItem("NTP Server 1", SFE_QUAD_MENU_VARIABLE_TYPE_TEXT);
-  theMenu.setMenuItemVariable("NTP Server 1", "pool.ntp.org");
-  theMenu.addMenuItem("NTP Server 2", SFE_QUAD_MENU_VARIABLE_TYPE_TEXT);
-  theMenu.setMenuItemVariable("NTP Server 2", "time.nist.gov");
-  theMenu.addMenuItem("GMT Offset (sec)", SFE_QUAD_MENU_VARIABLE_TYPE_LONG);
-  SFE_QUAD_Menu_Every_Type_t defaultValue;
-  defaultValue.LONG = 3600;
-  theMenu.setMenuItemVariable("GMT Offset (sec)", &defaultValue); // Set the default GMT offset (time zone) - this will be updated by readLoggerConfig
-  theMenu.addMenuItem("Daylight Offset (sec)", SFE_QUAD_MENU_VARIABLE_TYPE_INT);
-  defaultValue.INT = 3600;
-  theMenu.setMenuItemVariable("Daylight Offset (sec)", &defaultValue); // Set the default daylight offset - this will be updated by readLoggerConfig
-  theMenu.addMenuItem("TimeZone Rule", SFE_QUAD_MENU_VARIABLE_TYPE_TEXT);
-  // A list of rules for your zone can be obtained from: https://github.com/esp8266/Arduino/blob/master/cores/esp8266/TZ.h
-  //theMenu.setMenuItemVariable("TimeZone Rule", "GMT0BST,M3.5.0/1,M10.5.0"); // TimeZone rule for Europe/London
-  //theMenu.setMenuItemVariable("TimeZone Rule", "CET-1CEST,M3.5.0,M10.5.0/3"); // TimeZone rule for Europe/Rome including daylight adjustment rules
-  theMenu.setMenuItemVariable("TimeZone Rule", "MST7MDT,M3.2.0,M11.1.0"); // TimeZone rule for America/Denver
-  theMenu.addMenuItem("Use TimeZone Rule", SFE_QUAD_MENU_VARIABLE_TYPE_BOOL);
-  defaultValue.BOOL = 1;
-  theMenu.setMenuItemVariable("Use TimeZone Rule", &defaultValue);
-  theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
-  theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END); // End of the WiFi sub-menu
-  
-  // Logging sub-menu: set the logging interval etc.
-  theMenu.addMenuItem("Logging Menu", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_START); // Start of the logging sub-menu
-  theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
-  theMenu.addMenuItem("Logging Menu", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
-  theMenu.addMenuItem("============", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
-  theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
-  theMenu.addMenuItem("Logging interval (ms)", SFE_QUAD_MENU_VARIABLE_TYPE_ULONG);
-  defaultValue.ULONG = 1000;
-  theMenu.setMenuItemVariable("Logging interval (ms)", &defaultValue); // Set the default logging interval - this will be updated by readLoggerConfig
-  defaultValue.ULONG = 10;
-  theMenu.setMenuItemVariableMin("Logging interval (ms)", &defaultValue); // Set the minimum logging interval - this will be updated by readLoggerConfig
-  defaultValue.ULONG = 3600000;
-  theMenu.setMenuItemVariableMax("Logging interval (ms)", &defaultValue); // Set the maximum logging interval - this will be updated by readLoggerConfig
-  theMenu.addMenuItem("Log Local Time", SFE_QUAD_MENU_VARIABLE_TYPE_BOOL);
-  defaultValue.BOOL = 1;
-  theMenu.setMenuItemVariable("Log Local Time", &defaultValue);
-  theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
-  theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END); // End of the logging sub-menu
-  
-  theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
-  // End of the menu
-
-  readLoggerConfig(); // Read any existing menu values from file. Do this _after_ the menu has been created.
-
-  serialQUAD.println(F("Press any key to open the menu"));
-  serialQUAD.println();
-
-  // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
   // Print and write the sensor helper text
 
   SFE_QUAD_Menu_Every_Type_t logLocalTime;
-  theMenu.getMenuItemVariable("Log Local Time", &logLocalTime);    
+  mySensors.theMenu.getMenuItemVariable("Log Local Time", &logLocalTime);    
   
   mySensors.getSensorNames(); // Print the sensor names helper
   if (logLocalTime.BOOL)
@@ -279,7 +256,7 @@ void loop()
   static unsigned long lastRead;
 
   SFE_QUAD_Menu_Every_Type_t loggingInterval;
-  theMenu.getMenuItemVariable("Logging interval (ms)", &loggingInterval); // Get the logging interval from theMenu
+  mySensors.theMenu.getMenuItemVariable("Logging interval (ms)", &loggingInterval); // Get the logging interval from theMenu
   if (millis() > (lastRead + loggingInterval.ULONG)) // Is it time to read the sensors?
   {
     lastRead = millis(); // Update the time of the last read
@@ -287,7 +264,7 @@ void loop()
     mySensors.getSensorReadings(); // Read everything from all sensors
   
     SFE_QUAD_Menu_Every_Type_t logLocalTime;
-    theMenu.getMenuItemVariable("Log Local Time", &logLocalTime);
+    mySensors.theMenu.getMenuItemVariable("Log Local Time", &logLocalTime);
 
     if (logLocalTime.BOOL)
       printLocalTime(serialQUAD); // Print local time if desired
@@ -308,9 +285,9 @@ void loop()
   // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
   // Menu
   
-  if (theMenu._menuPort->available()) // Has the user pressed a key?
+  if (mySensors.theMenu._menuPort->available()) // Has the user pressed a key?
   {
-    theMenu.openMenu(); // If so, open the menu
+    mySensors.theMenu.openMenu(); // If so, open the menu
   }
 
   // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -423,28 +400,28 @@ void openSensorSettingMenu(void)
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-// Read the configuration file and configure the sensors
-void readSensorConfigurationFromStorage(void)
+// Read the configuration file, configure the sensors and update the menu variables
+void readLoggerConfig(void)
 {
   bool success = mySensors.readConfigurationFromStorage();
-  success &= mySensors.applySensorConfiguration();
+  success &= mySensors.applySensorAndMenuConfiguration();
   if (success)
-    serialQUAD.println(F("Sensor configuration read from storage"));
+    serialQUAD.println(F("Logger configuration read from storage"));
   else
-    serialQUAD.println(F("Unable to read sensor configuration from storage"));
+    serialQUAD.println(F("Unable to read logger configuration from storage"));
 }
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-// Write the sensor configuration to microSD
-void writeSensorConfigurationToStorage(void)
+// Write the logger configuration to microSD
+void writeLoggerConfig(void)
 {
-  bool success = mySensors.getSensorConfiguration();
+  bool success = mySensors.getSensorAndMenuConfiguration();
   success &= mySensors.writeConfigurationToStorage(false); // Set append to false - overwrite the configuration
   if (success)
-    serialQUAD.println(F("Sensor configuration written to file"));
+    serialQUAD.println(F("Logger configuration written to file"));
   else
-    serialQUAD.println(F("Unable to write sensor configuration to file"));
+    serialQUAD.println(F("Unable to write logger configuration to file"));
 }
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -494,64 +471,6 @@ void newLogFile(void)
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-void writeLoggerConfig(void)
-{
-// Define the log file type - use the same type as the Qwiic Universal Auto-Detect library
-#if SFE_QUAD_SD_FAT_TYPE == 1
-  File32 newFile;
-#elif SFE_QUAD_SD_FAT_TYPE == 2
-  ExFile newFile;
-#elif SFE_QUAD_SD_FAT_TYPE == 3
-  FsFile newFile;
-#else // SD_FAT_TYPE == 0
-  File newFile;
-#endif  // SD_FAT_TYPE
-
-  bool success = newFile.open(loggerConfigurationFileName, O_CREAT | O_WRONLY | O_TRUNC) == true;
-
-  if (success)
-  {
-    success = theMenu.writeMenuVariables(&newFile);
-    newFile.close();
-  }
-
-  if (success)
-    theMenu._menuPort->println(F("Logger configuration written to file"));
-  else
-    theMenu._menuPort->println(F("Unable to write logger configuration to file"));
-}
-
-// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-void readLoggerConfig(void)
-{
-// Define the log file type - use the same type as the Qwiic Universal Auto-Detect library
-#if SFE_QUAD_SD_FAT_TYPE == 1
-  File32 newFile;
-#elif SFE_QUAD_SD_FAT_TYPE == 2
-  ExFile newFile;
-#elif SFE_QUAD_SD_FAT_TYPE == 3
-  FsFile newFile;
-#else // SD_FAT_TYPE == 0
-  File newFile;
-#endif  // SD_FAT_TYPE
-
-  bool success = newFile.open(loggerConfigurationFileName, O_READ) == true;
-
-  if (success)
-  {
-    success = theMenu.readMenuVariables(&newFile);
-    newFile.close();
-  }
-
-  if (success)
-    theMenu._menuPort->println(F("Logger configuration read from file"));
-  else
-    theMenu._menuPort->println(F("Unable to read logger configuration from file"));  
-}
-
-// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
 // Connect to WiFi and be ready to set RTC using NTP
 // Code taken mostly from Espressif's SimpleTime example
 void setRTC(void)
@@ -569,49 +488,27 @@ void setRTC(void)
    */
   sntp_servermode_dhcp(1);    // (optional)
 
-  SFE_QUAD_Menu_Every_Type_t useTimeZoneRule;
-  theMenu.getMenuItemVariable("Use TimeZone Rule", &useTimeZoneRule); // Find out if we are using the TimeZone Rule (or GMT and daylight offsets)
+  /**
+   * A more convenient approach to handle TimeZones with daylightOffset 
+   * would be to specify a environmnet variable with TimeZone definition including daylight adjustmnet rules.
+   * A list of rules for your zone could be obtained from https://github.com/esp8266/Arduino/blob/master/cores/esp8266/TZ.h
+   */
+  char time_zone[50];
+  mySensors.theMenu.getMenuItemVariable("TimeZone Rule", time_zone, 50);
 
   char ntpServer1[20];
-  theMenu.getMenuItemVariable("NTP Server 1", ntpServer1, 20);
+  mySensors.theMenu.getMenuItemVariable("NTP Server 1", ntpServer1, 20);
   char ntpServer2[20];
-  theMenu.getMenuItemVariable("NTP Server 2", ntpServer2, 20);
+  mySensors.theMenu.getMenuItemVariable("NTP Server 2", ntpServer2, 20);
 
-  if (useTimeZoneRule.BOOL)
-  {
-    /**
-     * A more convenient approach to handle TimeZones with daylightOffset 
-     * would be to specify a environmnet variable with TimeZone definition including daylight adjustmnet rules.
-     * A list of rules for your zone could be obtained from https://github.com/esp8266/Arduino/blob/master/cores/esp8266/TZ.h
-     */
-    char time_zone[50];
-    theMenu.getMenuItemVariable("TimeZone Rule", time_zone, 50);
-
-    configTzTime(time_zone, ntpServer1, ntpServer2);    
-  }
-  else
-  {
-    /**
-     * This will set configured ntp servers and constant TimeZone/daylightOffset
-     * should be OK if your time zone does not need to adjust daylightOffset twice a year,
-     * in such a case time adjustment won't be handled automagicaly.
-     */
-
-    SFE_QUAD_Menu_Every_Type_t menu_offset;
-    theMenu.getMenuItemVariable("GMT Offset (sec)", &menu_offset);
-    long gmtOffset_sec = menu_offset.LONG;
-    theMenu.getMenuItemVariable("Daylight Offset (sec)", &menu_offset);
-    int daylightOffset_sec = menu_offset.LONG;
-
-    configTime(gmtOffset_sec, daylightOffset_sec, ntpServer1, ntpServer2);    
-  }
+  configTzTime(time_zone, ntpServer1, ntpServer2);    
 
   //connect to WiFi
 
   char ssid[32];
-  theMenu.getMenuItemVariable("WiFi SSID", ssid, 32);
+  mySensors.theMenu.getMenuItemVariable("WiFi SSID", ssid, 32);
   char password[32];
-  theMenu.getMenuItemVariable("WiFi password", password, 32);
+  mySensors.theMenu.getMenuItemVariable("WiFi password", password, 32);
 
   serialQUAD.printf("Connecting to %s ", ssid);
 

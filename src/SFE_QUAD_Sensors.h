@@ -41,6 +41,8 @@
 #include "Arduino.h"
 #include <Wire.h>
 
+#include "SFE_QUAD_Menus.h"
+
 #include "src/I2C_MUX/SparkFun_I2C_Mux_Arduino_Library.h"
 
 // Stringify helpers
@@ -434,16 +436,18 @@ public:
   bool settingMenu(void);                                           // The setting menu - apply settings to individual sensors. Note: settings are different to configuration
   bool getSettingValueDouble(double *value, unsigned long timeout); // Helper function for settingMenu - allow the user to enter a double value via the menu port. Supports exponent format
 
-  bool getSensorConfiguration(void);   // Read the sensor configuration from the sensors. Store it in configuration in text format
-  bool applySensorConfiguration(void); // Apply the configuration to the sensors
+  bool getSensorAndMenuConfiguration(void);   // Read the sensor configuration from the sensors. Store it in configuration in text format
+  bool applySensorAndMenuConfiguration(void); // Apply the configuration to the sensors
 
   SFE_QUAD_Sensor *_head; // The head of the linked list of sensors
-  char *readings;        // The sensor readings stored as text (CSV)
-  char *configuration;   // The sensor configuration, read by getSensorConfiguration, stored as text
-  bool _printDebug;      // A flag to show if debug messages are enabled. Set true by enableDebugging
-  TwoWire *_i2cPort;     // The I2C (TwoWire) port which the sensors are connected to
-  Stream *_menuPort;     // The Serial port (Stream) used for the menu
-  Stream *_debugPort;    // The Serial port (Stream) used for debug messages. Call enableDebugging to set the port
+  char *readings;         // The sensor readings stored as text (CSV)
+  char *configuration;    // The sensor configuration, read by getSensorConfiguration, stored as text
+  bool _printDebug;       // A flag to show if debug messages are enabled. Set true by enableDebugging
+  TwoWire *_i2cPort;      // The I2C (TwoWire) port which the sensors are connected to
+  Stream *_menuPort;      // The Serial port (Stream) used for the menu
+  Stream *_debugPort;     // The Serial port (Stream) used for debug messages. Call enableDebugging to set the port
+
+  SFE_QUAD_Menu theMenu; // Add an instance of the menu
 
   SFE_QUAD_Sensors_sprintf OLS_sprintf; // Provide access to the common sprintf(%f) and sprintf(%e) functions
 };
@@ -504,25 +508,23 @@ public:
   SdExFat sd;
 #elif SFE_QUAD_SD_FAT_TYPE == 3
   SdFs sd;
-#else // SD_FAT_TYPE == 0
+#else  // SD_FAT_TYPE == 0
   SdFat sd;
-#endif  // SD_FAT_TYPE
+#endif // SD_FAT_TYPE
 
 private:
-
   char *_theStorageName = NULL; // The name of the settings file - set by beginStorage
   int _csPin = -1;              // The SPI Chip Select pin - set by beginStorage
 
 #if SFE_QUAD_SD_FAT_TYPE == 1
-  File32 _theStorage;             // SdFat File
+  File32 _theStorage; // SdFat File
 #elif SFE_QUAD_SD_FAT_TYPE == 2
-  ExFile _theStorage;             // SdFat File
+  ExFile _theStorage; // SdFat File
 #elif SFE_QUAD_SD_FAT_TYPE == 3
-  FsFile _theStorage;             // SdFat File
-#else // SD_FAT_TYPE == 0
-  File _theStorage;             // SdFat File
-#endif  // SD_FAT_TYPE
-
+  FsFile _theStorage; // SdFat File
+#else  // SD_FAT_TYPE == 0
+  File _theStorage; // SdFat File
+#endif // SD_FAT_TYPE
 };
 
 #endif

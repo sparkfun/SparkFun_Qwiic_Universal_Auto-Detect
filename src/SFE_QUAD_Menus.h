@@ -5,12 +5,6 @@
 
 #include "Arduino.h"
 
-//#define SFE_QUAD_Menus_No_File // Useful for testing without SdFat - disables readMenuVariables
-
-#ifndef SFE_QUAD_Menus_No_File
-#include "SFE_QUAD_Sensors.h"
-#endif
-
 // Enum for the different variable types
 typedef enum
 {
@@ -52,6 +46,7 @@ class SFE_QUAD_Menu_sprintf
 {
 public:
   void printDouble(double value, Print *pr);
+  char *dtostrf(double value, char *buffer);
   unsigned char _prec = 7;                                // precision
   void setPrecision(unsigned char prec) { _prec = prec; } // Call setPrecision to change the number of decimal places for the readings
   unsigned char getPrecision(void) { return (_prec); }
@@ -81,36 +76,49 @@ public:
   SFE_QUAD_Menu(void);
   ~SFE_QUAD_Menu(void);
 
-  void setMenuPort(Stream &port, bool supportsBackspace = false);
-  void setDebugPort(Stream &port);
-  bool addMenuItem(const char *itemName, SFE_QUAD_Menu_Variable_Type_e variableType);
-  bool addMenuItem(const char *itemName, void (*codePointer)()); // CODE
-  SFE_QUAD_Menu_Variable_Type_e getMenuItemVariableType(const char *itemName);
-  bool getMenuItemVariable(const char *itemName, SFE_QUAD_Menu_Every_Type_t *theValue);
-  bool getMenuItemVariable(const char *itemName, char *theValue, size_t maxLen); // TEXT
-  bool setMenuItemVariable(const char *itemName, const SFE_QUAD_Menu_Every_Type_t *theValue);
-  bool setMenuItemVariable(const char *itemName, const char *theValue); // TEXT
-  bool setMenuItemVariableMin(const char *itemName, const SFE_QUAD_Menu_Every_Type_t *minVal);
-  bool setMenuItemVariableMax(const char *itemName, const SFE_QUAD_Menu_Every_Type_t *maxVal);
-  bool openMenu(SFE_QUAD_Menu_Item *start = NULL);
-  uint32_t getMenuChoice(unsigned long timeout);
-  bool getValueDouble(double *value, unsigned long timeout);
-  bool getValueText(char * *value, unsigned long timeout);
-  bool writeMenuVariables(Print *pr);
-#ifndef SFE_QUAD_Menus_No_File
-  bool readMenuVariables(File *st);
-#endif
-  size_t getMenuItemNameMaxLen(void);
-  SFE_QUAD_Menu_Item *menuItemExists(const char *itemName);
+  void setMenuPort(Stream &port, bool supportsBackspace = false);                              // Define which serial port the menus will use
+  void setDebugPort(Stream &port);                                                             // Define which serial port menu debug messages will be output on
+  bool addMenuItem(const char *itemName, SFE_QUAD_Menu_Variable_Type_e variableType);          // Add an item of variableType to the menu
+  bool addMenuItem(const char *itemName, void (*codePointer)());                               // Add a CODE item to the menu
+  SFE_QUAD_Menu_Variable_Type_e getMenuItemVariableType(const char *itemName);                 // Return the variable type for menu itemName
+  bool getMenuItemVariable(const char *itemName, SFE_QUAD_Menu_Every_Type_t *theValue);        // Get the menu item variable - returned in the Every_Type
+  bool getMenuItemVariable(const char *itemName, char *theValue, size_t maxLen);               // Get the menu item TEXT variable - maxLen defines how many chars theValue can hold
+  bool setMenuItemVariable(const char *itemName, const SFE_QUAD_Menu_Every_Type_t *theValue);  // Set the menu variable - the value is passed in the Every_Type
+  bool setMenuItemVariable(const char *itemName, const char *theValue);                        // Set the menu variable TEXT
+  bool setMenuItemVariableMin(const char *itemName, const SFE_QUAD_Menu_Every_Type_t *minVal); // Define a minimum value for the menu item value - type is the same as the item value
+  bool setMenuItemVariableMax(const char *itemName, const SFE_QUAD_Menu_Every_Type_t *maxVal); // Define a maximum value for the menu item value - type is the same as the item value
+  bool openMenu(SFE_QUAD_Menu_Item *start = NULL);                                             // Open the menu, using _menuPort, starting at start (too allow for recursive sub-menus)
+  uint32_t getMenuChoice(unsigned long timeout);                                               // Ask the user to a menu choice using _menuPort
+  bool getValueDouble(double *value, unsigned long timeout);                                   // Ask the user for a double value using _menuPort
+  bool getValueText(char **value, unsigned long timeout);                                      // Ask the user for a text value using _menuPort
+  uint16_t getNumMenuVariables(void);                                                          // Return the number of menu variables - that could be stored in file / EEPROM etc.
+  bool getMenuVariableAsCSV(uint16_t num, char *var, size_t maxLen);                           // Return the menu variable in CSV format, ready to be written to storage - maxLen defines how many chars var can hold
+  bool updateMenuVariableFromCSV(char *line);                                                  // Parse and update the menu item variable from a line of CSV (from storage)
+  size_t getMenuItemNameMaxLen(void);                                                          // Returns the maximum length of all the menu itemNames
+  size_t getMenuVariablesMaxLen(void);                                                         // Returns the likely combined maximum length of a menu variable
+  SFE_QUAD_Menu_Item *menuItemExists(const char *itemName);                                    // Return a pointer to the menu item if it exists, otherwise NULL
 
   SFE_QUAD_Menu_Item *_head;          // The head of the linked list of sensors
   Stream *_menuPort;                  // The Serial port (Stream) used for the menu
   Stream *_debugPort;                 // The Serial port (Stream) used for the debug messages
   unsigned long _menuTimeout = 10000; // Default timeout for the menus (millis)
-  void setMenuTimeout(unsigned long newTimeout) { if (newTimeout > 0) { _menuTimeout = newTimeout; } }
+  void setMenuTimeout(unsigned long newTimeout)
+  {
+    if (newTimeout > 0)
+    {
+      _menuTimeout = newTimeout;
+    }
+  }
   uint16_t _maxTextChars = 32; // Maximum number of chars that can be entered into a text field etc.
-  void setMaxTextChars(uint16_t newMax) { if (newMax >= 32) { _maxTextChars = newMax; } }
+  void setMaxTextChars(uint16_t newMax)
+  {
+    if (newMax >= 32)
+    {
+      _maxTextChars = newMax;
+    }
+  }
   bool _supportsBackspace = false; // Flag to indicate if the serial menu supports backspace and so can edit existing text
+  void setSupportsBackspace(bool support) { _supportsBackspace = support; }
 
   SFE_QUAD_Menu_sprintf _sprintf; // Provide access to the common sprintf(%f) and sprintf(%e) functions
 };
