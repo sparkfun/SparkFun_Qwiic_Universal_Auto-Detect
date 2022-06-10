@@ -76,9 +76,6 @@ void setup()
   delay(1000);
   serialQUAD.println(F("SparkFun Qwiic Universal Auto-Detect - ESP32 Thing Plus C Logger - with menus and RTC support"));
   serialQUAD.println();
-  serialQUAD.println(F("A list of rules for your time zone can be obtained from:"));
-  serialQUAD.println(F("https://github.com/esp8266/Arduino/blob/master/cores/esp8266/TZ.h"));
-  serialQUAD.println();
 
   // Enable power for the Qwiic bus
   // The input pull-up is enough to enable the regulator
@@ -96,7 +93,7 @@ void setup()
 
   mySensors.setWirePort(Wire); // Tell the sensors instance which Wire port to use
 
-  mySensors.enableDebugging(serialQUAD); // Uncomment this line to enable debug messages on serialQUAD
+  //mySensors.enableDebugging(serialQUAD); // Uncomment this line to enable debug messages on serialQUAD
 
   mySensors.setMenuPort(serialQUAD); // Use serialQUAD for the logging menu
   
@@ -130,11 +127,13 @@ void setup()
   mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   mySensors.theMenu.addMenuItem("Open the sensor logging menu", openSensorLoggingMenu);
   mySensors.theMenu.addMenuItem("Open the sensor settings menu", openSensorSettingMenu);
+  mySensors.theMenu.addMenuItem("Open new log file", newLogFile);
+  mySensors.theMenu.addMenuItem("Stop logging", stopLogging);
+  mySensors.theMenu.addMenuItem("Set RTC using NTP over WiFi", setRTC);
+  mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   mySensors.theMenu.addMenuItem("Write the logger configuration to file", writeLoggerConfig);
   mySensors.theMenu.addMenuItem("Read the logger configuration from file", readLoggerConfig);
-  mySensors.theMenu.addMenuItem("Stop logging", stopLogging);
-  mySensors.theMenu.addMenuItem("Open new log file", newLogFile);
-  mySensors.theMenu.addMenuItem("Set RTC using NTP over WiFi", setRTC);
+  mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
 
   // WiFi sub-menu: set the WiFi SSID and password
   mySensors.theMenu.addMenuItem("WiFi Menu", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_START); // Start of the WiFi sub-menu
@@ -156,6 +155,9 @@ void setup()
   //mySensors.theMenu.setMenuItemVariable("TimeZone Rule", "CET-1CEST,M3.5.0,M10.5.0/3"); // TimeZone rule for Europe/Rome including daylight adjustment rules
   mySensors.theMenu.setMenuItemVariable("TimeZone Rule", "MST7MDT,M3.2.0,M11.1.0"); // TimeZone rule for America/Denver
   mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  mySensors.theMenu.addMenuItem("A list of rules for your time zone can be obtained from:", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  mySensors.theMenu.addMenuItem("https://github.com/esp8266/Arduino/blob/master/cores/esp8266/TZ.h", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END); // End of the WiFi sub-menu
   
   // Logging sub-menu: set the logging interval etc.
@@ -172,6 +174,13 @@ void setup()
   mySensors.theMenu.setMenuItemVariableMin("Logging interval (ms)", &defaultValue); // Set the minimum logging interval - this will be updated by readLoggerConfig
   defaultValue.ULONG = 3600000;
   mySensors.theMenu.setMenuItemVariableMax("Logging interval (ms)", &defaultValue); // Set the maximum logging interval - this will be updated by readLoggerConfig
+  mySensors.theMenu.addMenuItem("File sync interval (ms)", SFE_QUAD_MENU_VARIABLE_TYPE_ULONG);
+  defaultValue.ULONG = 10000;
+  mySensors.theMenu.setMenuItemVariable("File sync interval (ms)", &defaultValue); // Set the default file sync interval - this will be updated by readLoggerConfig
+  defaultValue.ULONG = 1000;
+  mySensors.theMenu.setMenuItemVariableMin("File sync interval (ms)", &defaultValue); // Set the minimum file sync interval - this will be updated by readLoggerConfig
+  defaultValue.ULONG = 3600000;
+  mySensors.theMenu.setMenuItemVariableMax("File sync interval (ms)", &defaultValue); // Set the maximum file sync interval - this will be updated by readLoggerConfig
   mySensors.theMenu.addMenuItem("Log Local Time", SFE_QUAD_MENU_VARIABLE_TYPE_BOOL);
   defaultValue.BOOL = 1;
   mySensors.theMenu.setMenuItemVariable("Log Local Time", &defaultValue);
@@ -209,6 +218,7 @@ void setup()
   {
     serialQUAD.print(F("Logging sensor data to: "));
     serialQUAD.println(sensorDataFileName);
+    updateDataFileCreate(&sensorDataFile);
   }
   else
   {
@@ -253,7 +263,8 @@ void loop()
   // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
   // Logging interval - read the sensors every loggingInterval milliseconds
   
-  static unsigned long lastRead;
+  static unsigned long lastRead = 0;
+  static unsigned long lastSync = 0;
 
   SFE_QUAD_Menu_Every_Type_t loggingInterval;
   mySensors.theMenu.getMenuItemVariable("Logging interval (ms)", &loggingInterval); // Get the logging interval from theMenu
@@ -277,7 +288,14 @@ void loop()
       if (logLocalTime.BOOL)
         printLocalTime(sensorDataFile); // Write local time to the file if desired
       sensorDataFile.println(mySensors.readings); // Write the data to file
-      sensorDataFile.sync(); // This will help prevent data loss if the power is removed during logging
+      
+      mySensors.theMenu.getMenuItemVariable("File sync interval (ms)", &loggingInterval); // Get the file sync interval from theMenu
+      if (millis() > (lastSync + loggingInterval.ULONG)) // Is it time to read the sensors?
+      {
+        sensorDataFile.sync(); // This will help prevent data loss if the power is removed during logging
+        updateDataFileAccess(&sensorDataFile);
+      }
+      
       digitalWrite(LED_BUILTIN, LOW);
     }
   }
@@ -419,7 +437,17 @@ void writeLoggerConfig(void)
   bool success = mySensors.getSensorAndMenuConfiguration();
   success &= mySensors.writeConfigurationToStorage(false); // Set append to false - overwrite the configuration
   if (success)
+  {
     serialQUAD.println(F("Logger configuration written to file"));
+
+    // Just to prove you can: update the config file date & time
+    if (mySensors._theStorage.open(mySensors._theStorageName, O_APPEND)) // Re-open the file
+    {
+      updateDataFileCreate(&mySensors._theStorage); // Update the create and access timestamps
+      updateDataFileAccess(&mySensors._theStorage);
+      mySensors._theStorage.close(); // Close the file again
+    }
+  }
   else
     serialQUAD.println(F("Unable to write logger configuration to file"));
 }
@@ -431,6 +459,7 @@ void stopLogging(void)
 {
   if (onlineDataLogging)
   {
+    updateDataFileAccess(&sensorDataFile);
     sensorDataFile.close();
     onlineDataLogging = false;
     serialQUAD.println(F("Log file closed"));
@@ -444,6 +473,7 @@ void newLogFile(void)
 {
   if (onlineDataLogging)
   {
+    updateDataFileAccess(&sensorDataFile);
     sensorDataFile.close();
 
     serialQUAD.println(F("Finding the next available log file..."));
@@ -457,6 +487,7 @@ void newLogFile(void)
     {
       serialQUAD.print(F("Logging sensor data to: "));
       serialQUAD.println(sensorDataFileName);
+      updateDataFileCreate(&sensorDataFile);
     }
     else
     {
@@ -560,4 +591,31 @@ void printLocalTime(Print &pr)
   struct tm *timeinfo;
   timeinfo = localtime(&t);
   pr.print(timeinfo, "%Y/%m/%d %H:%M:%S,");
+}
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+void updateDataFileCreate(File *dataFile)
+{
+  struct timeval tv;
+  struct timezone tz;
+  gettimeofday(&tv, &tz);
+  time_t t = (time_t)tv.tv_sec;
+  struct tm *timeinfo;
+  timeinfo = localtime(&t);
+  dataFile->timestamp(T_CREATE, (timeinfo->tm_year + 1900), (timeinfo->tm_mon + 1), timeinfo->tm_mday, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
+}
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+void updateDataFileAccess(File *dataFile)
+{
+  struct timeval tv;
+  struct timezone tz;
+  gettimeofday(&tv, &tz);
+  time_t t = (time_t)tv.tv_sec;
+  struct tm *timeinfo;
+  timeinfo = localtime(&t);
+  dataFile->timestamp(T_ACCESS, (timeinfo->tm_year + 1900), (timeinfo->tm_mon + 1), timeinfo->tm_mday, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
+  dataFile->timestamp(T_WRITE, (timeinfo->tm_year + 1900), (timeinfo->tm_mon + 1), timeinfo->tm_mday, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
 }
