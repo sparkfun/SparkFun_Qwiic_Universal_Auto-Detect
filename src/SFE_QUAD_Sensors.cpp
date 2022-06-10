@@ -196,11 +196,13 @@ void SFE_QUAD_Sensors::enableDebugging(Stream &port)
 {
   _debugPort = &port;
   _printDebug = true;
+  theMenu.setDebugPort(port);
 }
 
 void SFE_QUAD_Sensors::setMenuPort(Stream &port)
 {
   _menuPort = &port;
+  theMenu.setMenuPort(port);
 }
 
 bool SFE_QUAD_Sensors::detectSensors(void)
@@ -220,12 +222,12 @@ bool SFE_QUAD_Sensors::detectSensors(void)
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_SHTC3)
   tryThisSensorType = sensorFactory(Sensor_SHTC3);
   if (tryThisSensorType != NULL)
-    if (tryThisSensorType->_classPtr != NULL) // Check if sensor can be included
+    if (tryThisSensorType->_classPtr != NULL)               // Check if sensor can be included
       if (tryThisSensorType->detectSensor(0x70, *_i2cPort)) // Check if the device is detected
       {
         shtc3OnMain = true;
-        //if (_printDebug)
-        //  _debugPort->println(F("detectSensors: SHTC3 found on main branch"));
+        // if (_printDebug)
+        //   _debugPort->println(F("detectSensors: SHTC3 found on main branch"));
       }
 #endif
 
@@ -331,8 +333,7 @@ bool SFE_QUAD_Sensors::detectSensors(void)
                   }
                 }
                 // If this is a MS5637, check if we have already found a MS8607. Skip it if we have
-                else if ((strcmp(tryThisSensorType->getSensorName(), "MS5637") == 0)
-                  && ((sensorExists("MS8607", 0x40, 0, 0) != NULL) || (sensorExists("MS8607", 0x40, muxAddr == 0x6F ? 0 : muxAddr, muxPort) != NULL)))
+                else if ((strcmp(tryThisSensorType->getSensorName(), "MS5637") == 0) && ((sensorExists("MS8607", 0x40, 0, 0) != NULL) || (sensorExists("MS8607", 0x40, muxAddr == 0x6F ? 0 : muxAddr, muxPort) != NULL)))
                 {
                   if (_printDebug)
                   {
@@ -343,8 +344,7 @@ bool SFE_QUAD_Sensors::detectSensors(void)
                   }
                 }
                 // If this is a VEML7700, check if we have already found a VEML6075. Skip it if we have
-                else if ((strcmp(tryThisSensorType->getSensorName(), "VEML7700") == 0)
-                  && ((sensorExists("VEML6075", 0x10, 0, 0) != NULL) || (sensorExists("VEML6075", 0x10, muxAddr == 0x6F ? 0 : muxAddr, muxPort) != NULL)))
+                else if ((strcmp(tryThisSensorType->getSensorName(), "VEML7700") == 0) && ((sensorExists("VEML6075", 0x10, 0, 0) != NULL) || (sensorExists("VEML6075", 0x10, muxAddr == 0x6F ? 0 : muxAddr, muxPort) != NULL)))
                 {
                   if (_printDebug)
                   {
@@ -1335,238 +1335,308 @@ bool SFE_QUAD_Sensors::getSettingValueDouble(double *value, unsigned long timeou
   return (true);
 }
 
-bool SFE_QUAD_Sensors::getSensorConfiguration(void)
+bool SFE_QUAD_Sensors::getSensorAndMenuConfiguration(void)
 {
-  if (_head == NULL) // If head is NULL no sensors have been found
+  if ((_head == NULL)             // If head is NULL no sensors have been found
+      && (theMenu._head == NULL)) // If theMenu _head is NULL no menu items have been added
   {
     if (_printDebug)
-      _debugPort->println(F("getSensorConfiguration: no sensors found!"));
+      _debugPort->println(F("getSensorAndMenuConfiguration: no sensor or menu items found!"));
     return (false);
   }
 
-  if (configuration != NULL)
-    delete[] configuration;    // Delete the old configuration
-  configuration = new char[1]; // Initialize configuration
-  *configuration = 0;
-
-  SFE_QUAD_Sensor *thisSensor = _head; // Point to the first sensor
-
-  bool keepGoing = true;
-
-  while (keepGoing)
+  if (_head == NULL) // If head is NULL no sensors have been found
   {
-    // First, record the logging settings
-    uint8_t senseCount;
-    thisSensor->getSenseCount(&senseCount);
-    char loggingStr[strlen(thisSensor->getSensorName()) + 32 + (senseCount * 2)]; // TODO: find a better way to do this!
-    // Use -1 to indicate that these are the logging settings, not a configuration item
-    sprintf(loggingStr, "%s,%d,%d,%d,-1,", thisSensor->getSensorName(), thisSensor->_sensorAddress, thisSensor->_muxAddress, thisSensor->_muxPort);
-    for (uint8_t sense = 0; sense <= senseCount; sense++)
-    {
-      if (thisSensor->_logSense[sense] == 0)
-        strcat(loggingStr, "0");
-      else
-        strcat(loggingStr, "1");
-    }
-    strcat(loggingStr, "\r\n");
-
     if (_printDebug)
-    {
-      _debugPort->print(F("getSensorConfiguration: logging settings for : "));
-      _debugPort->print(loggingStr);
-    }
+      _debugPort->println(F("getSensorAndMenuConfiguration: no sensors found!"));
+  }
+  else
+  {
+    if (configuration != NULL)
+      delete[] configuration;    // Delete the old configuration
+    configuration = new char[1]; // Initialize configuration
+    *configuration = 0;
 
-    size_t configLen = 0;
-    configLen = strlen(configuration);         // Get the current configuration length
-    configLen += strlen(loggingStr);           // Get the length of the logging settings
-    char *newConfig = new char[configLen + 1]; // Allocate memory to hold configuration plus scratchpad plus a null
-    if (newConfig == NULL)                     // Did the memory allocation fail?
+    SFE_QUAD_Sensor *thisSensor = _head; // Point to the first sensor
+
+    bool keepGoing = true;
+
+    while (keepGoing)
     {
+      // First, record the logging settings
+      uint8_t senseCount;
+      thisSensor->getSenseCount(&senseCount);
+      char loggingStr[strlen(thisSensor->getSensorName()) + 32 + (senseCount * 2)]; // TODO: find a better way to do this!
+      // Use -1 to indicate that these are the logging settings, not a configuration item
+      sprintf(loggingStr, "%s,%d,%d,%d,-1,", thisSensor->getSensorName(), thisSensor->_sensorAddress, thisSensor->_muxAddress, thisSensor->_muxPort);
+      for (uint8_t sense = 0; sense <= senseCount; sense++)
+      {
+        if (thisSensor->_logSense[sense] == 0)
+          strcat(loggingStr, "0");
+        else
+          strcat(loggingStr, "1");
+      }
+      strcat(loggingStr, "\r\n");
+
       if (_printDebug)
-        _debugPort->println(F("getSensorConfiguration: newConfig memory allocation failed!"));
-      return (false);
-    }
-    memset(newConfig, 0, configLen + 1);                     // Clear the memory to make sure it is null-terminated
-    memcpy(newConfig, configuration, strlen(configuration)); // Copy in the existing readings
-    strcat(newConfig, loggingStr);                           // Append the logging string
-    delete[] configuration;  // Delete configuration
-    configuration = newConfig; // Make config point to newConfig
+      {
+        _debugPort->print(F("getSensorAndMenuConfiguration: logging settings for : "));
+        _debugPort->print(loggingStr);
+      }
 
-    // If required, configure the mux port
-    if (thisSensor->_muxAddress >= 0x70)
-    {
-      QWIICMUX *thisMux = new QWIICMUX;
-      if (thisMux == NULL)
+      size_t configLen = 0;
+      configLen = strlen(configuration);         // Get the current configuration length
+      configLen += strlen(loggingStr);           // Get the length of the logging settings
+      char *newConfig = new char[configLen + 1]; // Allocate memory to hold configuration plus scratchpad plus a null
+      if (newConfig == NULL)                     // Did the memory allocation fail?
       {
         if (_printDebug)
-          _debugPort->println(F("getSensorConfiguration: could not allocate memory for thisMux!"));
+          _debugPort->println(F("getSensorAndMenuConfiguration: newConfig memory allocation failed!"));
         return (false);
       }
-      thisMux->begin(thisSensor->_muxAddress, *_i2cPort);
-      thisMux->setPort(thisSensor->_muxPort);
-      delete thisMux;
+      memset(newConfig, 0, configLen + 1);                     // Clear the memory to make sure it is null-terminated
+      memcpy(newConfig, configuration, strlen(configuration)); // Copy in the existing readings
+      strcat(newConfig, loggingStr);                           // Append the logging string
+      delete[] configuration;                                  // Delete configuration
+      configuration = newConfig;                               // Make config point to newConfig
+
+      // If required, configure the mux port
+      if (thisSensor->_muxAddress >= 0x70)
+      {
+        QWIICMUX *thisMux = new QWIICMUX;
+        if (thisMux == NULL)
+        {
+          if (_printDebug)
+            _debugPort->println(F("getSensorAndMenuConfiguration: could not allocate memory for thisMux!"));
+          return (false);
+        }
+        thisMux->begin(thisSensor->_muxAddress, *_i2cPort);
+        thisMux->setPort(thisSensor->_muxPort);
+        delete thisMux;
+      }
+
+      uint8_t configCount;
+      bool result = thisSensor->getConfigurationItemCount(&configCount);
+
+      if (result && (configCount > 0))
+      {
+        for (uint8_t configItem = 0; configItem < configCount; configItem++)
+        {
+          if (_printDebug)
+          {
+            _debugPort->print(F("getSensorAndMenuConfiguration: configuration for : "));
+            _debugPort->println(thisSensor->getSensorName());
+          }
+
+          configLen = 0;
+          configLen += strlen(thisSensor->getSensorName()) + 1;
+
+          char tempStr[32]; // TODO: find a better way to do this!
+          sprintf(tempStr, "%d,%d,%d,%d,", thisSensor->_sensorAddress, thisSensor->_muxAddress, thisSensor->_muxPort, configItem);
+          configLen += strlen(tempStr);
+
+          SFE_QUAD_Sensor::SFE_QUAD_Sensor_Setting_Type_e type;
+          thisSensor->getConfigurationItemType(configItem, &type);
+          SFE_QUAD_Sensor::SFE_QUAD_Sensor_Every_Type_t value;
+          thisSensor->getConfigurationItem(configItem, &value);
+          switch (type)
+          {
+          case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_BOOL:
+            sprintf(tempStr, "%d", value.BOOL);
+            configLen += strlen(tempStr);
+            break;
+          case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_FLOAT:
+            OLS_sprintf.OLS_dtostrf(value.FLOAT, tempStr);
+            configLen += strlen(tempStr);
+            break;
+          case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_DOUBLE:
+            OLS_sprintf.OLS_dtostrf(value.DOUBLE, tempStr);
+            configLen += strlen(tempStr);
+            break;
+          case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_INT:
+            sprintf(tempStr, "%d", value.INT);
+            configLen += strlen(tempStr);
+            break;
+          case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_UINT8_T:
+            sprintf(tempStr, "%d", value.UINT8_T);
+            configLen += strlen(tempStr);
+            break;
+          case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_UINT16_T:
+            sprintf(tempStr, "%d", value.UINT16_T);
+            configLen += strlen(tempStr);
+            break;
+          case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_UINT32_T:
+            sprintf(tempStr, "%d", value.UINT32_T);
+            configLen += strlen(tempStr);
+            break;
+          default:
+            configLen += 1; // ?
+            break;
+          }
+
+          configLen += 3; // \r \n NULL
+
+          char *scratchpad = new char[configLen]; // Allocate memory to hold the configuration temporarily
+          if (scratchpad == NULL)                 // Did the memory allocation fail?
+          {
+            if (_printDebug)
+              _debugPort->println(F("getSensorAndMenuConfiguration: scratchpad memory allocation failed!"));
+            return (false);
+          }
+          scratchpad[0] = 0;
+
+          strcat(scratchpad, thisSensor->getSensorName());
+          strcat(scratchpad, ",");
+
+          sprintf(tempStr, "%d,%d,%d,%d,", thisSensor->_sensorAddress, thisSensor->_muxAddress, thisSensor->_muxPort, configItem);
+
+          strcat(scratchpad, tempStr);
+
+          switch (type)
+          {
+          case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_BOOL:
+            sprintf(tempStr, "%d", value.BOOL);
+            strcat(scratchpad, tempStr);
+            break;
+          case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_FLOAT:
+            OLS_sprintf.OLS_dtostrf(value.FLOAT, tempStr);
+            strcat(scratchpad, tempStr);
+            break;
+          case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_DOUBLE:
+            OLS_sprintf.OLS_dtostrf(value.DOUBLE, tempStr);
+            strcat(scratchpad, tempStr);
+            break;
+          case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_INT:
+            sprintf(tempStr, "%d", value.INT);
+            strcat(scratchpad, tempStr);
+            break;
+          case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_UINT8_T:
+            sprintf(tempStr, "%d", value.UINT8_T);
+            strcat(scratchpad, tempStr);
+            break;
+          case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_UINT16_T:
+            sprintf(tempStr, "%d", value.UINT16_T);
+            strcat(scratchpad, tempStr);
+            break;
+          case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_UINT32_T:
+            sprintf(tempStr, "%d", value.UINT32_T);
+            strcat(scratchpad, tempStr);
+            break;
+          default:
+            strcat(scratchpad, "?");
+            break;
+          }
+
+          strcat(scratchpad, "\r\n");
+
+          if (_printDebug)
+          {
+            _debugPort->print(scratchpad);
+          }
+
+          // Now concatenate scratchpad onto configuration
+          configLen = strlen(configuration);         // Get the current configuration length
+          configLen += strlen(scratchpad);           // Get the length of this configuration item
+          char *newConfig = new char[configLen + 1]; // Allocate memory to hold configuration plus scratchpad plus a null
+          if (newConfig == NULL)                     // Did the memory allocation fail?
+          {
+            if (_printDebug)
+              _debugPort->println(F("getSensorAndMenuConfiguration: newConfig memory allocation failed!"));
+            delete[] scratchpad; // Delete the scratchpad
+            return (false);
+          }
+          memset(newConfig, 0, configLen + 1);                     // Clear the memory to make sure it is null-terminated
+          memcpy(newConfig, configuration, strlen(configuration)); // Copy in the existing readings
+          strcat(newConfig, scratchpad);                           // Append the new configuration item from scratchpad
+          delete[] configuration;                                  // Delete configuration
+          configuration = newConfig;                               // Make config point to newConfig
+          delete[] scratchpad;                                     // Delete the scratchpad
+        }
+      }
+
+      if (thisSensor->_next == NULL) // Have we reached the end of the sensor list?
+        keepGoing = false;
+      else
+        thisSensor = thisSensor->_next; // Point to the next sensor
     }
+  }
 
-    uint8_t configCount;
-    bool result = thisSensor->getConfigurationItemCount(&configCount);
+  if (theMenu._head == NULL) // If theMenu _head is NULL no menu items have been added
+  {
+    if (_printDebug)
+      _debugPort->println(F("getSensorAndMenuConfiguration: no menu items have been added"));
+    return (true); // Return true because some sensors must have been found
+  }
 
-    if (result && (configCount > 0))
+  uint16_t numVars = theMenu.getNumMenuVariables();
+
+  if (numVars == 0)
+  {
+    if (_printDebug)
+      _debugPort->println(F("getSensorAndMenuConfiguration: numVars is zero... Error?"));
+    return (_head != NULL);
+  }
+
+  if (_head == NULL) // If head is NULL no sensors have been found, so delete the old configuration so we can add just the menu items
+  {
+    if (configuration != NULL)
+      delete[] configuration;    // Delete the old configuration
+    configuration = new char[1]; // Initialize configuration
+    *configuration = 0;
+  }
+
+  char *store = new char[theMenu.getMenuVariablesMaxLen()]; // Allocate memory to hold the menu item line
+  if (store == NULL)
+  {
+    if (_printDebug)
+      _debugPort->println(F("getSensorAndMenuConfiguration: failed to allocate memory for store"));
+    return (_head != NULL);
+  }
+
+  for (uint16_t var = 0; var < numVars; var++)
+  {
+    if (theMenu.getMenuVariableAsCSV(var, store, theMenu.getMenuVariablesMaxLen())) // Get this menu variable as CSV text
     {
-      for (uint8_t configItem = 0; configItem < configCount; configItem++)
+      size_t configLen = 0;
+      configLen = strlen(configuration);         // Get the current configuration length
+      configLen += strlen(store);                // Get the length of the menu variable CSV
+      char *newConfig = new char[configLen + 3]; // Allocate memory to hold configuration plus scratchpad plus \r, \n and null
+      if (newConfig == NULL)                     // Did the memory allocation fail?
       {
         if (_printDebug)
-        {
-          _debugPort->print(F("getSensorConfiguration: configuration for : "));
-          _debugPort->println(thisSensor->getSensorName());
-        }
-
-        configLen = 0;
-        configLen += strlen(thisSensor->getSensorName()) + 1;
-
-        char tempStr[32]; // TODO: find a better way to do this!
-        sprintf(tempStr, "%d,%d,%d,%d,", thisSensor->_sensorAddress, thisSensor->_muxAddress, thisSensor->_muxPort, configItem);
-        configLen += strlen(tempStr);
-
-        SFE_QUAD_Sensor::SFE_QUAD_Sensor_Setting_Type_e type;
-        thisSensor->getConfigurationItemType(configItem, &type);
-        SFE_QUAD_Sensor::SFE_QUAD_Sensor_Every_Type_t value;
-        thisSensor->getConfigurationItem(configItem, &value);
-        switch (type)
-        {
-        case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_BOOL:
-          sprintf(tempStr, "%d", value.BOOL);
-          configLen += strlen(tempStr);
-          break;
-        case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_FLOAT:
-          OLS_sprintf.OLS_dtostrf(value.FLOAT, tempStr);
-          configLen += strlen(tempStr);
-          break;
-        case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_DOUBLE:
-          OLS_sprintf.OLS_dtostrf(value.DOUBLE, tempStr);
-          configLen += strlen(tempStr);
-          break;
-        case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_INT:
-          sprintf(tempStr, "%d", value.INT);
-          configLen += strlen(tempStr);
-          break;
-        case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_UINT8_T:
-          sprintf(tempStr, "%d", value.UINT8_T);
-          configLen += strlen(tempStr);
-          break;
-        case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_UINT16_T:
-          sprintf(tempStr, "%d", value.UINT16_T);
-          configLen += strlen(tempStr);
-          break;
-        case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_UINT32_T:
-          sprintf(tempStr, "%d", value.UINT32_T);
-          configLen += strlen(tempStr);
-          break;
-        default:
-          configLen += 1; // ?
-          break;
-        }
-
-        configLen += 3; // \r \n NULL
-
-        char *scratchpad = new char[configLen]; // Allocate memory to hold the configuration temporarily
-        if (scratchpad == NULL)                 // Did the memory allocation fail?
-        {
-          if (_printDebug)
-            _debugPort->println(F("getSensorConfiguration: scratchpad memory allocation failed!"));
-          return (false);
-        }
-        scratchpad[0] = 0;
-
-        strcat(scratchpad, thisSensor->getSensorName());
-        strcat(scratchpad, ",");
-
-        sprintf(tempStr, "%d,%d,%d,%d,", thisSensor->_sensorAddress, thisSensor->_muxAddress, thisSensor->_muxPort, configItem);
-
-        strcat(scratchpad, tempStr);
-
-        switch (type)
-        {
-        case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_BOOL:
-          sprintf(tempStr, "%d", value.BOOL);
-          strcat(scratchpad, tempStr);
-          break;
-        case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_FLOAT:
-          OLS_sprintf.OLS_dtostrf(value.FLOAT, tempStr);
-          strcat(scratchpad, tempStr);
-          break;
-        case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_DOUBLE:
-          OLS_sprintf.OLS_dtostrf(value.DOUBLE, tempStr);
-          strcat(scratchpad, tempStr);
-          break;
-        case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_INT:
-          sprintf(tempStr, "%d", value.INT);
-          strcat(scratchpad, tempStr);
-          break;
-        case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_UINT8_T:
-          sprintf(tempStr, "%d", value.UINT8_T);
-          strcat(scratchpad, tempStr);
-          break;
-        case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_UINT16_T:
-          sprintf(tempStr, "%d", value.UINT16_T);
-          strcat(scratchpad, tempStr);
-          break;
-        case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_UINT32_T:
-          sprintf(tempStr, "%d", value.UINT32_T);
-          strcat(scratchpad, tempStr);
-          break;
-        default:
-          strcat(scratchpad, "?");
-          break;
-        }
-
-        strcat(scratchpad, "\r\n");
-
-        if (_printDebug)
-        {
-          _debugPort->print(scratchpad);
-        }
-
-        // Now concatenate scratchpad onto configuration
-        configLen = strlen(configuration);         // Get the current configuration length
-        configLen += strlen(scratchpad);           // Get the length of this configuration item
-        char *newConfig = new char[configLen + 1]; // Allocate memory to hold configuration plus scratchpad plus a null
-        if (newConfig == NULL)                     // Did the memory allocation fail?
-        {
-          if (_printDebug)
-            _debugPort->println(F("getSensorConfiguration: newConfig memory allocation failed!"));
-          delete[] scratchpad; // Delete the scratchpad
-          return (false);
-        }
-        memset(newConfig, 0, configLen + 1);                     // Clear the memory to make sure it is null-terminated
-        memcpy(newConfig, configuration, strlen(configuration)); // Copy in the existing readings
-        strcat(newConfig, scratchpad);                           // Append the new configuration item from scratchpad
-        delete[] configuration;  // Delete configuration
-        configuration = newConfig; // Make config point to newConfig
-        delete[] scratchpad;       // Delete the scratchpad
+          _debugPort->println(F("getSensorAndMenuConfiguration: newConfig memory allocation failed!"));
+        delete[] store;
+        return (false);
       }
+      memset(newConfig, 0, configLen + 3);                     // Clear the memory to make sure it is null-terminated
+      memcpy(newConfig, configuration, strlen(configuration)); // Copy in the existing readings
+      strcat(newConfig, store);                                // Append the menu variable
+      strcat(newConfig, "\r\n");                               // Append \r\n
+      delete[] configuration;                                  // Delete configuration
+      configuration = newConfig;                               // Make config point to newConfig
     }
-
-    if (thisSensor->_next == NULL) // Have we reached the end of the sensor list?
-      keepGoing = false;
-    else
-      thisSensor = thisSensor->_next; // Point to the next sensor
   }
+
+  delete[] store;
 
   return (true);
 }
 
-bool SFE_QUAD_Sensors::applySensorConfiguration(void)
+bool SFE_QUAD_Sensors::applySensorAndMenuConfiguration(void)
 {
-  if (_head == NULL) // If head is NULL no sensors have been found
+  if ((_head == NULL)             // If head is NULL no sensors have been found
+      && (theMenu._head == NULL)) // If theMenu _head is NULL no menu items have been added
   {
-    if (_printDebug == true)
-      _debugPort->println(F("applySensorConfiguration: no sensors found!"));
+    if (_printDebug)
+      _debugPort->println(F("applySensorAndMenuConfiguration: no sensor or menu items found!"));
     return (false);
   }
 
   // Go though the configuration, reading a line at a time
   // For each line, check for a matching sensor
   // If a match is found, set the configuration item
+  // Also check for a matching menu variable
+  // If a match is found, update the variable
 
   // A health warning about strtok:
   //
@@ -1596,7 +1666,7 @@ bool SFE_QUAD_Sensors::applySensorConfiguration(void)
     {
       if (_printDebug)
       {
-        _debugPort->print(F("applySensorConfiguration: configuration line : "));
+        _debugPort->print(F("applySensorAndMenuConfiguration: configuration line : "));
         _debugPort->print(lineNumber);
         _debugPort->print(F(" : "));
         _debugPort->println(line);
@@ -1619,7 +1689,7 @@ bool SFE_QUAD_Sensors::applySensorConfiguration(void)
           if (thisMux == NULL)
           {
             if (_printDebug)
-              _debugPort->println(F("applySensorConfiguration: could not allocate memory for thisMux!"));
+              _debugPort->println(F("applySensorAndMenuConfiguration: could not allocate memory for thisMux!"));
             return (false);
           }
           thisMux->begin(thisSensor->_muxAddress, *_i2cPort);
@@ -1639,7 +1709,7 @@ bool SFE_QUAD_Sensors::applySensorConfiguration(void)
               thisSensor->_logSense[sense] = 1;
           }
           if (_printDebug)
-            _debugPort->println(F("applySensorConfiguration: using logging settings"));
+            _debugPort->println(F("applySensorAndMenuConfiguration: using logging settings"));
         }
         else
         {
@@ -1654,7 +1724,7 @@ bool SFE_QUAD_Sensors::applySensorConfiguration(void)
               {
                 if (_printDebug)
                 {
-                  _debugPort->print(F("applySensorConfiguration: using line : "));
+                  _debugPort->print(F("applySensorAndMenuConfiguration: using line : "));
                   _debugPort->println(lineNumber);
                 }
 
@@ -1703,9 +1773,31 @@ bool SFE_QUAD_Sensors::applySensorConfiguration(void)
       {
         if (_printDebug)
         {
-          _debugPort->print(F("applySensorConfiguration: no matching sensor for line : "));
+          _debugPort->print(F("applySensorAndMenuConfiguration: no matching sensor for line : "));
           _debugPort->println(lineNumber);
         }
+      }
+    }
+    else
+    {
+      if (_printDebug)
+      {
+        _debugPort->print(F("applySensorAndMenuConfiguration: attempting to update menu using line : "));
+        _debugPort->print(lineNumber);
+        _debugPort->print(F(" : "));
+        _debugPort->println(line);
+      }
+
+      bool success = theMenu.updateMenuVariableFromCSV(line);
+
+      if (_printDebug)
+      {
+        _debugPort->print(F("applySensorAndMenuConfiguration: attempt to update menu using line "));
+        _debugPort->print(lineNumber);
+        _debugPort->print(F(" was"));
+        if (!success)
+          _debugPort->print(F(" not"));
+        _debugPort->println(F(" successful"));
       }
     }
 
@@ -1907,7 +1999,7 @@ bool SFE_QUAD_Sensors__SdFat::beginStorage(int csPin, const char *theFileName)
     return (false);
   }
 
-  //Change to root directory. All new file creation will be in root.
+  // Change to root directory. All new file creation will be in root.
   if (sd.chdir() == false)
   {
     if (_printDebug)
