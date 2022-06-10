@@ -52,8 +52,9 @@
 class SFE_QUAD_Sensors_sprintf
 {
 public:
-  char *OLS_dtostrf(double value, char *buffer);
-  char *OLS_etoa(double value, char *buffer);
+  char *OLS_dtostrf(double value, char *buffer);          // Convert double to string (included because not all platforms support dtostrf correctly)
+  char *OLS_etoa(double value, char *buffer);             // Convert double to ASCII text using exponent format
+  bool expStrToDouble(const char *str, double *value);    // Convert exponent-format string to double
   unsigned char _prec = 7;                                // precision
   void setPrecision(unsigned char prec) { _prec = prec; } // Call setPrecision to change the number of decimal places for the readings
   unsigned char getPrecision(void) { return (_prec); }
@@ -470,10 +471,10 @@ public:
   bool readConfigurationFromStorage(void);               // Read theFileName, copy the contents into configuration
   bool endStorage(void);                                 // End the storage (if required)
   File _theStorage;                                      // SD File
-  char *_theStorageName = NULL; // The name of the settings file - set by beginStorage
+  char *_theStorageName = NULL;                          // The name of the settings file - set by beginStorage
 
 private:
-  int _csPin = -1;              // The SPI Chip Select pin - set by beginStorage
+  int _csPin = -1; // The SPI Chip Select pin - set by beginStorage
 };
 
 #endif
@@ -525,7 +526,7 @@ public:
   char *_theStorageName = NULL; // The name of the settings file - set by beginStorage
 
 private:
-  int _csPin = -1;              // The SPI Chip Select pin - set by beginStorage
+  int _csPin = -1; // The SPI Chip Select pin - set by beginStorage
 };
 
 #endif
@@ -550,7 +551,7 @@ public:
   bool readConfigurationFromStorage(void);               // Read theFileName, copy the contents into configuration
   bool endStorage(void);                                 // End the storage (if required)
   File _theStorage;                                      // SD File
-  char *_theStorageName = NULL; // The name of the settings file - set by beginStorage
+  char *_theStorageName = NULL;                          // The name of the settings file - set by beginStorage
 };
 
 #endif

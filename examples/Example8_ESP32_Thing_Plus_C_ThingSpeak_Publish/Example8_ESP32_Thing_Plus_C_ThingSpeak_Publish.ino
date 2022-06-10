@@ -66,7 +66,7 @@ void setup()
   // We can then also use the BOOT button as a "stop logging" button
   pinMode(qwiicPower, INPUT_PULLUP);
 
-  // Flash LED_BUILTIN each time we write to microSD
+  // Flash LED_BUILTIN each time we publish to ThingSpeak
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
 
@@ -186,7 +186,6 @@ void setup()
 
 void loop()
 {
-
   // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
   // Publish interval - read the sensors every publishInterval milliseconds
   
@@ -211,8 +210,17 @@ void loop()
     
     while ((field != NULL) && (fieldNum <= 8) && (result == TS_OK_SUCCESS))
     {
-      //serialQUAD.println("Adding field " + String(field));
-      result = ThingSpeak.setField(fieldNum, String(field));
+      if ((strchr(field, 'e') != NULL) || (strchr(field, 'E') != NULL)) // Does field contain exponent-format data?
+      {
+        double val;
+        if (mySensors.OLS_sprintf.expStrToDouble(field, &val))
+          result = ThingSpeak.setField(fieldNum, (float)val);
+        else
+          result = TS_ERR_NOT_INSERTED;
+      }
+      else
+        result = ThingSpeak.setField(fieldNum, String(field)); // Use the string-format data as-is
+        
       field = strtok_r(NULL, ",", &preserve);
       fieldNum++;
     }
@@ -229,6 +237,8 @@ void loop()
       {
         serialQUAD.println(F("Publishing data to ThingSpeak"));
 
+        digitalWrite(LED_BUILTIN, HIGH); // Flash LED_BUILTIN each time we publish to ThingSpeak        
+
         SFE_QUAD_Menu_Every_Type_t channelNumber;
         mySensors.theMenu.getMenuItemVariable("Channel ID", &channelNumber); // Get the channel number
 
@@ -241,6 +251,8 @@ void loop()
           serialQUAD.println(F("Channel update was successful"));
         else
           serialQUAD.println("Channel update failed with error " + String(result));
+
+        digitalWrite(LED_BUILTIN, LOW);
       }
     }
     else
@@ -256,7 +268,6 @@ void loop()
   {
     mySensors.theMenu.openMenu(); // If so, open the menu
   }
-
 } // /loop()
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=

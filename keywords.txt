@@ -29,6 +29,7 @@ SFE_QUAD_Menu_Every_Type_t	KEYWORD1
 
 OLS_dtostrf	KEYWORD2
 OLS_etoa	KEYWORD2
+expStrToDouble	KEYWORD2
 setPrecision	KEYWORD2
 getPrecision	KEYWORD2
 
