@@ -139,6 +139,78 @@ char *SFE_QUAD_Sensors_sprintf::OLS_etoa(double value, char *buffer)
   return out;
 }
 
+bool SFE_QUAD_Sensors_sprintf::expStrToDouble(const char *str, double *value)
+{
+  *value = 0.0;
+  int dp = 0;
+  double posNeg = 1.0;
+  int exp = 0;
+  int expPosNeg = 1;
+  bool expSeen = false;
+  const char *ptr = str;
+
+  size_t strLen = strlen(str);
+  if ((strLen == 0) || (strLen > 32))
+    return (false);
+
+  for (size_t i = 0; i < strLen; i++)
+  {
+    char c = *ptr;
+
+    if ((dp == 0) && (expSeen == false)) // If a decimal point has not been seen and an 'e' has not been seen
+    {
+      if (c == '-')
+      {
+        posNeg = -1.0;
+      }
+      else if ((c >= '0') && (c <= '9'))
+      {
+        *value = *value * 10.0;
+        *value = *value + (posNeg * (double)(c - '0'));
+      }
+      else if (c == '.')
+      {
+        dp = -1;
+      }
+      else if ((c == 'e') || (c == 'E'))
+      {
+        expSeen = true;
+      }
+    }
+    else if ((dp != 0) && (expSeen == false)) // If a decimal point has been seen and an 'e' has not been seen
+    {
+      if ((c >= '0') && (c <= '9'))
+      {
+        *value = *value + (posNeg * ((double)(c - '0')) * pow(10, dp));
+        dp -= 1;
+      }
+      else if ((c == 'e') || (c == 'E'))
+      {
+        expSeen = true;
+      }
+    }
+    else // if (expSeen == true) // If an 'e' has been seen
+    {
+      if (c == '-')
+      {
+        expPosNeg = -1;
+      }
+      else if ((c >= '0') && (c <= '9'))
+      {
+        exp *= 10;
+        exp += expPosNeg * ((int)(c - '0'));
+      }
+    }
+
+    ptr++;
+  }
+
+  if (expSeen == true)
+    *value = (*value) * pow(10, exp);
+
+  return (true);
+}
+
 SFE_QUAD_Sensors::SFE_QUAD_Sensors(void)
 {
   _i2cPort = NULL;

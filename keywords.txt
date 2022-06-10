@@ -13,6 +13,15 @@ SFE_QUAD_Sensors__SD	KEYWORD1
 SFE_QUAD_Sensors__SdFat	KEYWORD1
 SFE_QUAD_Sensors__LittleFS	KEYWORD1
 SFE_QUAD_Sensors__EEPROM	KEYWORD1
+SFE_QUAD_Sensor_Setting_Type_e	KEYWORD1
+SFE_QUAD_Sensor_Every_Type_t	KEYWORD1
+SFEQUADSensorType	KEYWORD1
+
+SFE_QUAD_Menu	KEYWORD1
+SFE_QUAD_Menu_sprintf	KEYWORD1
+SFE_QUAD_Menu_Item	KEYWORD1
+SFE_QUAD_Menu_Variable_Type_e	KEYWORD1
+SFE_QUAD_Menu_Every_Type_t	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
@@ -20,7 +29,9 @@ SFE_QUAD_Sensors__EEPROM	KEYWORD1
 
 OLS_dtostrf	KEYWORD2
 OLS_etoa	KEYWORD2
+expStrToDouble	KEYWORD2
 setPrecision	KEYWORD2
+getPrecision	KEYWORD2
 
 deleteSensorStorage	KEYWORD2
 getSensorName	KEYWORD2
@@ -41,10 +52,12 @@ getSettingType	KEYWORD2
 setSetting	KEYWORD2
 getConfigurationItemCount	KEYWORD2
 getConfigurationItemName	KEYWORD2
+getConfigurationItemNameMaxLen	KEYWORD2
 getConfigurationItemType	KEYWORD2
 getConfigurationItem	KEYWORD2
 setConfigurationItem	KEYWORD2
 
+sensorFactory	KEYWORD2
 setWirePort	KEYWORD2
 enableDebugging	KEYWORD2
 setMenuPort	KEYWORD2
@@ -60,13 +73,40 @@ loggingMenu	KEYWORD2
 getMenuChoice	KEYWORD2
 settingMenu	KEYWORD2
 getSettingValueDouble	KEYWORD2
-getSensorConfiguration	KEYWORD2
-applySensorConfiguration	KEYWORD2
+getSensorAndMenuConfiguration	KEYWORD2
+applySensorAndMenuConfiguration	KEYWORD2
 
 beginStorage	KEYWORD2
 writeConfigurationToStorage	KEYWORD2
 readConfigurationFromStorage	KEYWORD2
 endStorage	KEYWORD2
+
+printDouble	KEYWORD2
+dtostrf	KEYWORD2
+setPrecision	KEYWORD2
+getPrecision	KEYWORD2
+
+setMenuPort	KEYWORD2
+setDebugPort	KEYWORD2
+addMenuItem	KEYWORD2
+addMenuItem	KEYWORD2
+getMenuItemVariableType	KEYWORD2
+getMenuItemVariable	KEYWORD2
+setMenuItemVariable	KEYWORD2
+setMenuItemVariableMin	KEYWORD2
+setMenuItemVariableMax	KEYWORD2
+openMenu	KEYWORD2
+getMenuChoice	KEYWORD2
+getValueDouble	KEYWORD2
+getValueText	KEYWORD2
+getNumMenuVariables	KEYWORD2
+getMenuVariableAsCSV	KEYWORD2
+updateMenuVariableFromCSV	KEYWORD2
+getMenuItemNameMaxLen	KEYWORD2
+menuItemExists	KEYWORD2
+setMenuTimeout	KEYWORD2
+setMaxTextChars	KEYWORD2
+setSupportsBackspace	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
