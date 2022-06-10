@@ -1811,10 +1811,10 @@ bool SFE_QUAD_Menu::updateMenuVariableFromCSV(char *line)
             {
               char *charPtr2 = strchr(charPtr, '\r'); // Find the \r
               if (charPtr2 != NULL)
-                *charPtr2 = '\0'; // Change the \n to null so setMenuItemVariable does not add it
+                *charPtr2 = '\0'; // Change the \r to null so setMenuItemVariable does not add it
               setMenuItemVariable(line, charPtr); // Copy the TEXT into the matching menu item
               if (charPtr2 != NULL)
-                *charPtr2 = '\0'; // Restore the \n
+                *charPtr2 = '\r'; // Restore the \r
             }
               break;
             case SFE_QUAD_MENU_VARIABLE_TYPE_BOOL:

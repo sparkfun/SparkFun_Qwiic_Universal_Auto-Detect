@@ -469,9 +469,9 @@ public:
   bool writeConfigurationToStorage(bool append = false); // Write configuration to theFileName
   bool readConfigurationFromStorage(void);               // Read theFileName, copy the contents into configuration
   bool endStorage(void);                                 // End the storage (if required)
+  File _theStorage;                                      // SD File
 
 private:
-  File _theStorage;             // SD File
   char *_theStorageName = NULL; // The name of the settings file - set by beginStorage
   int _csPin = -1;              // The SPI Chip Select pin - set by beginStorage
 };
@@ -512,10 +512,6 @@ public:
   SdFat sd;
 #endif // SD_FAT_TYPE
 
-private:
-  char *_theStorageName = NULL; // The name of the settings file - set by beginStorage
-  int _csPin = -1;              // The SPI Chip Select pin - set by beginStorage
-
 #if SFE_QUAD_SD_FAT_TYPE == 1
   File32 _theStorage; // SdFat File
 #elif SFE_QUAD_SD_FAT_TYPE == 2
@@ -525,6 +521,10 @@ private:
 #else  // SD_FAT_TYPE == 0
   File _theStorage; // SdFat File
 #endif // SD_FAT_TYPE
+
+private:
+  char *_theStorageName = NULL; // The name of the settings file - set by beginStorage
+  int _csPin = -1;              // The SPI Chip Select pin - set by beginStorage
 };
 
 #endif
@@ -548,9 +548,9 @@ public:
   bool writeConfigurationToStorage(bool append = false); // Write configuration to theFileName
   bool readConfigurationFromStorage(void);               // Read theFileName, copy the contents into configuration
   bool endStorage(void);                                 // End the storage (if required)
+  File _theStorage;                                      // SD File
 
 private:
-  File _theStorage;             // SD File
   char *_theStorageName = NULL; // The name of the settings file - set by beginStorage
 };
 
