@@ -82,7 +82,7 @@ readConfigurationFromStorage	KEYWORD2
 endStorage	KEYWORD2
 
 printDouble	KEYWORD2
-dtostrf	KEYWORD2
+_dtostrf	KEYWORD2
 setPrecision	KEYWORD2
 getPrecision	KEYWORD2
 
