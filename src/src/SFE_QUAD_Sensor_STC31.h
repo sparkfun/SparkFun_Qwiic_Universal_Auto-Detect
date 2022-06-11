@@ -176,7 +176,7 @@ public:
         _validTemp = true;
       }
       _co2 = false;
-      OLS_sprintf.OLS_etoa((double)device->getCO2(), reading); // Get the CO2 concentration
+      _sprintf._etoa((double)device->getCO2(), reading); // Get the CO2 concentration
       return (true);
       break;
     case 1:
@@ -186,7 +186,7 @@ public:
         _co2 = true;
       }
       _validTemp = false;
-      OLS_sprintf.OLS_etoa((double)device->getTemperature(), reading); // Get the temperature
+      _sprintf._etoa((double)device->getTemperature(), reading); // Get the temperature
       return (true);
       break;
     default:

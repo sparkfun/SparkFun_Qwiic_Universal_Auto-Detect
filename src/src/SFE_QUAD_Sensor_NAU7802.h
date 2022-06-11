@@ -145,7 +145,7 @@ public:
     switch (sense)
     {
     case 0:
-      OLS_sprintf.OLS_etoa((double)device->getWeight(true), reading); // Get the weight. Allow negative weights
+      _sprintf._etoa((double)device->getWeight(true), reading); // Get the weight. Allow negative weights
       return (true);
       break;
     default:

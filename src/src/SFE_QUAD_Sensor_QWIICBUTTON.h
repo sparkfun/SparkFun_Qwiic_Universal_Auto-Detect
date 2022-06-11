@@ -161,7 +161,7 @@ public:
       {
         pressedPopped = device->popPressedQueue();
       }
-      OLS_sprintf.OLS_etoa(((double)pressedPopped) / 1000.0, reading); // Get the pressure
+      _sprintf._etoa(((double)pressedPopped) / 1000.0, reading); // Get the pressure
       return (true);
     }
       break;
@@ -173,7 +173,7 @@ public:
         clickedPopped = device->popClickedQueue();
         _ledState ^= 1; // Toggle ledState
       }
-      OLS_sprintf.OLS_etoa(((double)clickedPopped) / 1000.0, reading); // Get the pressure
+      _sprintf._etoa(((double)clickedPopped) / 1000.0, reading); // Get the pressure
       if (_toggleLEDOnClick)
       {
         if (_ledState)

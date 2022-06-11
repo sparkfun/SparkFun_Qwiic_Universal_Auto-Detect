@@ -182,7 +182,7 @@ public:
         _rh = true;
       }
       _temp = false;
-      OLS_sprintf.OLS_etoa((double)device->getTemperature(), reading); // Get the temperature
+      _sprintf._etoa((double)device->getTemperature(), reading); // Get the temperature
       return (true);
       break;
     case 2:
@@ -193,7 +193,7 @@ public:
         _temp = true;
       }
       _rh = false;
-      OLS_sprintf.OLS_etoa((double)device->getHumidity(), reading); // Get the humidity
+      _sprintf._etoa((double)device->getHumidity(), reading); // Get the humidity
       return (true);
       break;
     default:

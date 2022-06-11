@@ -163,7 +163,7 @@ public:
       return (true);
       break;
     case 2:
-      OLS_sprintf.OLS_etoa((double)device->getLux(), reading); // Get the Lux
+      _sprintf._etoa((double)device->getLux(), reading); // Get the Lux
       return (true);
       break;
     default:

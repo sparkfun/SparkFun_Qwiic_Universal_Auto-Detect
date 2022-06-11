@@ -155,15 +155,15 @@ public:
     switch (sense)
     {
     case 0:
-      OLS_sprintf.OLS_etoa((double)device->uva(), reading); // Get the pressure
+      _sprintf._etoa((double)device->uva(), reading); // Get the pressure
       return (true);
       break;
     case 1:
-      OLS_sprintf.OLS_etoa((double)device->uvb(), reading); // Get the temperature
+      _sprintf._etoa((double)device->uvb(), reading); // Get the temperature
       return (true);
       break;
     case 2:
-      OLS_sprintf.OLS_etoa((double)device->index(), reading); // Get the humidity
+      _sprintf._etoa((double)device->index(), reading); // Get the humidity
       return (true);
       break;
     default:

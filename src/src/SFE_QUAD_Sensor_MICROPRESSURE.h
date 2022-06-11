@@ -163,31 +163,31 @@ public:
     switch (sense)
     {
     case 0:
-      OLS_sprintf.OLS_etoa((double)device->readPressure(), reading); // Get the pressure
+      _sprintf._etoa((double)device->readPressure(), reading); // Get the pressure
       return (true);
       break;
     case 1:
-      OLS_sprintf.OLS_etoa((double)device->readPressure(PA), reading); // Get the pressure
+      _sprintf._etoa((double)device->readPressure(PA), reading); // Get the pressure
       return (true);
       break;
     case 2:
-      OLS_sprintf.OLS_etoa((double)device->readPressure(KPA), reading); // Get the pressure
+      _sprintf._etoa((double)device->readPressure(KPA), reading); // Get the pressure
       return (true);
       break;
     case 3:
-      OLS_sprintf.OLS_etoa((double)device->readPressure(TORR), reading); // Get the pressure
+      _sprintf._etoa((double)device->readPressure(TORR), reading); // Get the pressure
       return (true);
       break;
     case 4:
-      OLS_sprintf.OLS_etoa((double)device->readPressure(INHG), reading); // Get the pressure
+      _sprintf._etoa((double)device->readPressure(INHG), reading); // Get the pressure
       return (true);
       break;
     case 5:
-      OLS_sprintf.OLS_etoa((double)device->readPressure(ATM), reading); // Get the pressure
+      _sprintf._etoa((double)device->readPressure(ATM), reading); // Get the pressure
       return (true);
       break;
     case 6:
-      OLS_sprintf.OLS_etoa((double)device->readPressure(BAR), reading); // Get the pressure
+      _sprintf._etoa((double)device->readPressure(BAR), reading); // Get the pressure
       return (true);
       break;
     default:
