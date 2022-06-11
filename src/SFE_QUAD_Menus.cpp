@@ -1395,7 +1395,7 @@ bool SFE_QUAD_Menu::getMenuVariableAsCSV(uint16_t num, char *var, size_t maxLen)
         size_t len = strlen(menuItemPtr->_itemName);
         len += 4;
         char tempStr[32]; // TODO: find a better way to do this!
-        _sprintf.dtostrf(menuItemPtr->_theVariable->FLOAT, tempStr);
+        _sprintf._dtostrf(menuItemPtr->_theVariable->FLOAT, tempStr);
         len += strlen(tempStr);
         if (len < maxLen)
         {
@@ -1409,13 +1409,13 @@ bool SFE_QUAD_Menu::getMenuVariableAsCSV(uint16_t num, char *var, size_t maxLen)
           if (menuItemPtr->_minVal != NULL)
           {
             strcat(var, ",min,");
-            _sprintf.dtostrf((double)menuItemPtr->_minVal->FLOAT, tempStr);
+            _sprintf._dtostrf((double)menuItemPtr->_minVal->FLOAT, tempStr);
             strcat(var, tempStr);
           }
           if (menuItemPtr->_maxVal != NULL)
           {
             strcat(var, ",max,");
-            _sprintf.dtostrf((double)menuItemPtr->_maxVal->FLOAT, tempStr);
+            _sprintf._dtostrf((double)menuItemPtr->_maxVal->FLOAT, tempStr);
             strcat(var, tempStr);
           }
           return (true);
@@ -1440,7 +1440,7 @@ bool SFE_QUAD_Menu::getMenuVariableAsCSV(uint16_t num, char *var, size_t maxLen)
         size_t len = strlen(menuItemPtr->_itemName);
         len += 4;
         char tempStr[32]; // TODO: find a better way to do this!
-        _sprintf.dtostrf(menuItemPtr->_theVariable->DOUBLE, tempStr);
+        _sprintf._dtostrf(menuItemPtr->_theVariable->DOUBLE, tempStr);
         len += strlen(tempStr);
         if (len < maxLen)
         {
@@ -1454,13 +1454,13 @@ bool SFE_QUAD_Menu::getMenuVariableAsCSV(uint16_t num, char *var, size_t maxLen)
           if (menuItemPtr->_minVal != NULL)
           {
             strcat(var, ",min,");
-            _sprintf.dtostrf(menuItemPtr->_minVal->DOUBLE, tempStr);
+            _sprintf._dtostrf(menuItemPtr->_minVal->DOUBLE, tempStr);
             strcat(var, tempStr);
           }
           if (menuItemPtr->_maxVal != NULL)
           {
             strcat(var, ",max,");
-            _sprintf.dtostrf(menuItemPtr->_maxVal->DOUBLE, tempStr);
+            _sprintf._dtostrf(menuItemPtr->_maxVal->DOUBLE, tempStr);
             strcat(var, tempStr);
           }
           return (true);
@@ -2343,7 +2343,7 @@ void SFE_QUAD_Menu_sprintf::printDouble(double value, Print *pr)
   }
 }
 
-char *SFE_QUAD_Menu_sprintf::dtostrf(double value, char *buffer)
+char *SFE_QUAD_Menu_sprintf::_dtostrf(double value, char *buffer)
 {
   bool negative = false;
 
