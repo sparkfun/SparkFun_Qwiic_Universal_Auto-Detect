@@ -1,6 +1,6 @@
 #include "SFE_QUAD_Sensors.h"
 
-char *SFE_QUAD_Sensors_sprintf::OLS_dtostrf(double value, char *buffer)
+char *SFE_QUAD_Sensors_sprintf::_dtostrf(double value, char *buffer)
 {
   bool negative = false;
 
@@ -70,8 +70,69 @@ char *SFE_QUAD_Sensors_sprintf::OLS_dtostrf(double value, char *buffer)
   return out;
 }
 
-char *SFE_QUAD_Sensors_sprintf::OLS_etoa(double value, char *buffer)
+char *SFE_QUAD_Sensors_sprintf::_etoa(double value, char *buffer)
 {
+  if (sizeof(double) != sizeof(uint64_t))
+  {
+    // Kludge for platforms that do not support 64-bit double
+    int expval = 0;
+
+    if (value < 0.0)
+    {
+      if (value> -1.0)
+      {
+        while (value > -1.0)
+        {
+          value *= 10.0;
+          expval--;
+        }
+      }
+      else if (value <= -10.0)
+      {
+        while (value <= -10.0)
+        {
+          value /= 10.0;
+          expval++;
+        }
+      }
+    }
+    else if (value > 0.0)
+    {
+      if (value < 1.0)
+      {
+        while (value < 1.0)
+        {
+          value *= 10.0;
+          expval--;
+        }
+      }
+      else if (value >= 10.0)
+      {
+        while (value >= 10.0)
+        {
+          value /= 10.0;
+          expval++;
+        }
+      }
+    }
+
+    // output the floating part
+    char *out = _dtostrf(value, buffer);
+
+    // output the exponent part
+    // output the exponential symbol
+    *out++ = 'e';
+    // output the exponent value
+    *out++ = expval < 0 ? '-' : '+';
+    unsigned char prec = _prec;
+    _prec = 0; // Hack! Set _prec to zero to avoid printing a decimal point in the exponent
+    out = _dtostrf(expval < 0 ? -expval : expval, out);
+    _prec = prec; // Restore _prec
+    return (out);
+  }
+
+  // 64-bit Platforms
+
   if (isnan(value))
   {
     strcpy(buffer, "nan");
@@ -92,6 +153,7 @@ char *SFE_QUAD_Sensors_sprintf::OLS_etoa(double value, char *buffer)
 
   // determine the decimal exponent
   // based on the algorithm by David Gay (https://www.ampl.com/netlib/fp/dtoa.c)
+  
   union
   {
     uint64_t U;
@@ -124,7 +186,7 @@ char *SFE_QUAD_Sensors_sprintf::OLS_etoa(double value, char *buffer)
   }
 
   // output the floating part
-  char *out = OLS_dtostrf(negative ? -value : value, buffer);
+  char *out = _dtostrf(negative ? -value : value, buffer);
 
   // output the exponent part
   // output the exponential symbol
@@ -133,7 +195,7 @@ char *SFE_QUAD_Sensors_sprintf::OLS_etoa(double value, char *buffer)
   *out++ = expval < 0 ? '-' : '+';
   unsigned char prec = _prec;
   _prec = 0; // Hack! Set _prec to zero to avoid printing a decimal point in the exponent
-  out = OLS_dtostrf(expval < 0 ? -expval : expval, out);
+  out = _dtostrf(expval < 0 ? -expval : expval, out);
   _prec = prec; // Restore _prec
 
   return out;
@@ -1518,11 +1580,11 @@ bool SFE_QUAD_Sensors::getSensorAndMenuConfiguration(void)
             configLen += strlen(tempStr);
             break;
           case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_FLOAT:
-            OLS_sprintf.OLS_dtostrf(value.FLOAT, tempStr);
+            _sprintf._dtostrf(value.FLOAT, tempStr);
             configLen += strlen(tempStr);
             break;
           case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_DOUBLE:
-            OLS_sprintf.OLS_dtostrf(value.DOUBLE, tempStr);
+            _sprintf._dtostrf(value.DOUBLE, tempStr);
             configLen += strlen(tempStr);
             break;
           case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_INT:
@@ -1571,11 +1633,11 @@ bool SFE_QUAD_Sensors::getSensorAndMenuConfiguration(void)
             strcat(scratchpad, tempStr);
             break;
           case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_FLOAT:
-            OLS_sprintf.OLS_dtostrf(value.FLOAT, tempStr);
+            _sprintf._dtostrf(value.FLOAT, tempStr);
             strcat(scratchpad, tempStr);
             break;
           case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_DOUBLE:
-            OLS_sprintf.OLS_dtostrf(value.DOUBLE, tempStr);
+            _sprintf._dtostrf(value.DOUBLE, tempStr);
             strcat(scratchpad, tempStr);
             break;
           case SFE_QUAD_Sensor::SFE_QUAD_SETTING_TYPE_INT:

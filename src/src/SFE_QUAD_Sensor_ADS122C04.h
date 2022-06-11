@@ -153,19 +153,19 @@ public:
     switch (sense)
     {
     case 0:
-      OLS_sprintf.OLS_etoa((double)device->readPT100Centigrade(), reading); // Get the temperature
+      _sprintf._etoa((double)device->readPT100Centigrade(), reading); // Get the temperature
       return (true);
       break;
     case 1:
-      OLS_sprintf.OLS_etoa((double)device->readPT100Fahrenheit(), reading); // Get the temperature
+      _sprintf._etoa((double)device->readPT100Fahrenheit(), reading); // Get the temperature
       return (true);
       break;
     case 2:
-      OLS_sprintf.OLS_etoa((double)device->readInternalTemperature(), reading); // Get the temperature
+      _sprintf._etoa((double)device->readInternalTemperature(), reading); // Get the temperature
       return (true);
       break;
     case 3:
-      OLS_sprintf.OLS_etoa((double)device->readRawVoltage() * 0.000000244140625, reading); // Get the raw voltage. Convert to volts
+      _sprintf._etoa((double)device->readRawVoltage() * 0.000000244140625, reading); // Get the raw voltage. Convert to volts
       return (true);
       break;
     default:

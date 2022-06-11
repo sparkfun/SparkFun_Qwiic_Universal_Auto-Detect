@@ -213,7 +213,7 @@ void loop()
       if ((strchr(field, 'e') != NULL) || (strchr(field, 'E') != NULL)) // Does field contain exponent-format data?
       {
         double val;
-        if (mySensors.OLS_sprintf.expStrToDouble(field, &val))
+        if (mySensors._sprintf.expStrToDouble(field, &val))
           result = ThingSpeak.setField(fieldNum, (float)val);
         else
           result = TS_ERR_NOT_INSERTED;

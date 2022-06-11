@@ -52,8 +52,8 @@
 class SFE_QUAD_Sensors_sprintf
 {
 public:
-  char *OLS_dtostrf(double value, char *buffer);          // Convert double to string (included because not all platforms support dtostrf correctly)
-  char *OLS_etoa(double value, char *buffer);             // Convert double to ASCII text using exponent format
+  char *_dtostrf(double value, char *buffer);          // Convert double to string (included because not all platforms support dtostrf correctly)
+  char *_etoa(double value, char *buffer);             // Convert double to ASCII text using exponent format
   bool expStrToDouble(const char *str, double *value);    // Convert exponent-format string to double
   unsigned char _prec = 7;                                // precision
   void setPrecision(unsigned char prec) { _prec = prec; } // Call setPrecision to change the number of decimal places for the readings
@@ -207,15 +207,15 @@ public:
   // Set (write) the sensor configuration item
   virtual bool setConfigurationItem(uint8_t configItem, SFE_QUAD_Sensor_Every_Type_t *value) { return (false); }
 
-  SFE_QUAD_Sensors_sprintf OLS_sprintf; // Provide access to the common sprintf(%f) and sprintf(%e) functions
+  SFE_QUAD_Sensors_sprintf _sprintf; // Provide access to the common sprintf(%f) and sprintf(%e) functions
 };
 
 #include "SFE_QUAD_Headers.h"
 
 #if __has_include("SFE_QUAD_Headers.h") // Check if the compiler supports __has_include
-#define OLS_COMPILER_HAS_INCLUDE
+#define _COMPILER_HAS_INCLUDE
 #else
-#define OLS_COMPILER_NO_HAS_INCLUDE
+#define _COMPILER_NO_HAS_INCLUDE
 #endif
 
 class SFE_QUAD_Sensors
@@ -450,11 +450,11 @@ public:
 
   SFE_QUAD_Menu theMenu; // Add an instance of the menu
 
-  SFE_QUAD_Sensors_sprintf OLS_sprintf; // Provide access to the common sprintf(%f) and sprintf(%e) functions
+  SFE_QUAD_Sensors_sprintf _sprintf; // Provide access to the common sprintf(%f) and sprintf(%e) functions
 };
 
 // For all platforms (that support SD.h)
-#if __has_include(<SD.h>) || defined(OLS_COMPILER_NO_HAS_INCLUDE)
+#if __has_include(<SD.h>) || defined(_COMPILER_NO_HAS_INCLUDE)
 
 #define SFE_QUAD_SENSORS_SD
 
@@ -581,7 +581,7 @@ private:
 #endif
 
 // For SAMD platforms that support FlashAsEEPROM.h
-#if __has_include(<FlashAsEEPROM_SAMD.h>) || (defined(OLS_COMPILER_NO_HAS_INCLUDE) && defined(ARDUINO_ARCH_SAMD))
+#if __has_include(<FlashAsEEPROM_SAMD.h>) || (defined(_COMPILER_NO_HAS_INCLUDE) && defined(ARDUINO_ARCH_SAMD))
 
 #define SFE_QUAD_SENSORS_EEPROM
 

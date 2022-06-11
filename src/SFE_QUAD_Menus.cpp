@@ -24,6 +24,11 @@ void SFE_QUAD_Menu_Item::deleteMenuItemStorage(void)
   }
   if (_theVariable != NULL)
   {
+    if (_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_TEXT)
+    {
+      if (_theVariable->TEXT != NULL)
+        delete[] _theVariable->TEXT;
+    } 
     delete _theVariable;
     _theVariable = NULL;
   }
@@ -657,9 +662,12 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
         {
           _menuPort->print(F(" : "));
           if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_BOOL)
-            _menuPort->println(menuItemPtr->_theVariable->BOOL == true ? F("Yes") : F("No")); // TO DO: provide a way to let "Enabled" / "Disabled" to be used instead?
+            _menuPort->println(menuItemPtr->_theVariable->BOOL == true ? F("Yes") : F("No")); // TO DO: provide a way to let "Enabled" / "Disabled" be used instead?
           else if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_FLOAT)
-            _menuPort->println(menuItemPtr->_theVariable->FLOAT);
+          {
+            _sprintf.printDouble((double)menuItemPtr->_theVariable->FLOAT, _menuPort);
+            _menuPort->println();
+          }
           else if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_DOUBLE)
           {
             _sprintf.printDouble(menuItemPtr->_theVariable->DOUBLE, _menuPort);
@@ -1395,7 +1403,7 @@ bool SFE_QUAD_Menu::getMenuVariableAsCSV(uint16_t num, char *var, size_t maxLen)
         size_t len = strlen(menuItemPtr->_itemName);
         len += 4;
         char tempStr[32]; // TODO: find a better way to do this!
-        _sprintf.dtostrf(menuItemPtr->_theVariable->FLOAT, tempStr);
+        _sprintf._dtostrf(menuItemPtr->_theVariable->FLOAT, tempStr);
         len += strlen(tempStr);
         if (len < maxLen)
         {
@@ -1409,13 +1417,13 @@ bool SFE_QUAD_Menu::getMenuVariableAsCSV(uint16_t num, char *var, size_t maxLen)
           if (menuItemPtr->_minVal != NULL)
           {
             strcat(var, ",min,");
-            _sprintf.dtostrf((double)menuItemPtr->_minVal->FLOAT, tempStr);
+            _sprintf._dtostrf((double)menuItemPtr->_minVal->FLOAT, tempStr);
             strcat(var, tempStr);
           }
           if (menuItemPtr->_maxVal != NULL)
           {
             strcat(var, ",max,");
-            _sprintf.dtostrf((double)menuItemPtr->_maxVal->FLOAT, tempStr);
+            _sprintf._dtostrf((double)menuItemPtr->_maxVal->FLOAT, tempStr);
             strcat(var, tempStr);
           }
           return (true);
@@ -1440,7 +1448,7 @@ bool SFE_QUAD_Menu::getMenuVariableAsCSV(uint16_t num, char *var, size_t maxLen)
         size_t len = strlen(menuItemPtr->_itemName);
         len += 4;
         char tempStr[32]; // TODO: find a better way to do this!
-        _sprintf.dtostrf(menuItemPtr->_theVariable->DOUBLE, tempStr);
+        _sprintf._dtostrf(menuItemPtr->_theVariable->DOUBLE, tempStr);
         len += strlen(tempStr);
         if (len < maxLen)
         {
@@ -1454,13 +1462,13 @@ bool SFE_QUAD_Menu::getMenuVariableAsCSV(uint16_t num, char *var, size_t maxLen)
           if (menuItemPtr->_minVal != NULL)
           {
             strcat(var, ",min,");
-            _sprintf.dtostrf(menuItemPtr->_minVal->DOUBLE, tempStr);
+            _sprintf._dtostrf(menuItemPtr->_minVal->DOUBLE, tempStr);
             strcat(var, tempStr);
           }
           if (menuItemPtr->_maxVal != NULL)
           {
             strcat(var, ",max,");
-            _sprintf.dtostrf(menuItemPtr->_maxVal->DOUBLE, tempStr);
+            _sprintf._dtostrf(menuItemPtr->_maxVal->DOUBLE, tempStr);
             strcat(var, tempStr);
           }
           return (true);
@@ -2343,7 +2351,7 @@ void SFE_QUAD_Menu_sprintf::printDouble(double value, Print *pr)
   }
 }
 
-char *SFE_QUAD_Menu_sprintf::dtostrf(double value, char *buffer)
+char *SFE_QUAD_Menu_sprintf::_dtostrf(double value, char *buffer)
 {
   bool negative = false;
 

@@ -150,15 +150,15 @@ public:
     switch (sense)
     {
     case 0:
-      OLS_sprintf.OLS_etoa((double)device->getVoltage(), reading);
+      _sprintf._etoa((double)device->getVoltage(), reading);
       return (true);
       break;
     case 1:
-      OLS_sprintf.OLS_etoa((double)device->getSOC(), reading);
+      _sprintf._etoa((double)device->getSOC(), reading);
       return (true);
       break;
     case 2:
-      OLS_sprintf.OLS_etoa((double)device->getChangeRate(), reading);
+      _sprintf._etoa((double)device->getChangeRate(), reading);
       return (true);
       break;
     default:

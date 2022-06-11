@@ -46,7 +46,7 @@ class SFE_QUAD_Menu_sprintf
 {
 public:
   void printDouble(double value, Print *pr);
-  char *dtostrf(double value, char *buffer);
+  char *_dtostrf(double value, char *buffer);
   unsigned char _prec = 7;                                // precision
   void setPrecision(unsigned char prec) { _prec = prec; } // Call setPrecision to change the number of decimal places for the readings
   unsigned char getPrecision(void) { return (_prec); }

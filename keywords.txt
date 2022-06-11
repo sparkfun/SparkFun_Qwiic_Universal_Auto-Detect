@@ -27,8 +27,8 @@ SFE_QUAD_Menu_Every_Type_t	KEYWORD1
 # Methods and Functions (KEYWORD2)
 #######################################
 
-OLS_dtostrf	KEYWORD2
-OLS_etoa	KEYWORD2
+_dtostrf	KEYWORD2
+_etoa	KEYWORD2
 expStrToDouble	KEYWORD2
 setPrecision	KEYWORD2
 getPrecision	KEYWORD2
@@ -82,7 +82,7 @@ readConfigurationFromStorage	KEYWORD2
 endStorage	KEYWORD2
 
 printDouble	KEYWORD2
-dtostrf	KEYWORD2
+_dtostrf	KEYWORD2
 setPrecision	KEYWORD2
 getPrecision	KEYWORD2
 

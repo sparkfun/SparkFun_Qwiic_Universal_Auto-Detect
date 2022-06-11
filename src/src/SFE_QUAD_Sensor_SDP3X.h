@@ -164,7 +164,7 @@ public:
       {
         device->readMeasurement(&_pressure, &_temperature);
       }
-      OLS_sprintf.OLS_etoa((double)_temperature, reading); // Get the temperature
+      _sprintf._etoa((double)_temperature, reading); // Get the temperature
       _temperature = -9999; // Mark the temperature as stale
       return (true);
       break;
@@ -173,7 +173,7 @@ public:
       {
         device->readMeasurement(&_pressure, &_temperature);
       }
-      OLS_sprintf.OLS_etoa((double)_pressure, reading); // Get the pressure
+      _sprintf._etoa((double)_pressure, reading); // Get the pressure
       _pressure = -9999; // Mark the pressure as stale
       return (true);
       break;

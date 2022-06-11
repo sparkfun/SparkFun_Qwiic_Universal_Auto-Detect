@@ -146,11 +146,11 @@ public:
     switch (sense)
     {
     case 0:
-      OLS_sprintf.OLS_etoa((double)device->getPressure(), reading); // Get the pressure
+      _sprintf._etoa((double)device->getPressure(), reading); // Get the pressure
       return (true);
       break;
     case 1:
-      OLS_sprintf.OLS_etoa((double)device->getTemperature(), reading); // Get the temperature
+      _sprintf._etoa((double)device->getTemperature(), reading); // Get the temperature
       return (true);
       break;
     default:

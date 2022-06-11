@@ -164,7 +164,7 @@ public:
         _temp = true;
       }
       _rh = false;
-      OLS_sprintf.OLS_etoa((double)device->toPercent(), reading); // Get the humidity
+      _sprintf._etoa((double)device->toPercent(), reading); // Get the humidity
       return (true);
       break;
     case 1:
@@ -174,7 +174,7 @@ public:
         _rh = true;
       }
       _temp = false;
-      OLS_sprintf.OLS_etoa((double)device->toDegC(), reading); // Get the temperature
+      _sprintf._etoa((double)device->toDegC(), reading); // Get the temperature
       return (true);
       break;
     default:

@@ -161,11 +161,11 @@ public:
     switch (sense)
     {
     case 0:
-      OLS_sprintf.OLS_etoa((double)device->getThermocoupleTemp(), reading); // Get the temperature
+      _sprintf._etoa((double)device->getThermocoupleTemp(), reading); // Get the temperature
       return (true);
       break;
     case 1:
-      OLS_sprintf.OLS_etoa((double)device->getAmbientTemp(), reading); // Get the ambient temperature
+      _sprintf._etoa((double)device->getAmbientTemp(), reading); // Get the ambient temperature
       return (true);
       break;
     default:
