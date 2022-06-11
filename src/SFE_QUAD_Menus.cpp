@@ -657,9 +657,12 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
         {
           _menuPort->print(F(" : "));
           if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_BOOL)
-            _menuPort->println(menuItemPtr->_theVariable->BOOL == true ? F("Yes") : F("No")); // TO DO: provide a way to let "Enabled" / "Disabled" to be used instead?
+            _menuPort->println(menuItemPtr->_theVariable->BOOL == true ? F("Yes") : F("No")); // TO DO: provide a way to let "Enabled" / "Disabled" be used instead?
           else if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_FLOAT)
-            _menuPort->println(menuItemPtr->_theVariable->FLOAT);
+          {
+            _sprintf.printDouble((double)menuItemPtr->_theVariable->FLOAT, _menuPort);
+            _menuPort->println();
+          }
           else if (menuItemPtr->_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_DOUBLE)
           {
             _sprintf.printDouble(menuItemPtr->_theVariable->DOUBLE, _menuPort);
