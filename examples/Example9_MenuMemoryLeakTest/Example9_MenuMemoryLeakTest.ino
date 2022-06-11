@@ -39,6 +39,7 @@ void loop()
   theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   theMenu.addMenuItem("Toggle the LED", blink);
   theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  theMenu.addMenuItem("TEXT", SFE_QUAD_MENU_VARIABLE_TYPE_TEXT);
   theMenu.addMenuItem("BOOL", SFE_QUAD_MENU_VARIABLE_TYPE_BOOL);
   theMenu.addMenuItem("FLOAT", SFE_QUAD_MENU_VARIABLE_TYPE_FLOAT);
   theMenu.addMenuItem("DOUBLE", SFE_QUAD_MENU_VARIABLE_TYPE_DOUBLE);
@@ -53,14 +54,15 @@ void loop()
   SFE_QUAD_Menu_Every_Type_t defaultValue;
   defaultValue.BOOL = 0;
   defaultValue.FLOAT = 1.0;
-  defaultValue.DOUBLE = 2.0;
-  defaultValue.INT = 3;
+  defaultValue.DOUBLE = -2.0;
+  defaultValue.INT = -3;
   defaultValue.ULONG = 4;
-  defaultValue.LONG = 5;
+  defaultValue.LONG = -5;
   defaultValue.UINT8_T = 6;
   defaultValue.UINT16_T = 7;
   defaultValue.UINT32_T = 8;
 
+  theMenu.setMenuItemVariable("TEXT", "T-Rex has big teeth");
   theMenu.setMenuItemVariable("BOOL", &defaultValue);
   theMenu.setMenuItemVariable("FLOAT", &defaultValue);
   theMenu.setMenuItemVariable("DOUBLE", &defaultValue);

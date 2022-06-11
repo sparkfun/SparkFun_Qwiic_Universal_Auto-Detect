@@ -24,6 +24,11 @@ void SFE_QUAD_Menu_Item::deleteMenuItemStorage(void)
   }
   if (_theVariable != NULL)
   {
+    if (_variableType == SFE_QUAD_MENU_VARIABLE_TYPE_TEXT)
+    {
+      if (_theVariable->TEXT != NULL)
+        delete[] _theVariable->TEXT;
+    } 
     delete _theVariable;
     _theVariable = NULL;
   }
