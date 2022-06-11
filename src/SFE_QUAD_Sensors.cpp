@@ -72,6 +72,67 @@ char *SFE_QUAD_Sensors_sprintf::_dtostrf(double value, char *buffer)
 
 char *SFE_QUAD_Sensors_sprintf::_etoa(double value, char *buffer)
 {
+  if (sizeof(double) != sizeof(uint64_t))
+  {
+    // Kludge for platforms that do not support 64-bit double
+    int expval = 0;
+
+    if (value < 0.0)
+    {
+      if (value> -1.0)
+      {
+        while (value > -1.0)
+        {
+          value *= 10.0;
+          expval--;
+        }
+      }
+      else if (value <= -10.0)
+      {
+        while (value <= -10.0)
+        {
+          value /= 10.0;
+          expval++;
+        }
+      }
+    }
+    else if (value > 0.0)
+    {
+      if (value < 1.0)
+      {
+        while (value < 1.0)
+        {
+          value *= 10.0;
+          expval--;
+        }
+      }
+      else if (value >= 10.0)
+      {
+        while (value >= 10.0)
+        {
+          value /= 10.0;
+          expval++;
+        }
+      }
+    }
+
+    // output the floating part
+    char *out = _dtostrf(value, buffer);
+
+    // output the exponent part
+    // output the exponential symbol
+    *out++ = 'e';
+    // output the exponent value
+    *out++ = expval < 0 ? '-' : '+';
+    unsigned char prec = _prec;
+    _prec = 0; // Hack! Set _prec to zero to avoid printing a decimal point in the exponent
+    out = _dtostrf(expval < 0 ? -expval : expval, out);
+    _prec = prec; // Restore _prec
+    return (out);
+  }
+
+  // 64-bit Platforms
+
   if (isnan(value))
   {
     strcpy(buffer, "nan");
@@ -92,6 +153,7 @@ char *SFE_QUAD_Sensors_sprintf::_etoa(double value, char *buffer)
 
   // determine the decimal exponent
   // based on the algorithm by David Gay (https://www.ampl.com/netlib/fp/dtoa.c)
+  
   union
   {
     uint64_t U;
