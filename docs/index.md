@@ -34,5 +34,10 @@ The SparkFun Qwiic Universal Auto-Detect library makes it easy to create a scala
   * LittleFS
   * SD or microSD card: both SD and SdFat are supported
 
-## Documentation
-A full library use overview, API reference guide and key example walk-throughs are available on this GitHub page - [sparkfun.github.io/SparkFun_Qwiic_Universal_Auto-Detect](https://sparkfun.github.io/SparkFun_Qwiic_Universal_Auto-Detect/)
+### Getting Started
+
+Detailed examples are included as part of the library installation process and available in the Arduino IDE `File > Examples >` menu. A walk-thru of key examples is contained in the [Examples](sparkfun-qwiic-universal-auto-detect-examples/ex_01_Thing_Plus_C/) section of this documentation set. 
+
+
+### License
+SparkFun Qwiic Universal Auto-Detect is licensed using the Open Source MIT License

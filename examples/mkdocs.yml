@@ -1,0 +1,4 @@
+site_name: SparkFun Qwiic Universal Auto-Detect - Examples
+
+nav:
+  - Example 1 - Thing Plus C - using SD for setting storage: "ex_01_Thing_Plus_C.md"
