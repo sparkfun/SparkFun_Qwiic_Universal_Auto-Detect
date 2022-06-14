@@ -30,7 +30,8 @@ void loop()
   Serial.println(mySensors.readings);
 
   delay(500);
-}```
+}
+```
 
 The ```mySensors``` object is then _constructed_ (_instantiated_) at the start of the loop, and is _destructed_ (_deleted_) at the end of the loop.
 A new, fresh instance of ```mySensors``` is used each time around the loop. This is a very good test for a memory leak!
