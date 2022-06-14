@@ -73,7 +73,7 @@ Now that we have declared our custom initializer, we need to tell the library to
 ```
 
 If you have multiple sensors of the same type connected, you can apply the same custom initializer to all of them. This line of code
-causes the library to apply ```myCustomInitializer``` to all connected ***SFE_UBLOX_GNSS** sensors:
+causes the library to apply ```myCustomInitializer``` to all connected **SFE_UBLOX_GNSS** sensors:
 * ```setCustomInitialize(&myCustomInitializer, "SFE_UBLOX_GNSS");```
 
 But, as the code suggests, you could also create separate custom initializers and apply them to the sensors individually based on their
