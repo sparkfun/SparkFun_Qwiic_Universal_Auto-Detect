@@ -3,3 +3,4 @@ site_name: SparkFun Qwiic Universal Auto-Detect - Examples
 nav:
   - Example 1 - Thing Plus C - using SD for setting storage: "ex_01_Thing_Plus_C.md"
   - Example 2 - ESP32 LittleFS - using LittleFS for setting storage: "ex_02_ESP32_LittleFS.md"
+  - Example 3 - EEPROM - using EEPROM for setting storage: "ex_03_EEPROM.md"

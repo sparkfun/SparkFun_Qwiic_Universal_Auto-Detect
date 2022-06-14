@@ -2,7 +2,7 @@
   SFE QUAD ESP32 LittleFS
   By: Paul Clark
   SparkFun Electronics
-  Date: May 2022
+  Date: June 2022
   
   This code is a proof-of-concept demonstration of a scalable I2C sensing and logging device,
   based initially on the SparkFun Thing Plus C - ESP32 WROOM (SPX-18018):
@@ -81,6 +81,7 @@ void setup()
 
   mySensors.getSensorNames(); // Print the sensor names helper
   Serial.println(mySensors.readings);
+  
   mySensors.getSenseNames(); // Print the sense names helper
   Serial.println(mySensors.readings);
 }
