@@ -73,5 +73,15 @@ extra:
       link: https://twitter.com/sparkfun
   
 nav:
+  - Home: index.md
+  - Getting Started:
+    - Software Setup: software.md
+  - API Reference:
+    - SFE_QUAD_Sensors: api_SFE_QUAD_Sensors.md
+    - SFE_QUAD_Menu: api_SFE_QUAD_Menu.md
+    - SFE_QUAD_Sensor: api_SFE_QUAD_Sensor.md
+    - SFE_QUAD_Menu_Item: api_SFE_QUAD_Menu_Item.md
+    - SFE_QUAD_Sensors_sprintf: api_SFE_QUAD_Sensors_sprintf.md
+    - SFE_QUAD_Menu_sprintf: api_SFE_QUAD_Menu_sprintf.md
   - Examples: '!include ./examples/mkdocs.yml'
     

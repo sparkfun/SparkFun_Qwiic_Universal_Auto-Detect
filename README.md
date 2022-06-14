@@ -22,6 +22,7 @@
 The SparkFun Qwiic Universal Auto-Detect library makes it easy to create a scalable Qwiic (I<sup>2</sup>C) sensing and logging device on a wide range of platforms.
 
 ## Key Features
+
 * Automatic detection of a wide range of Qwiic sensors
   * Built-in [Qwiic Mux](https://www.sparkfun.com/products/16784) support
 * Only one library to install
@@ -35,4 +36,9 @@ The SparkFun Qwiic Universal Auto-Detect library makes it easy to create a scala
   * SD or microSD card: both SD and SdFat are supported
 
 ## Documentation
-A full library use overview, API reference guide and key example walk-throughs are available on this GitHub page - [sparkfun.github.io/SparkFun_Qwiic_Universal_Auto-Detect](https://sparkfun.github.io/SparkFun_Qwiic_Universal_Auto-Detect/)
+
+A full library use overview, API reference guide and key example walk-throughs are available on GitHub Pages - [sparkfun.github.io/SparkFun_Qwiic_Universal_Auto-Detect](https://sparkfun.github.io/SparkFun_Qwiic_Universal_Auto-Detect/)
+
+## Supported Sensors and Tested Platforms
+
+Please see the [documentation on GitHub Pages](https://sparkfun.github.io/SparkFun_Qwiic_Universal_Auto-Detect/) for full details
