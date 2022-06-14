@@ -82,7 +82,7 @@ A full [API Reference](api_SFE_QUAD_Sensors.md) is also provided for the library
 ## Tested Platforms
 
 * [ESP32 with microSD](https://www.sparkfun.com/products/18018)
-* [ESP32 with EEPROM or LittleFS](https://www.sparkfun.com/products/17743)
+* [ESP32 with EEPROM or LittleFS](https://www.sparkfun.com/products/15663)
 * [Artemis (Apollo3) with EEPROM](https://www.sparkfun.com/products/15574)
 
 ## License
