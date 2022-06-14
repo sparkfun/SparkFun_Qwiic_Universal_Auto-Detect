@@ -5,3 +5,5 @@ nav:
   - Example 2 - ESP32 LittleFS - using LittleFS for setting storage: "ex_02_ESP32_LittleFS.md"
   - Example 3 - EEPROM - using EEPROM for setting storage: "ex_03_EEPROM.md"
   - Example 4 - Custom Initialization - how to change the sensor initialization: "ex_04_Custom_Initialization.md"
+  - Example 5 - Memory Leak Test - how to test for a memory leak: "ex_05_Memory_Leak_Test.md"
+  
