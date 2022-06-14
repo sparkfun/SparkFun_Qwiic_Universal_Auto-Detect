@@ -97,6 +97,7 @@ void setup()
   // mySensors.beginStorage has done the sd.begin for us
   // Open the next available log file
   onlineDataLogging = false;
+  Serial.println(F("Finding the next available log file..."));
   if (findNextAvailableLog(sensorDataFileName, "dataLog", false)) // Do not reuse empty files - to save time
   {
     // O_CREAT - create the file if it does not exist
@@ -194,6 +195,8 @@ void openLoggingMenu(void)
   if (onlineDataLogging) // Open a new log file - the sense names may have changed
   {
     sensorDataFile.close();
+    
+    Serial.println(F("Finding the next available log file..."));
     
     if (findNextAvailableLog(sensorDataFileName, "dataLog", false)) // Do not reuse empty files - to save time
     {
