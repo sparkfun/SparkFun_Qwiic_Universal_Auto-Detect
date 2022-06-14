@@ -2,7 +2,7 @@
   SFE QUAD Custom Initialization
   By: Paul Clark
   SparkFun Electronics
-  Date: May 2022
+  Date: June 2022
   
   This code is a proof-of-concept demonstration of a scalable I2C sensing and logging device,
   based initially on the SparkFun Thing Plus C - ESP32 WROOM (SPX-18018):
@@ -47,7 +47,7 @@ void myCustomInitializer(uint8_t sensorAddress, TwoWire &port, void *_classPtr)
 
 SFE_QUAD_Sensors__SD mySensors;
 
-const char configurationFileName[] = "/OLconfig.csv"; //The sensor configuration will be stored in this file
+const char configurationFileName[] = "/Config.csv"; //The sensor configuration will be stored in this file
 
 //#define sd_cs SS // microSD chip select - this should work on most boards
 //#define sd_cs CS // Some boards use CS instead
@@ -59,23 +59,21 @@ int qwiicPower = 0; //Thing Plus C digital pin 0 is connected to the v-reg that 
 
 void setup()
 {
+  delay(1000); //Give the sensors time to power on
+
   Serial.begin(115200);
-  delay(1000);
   Serial.println(F("SparkFun Qwiic Universal Auto-Detect Example"));
 
   pinMode(qwiicPower, OUTPUT); // Enable power for the Qwiic bus
   digitalWrite(qwiicPower, HIGH);
 
-  Wire.begin();
+  Wire.begin(); // Begin the Wire port at the default speed (usually 100kHz)
 
   mySensors.setWirePort(Wire); // Tell the class which Wire port to use
 
-  mySensors.enableDebugging(Serial); // Uncomment this line to enable debug messages on Serial
+  //mySensors.enableDebugging(Serial); // Uncomment this line to enable debug messages on Serial
 
-  mySensors.setMenuPort(Serial); // Use Serial for the logging menu
-
-  while (mySensors._menuPort->available()) // Clear the menu serial buffer
-    mySensors._menuPort->read();
+  mySensors.setMenuPort(Serial); // Use Serial for the menus
 
   mySensors.detectSensors(); // Detect which sensors are connected
 
@@ -92,54 +90,71 @@ void setup()
   mySensors.initializeSensors(); // Initialize all the sensors
 
   if (!mySensors.beginStorage(sd_cs, (const char *)configurationFileName))
+  {
     Serial.println(F("beginStorage failed! You will not be able to write or read the sensor configuration..."));
+  }
 
-  Serial.println(F("Press L to open the logging menu"));
-  Serial.println(F("Press S to open the setting menu"));
-  Serial.println(F("Press W to write the sensor configuration to file"));
-  Serial.println(F("Press R to read the configuration file and configure the sensors"));
+  // Create the menu
+  mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  mySensors.theMenu.addMenuItem("Menu", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  mySensors.theMenu.addMenuItem("====", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  mySensors.theMenu.addMenuItem("Open the sensor logging menu", openLoggingMenu);
+  mySensors.theMenu.addMenuItem("Open the sensor settings menu", openSettingMenu);
+  mySensors.theMenu.addMenuItem("Write the sensor configuration to SD", writeConfig);
+  mySensors.theMenu.addMenuItem("Read the sensor configuration from SD", readConfig);
+  mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  
+  while (mySensors.theMenu._menuPort->available()) // Clear the menu serial buffer
+    mySensors.theMenu._menuPort->read();
+
+  Serial.println(F("Press any key to open the menu"));
 
   mySensors.getSensorNames(); // Print the sensor names helper
   Serial.println(mySensors.readings);
+
   mySensors.getSenseNames(); // Print the sense names helper
   Serial.println(mySensors.readings);
 }
 
 void loop()
 {
-  mySensors.getSensorReadings(); // Read everything from all sensors
+  mySensors.getSensorReadings(); // Read all enabled senses from all enabled sensors
 
   Serial.println(mySensors.readings);
 
-  if (mySensors._menuPort->available())
+  if (mySensors.theMenu._menuPort->available()) // Has the user pressed a key?
   {
-    char choice = mySensors._menuPort->read();
-    
-    if ((choice == 'l') || (choice == 'L'))
-    {
-      mySensors.loggingMenu();
-      
-      mySensors.getSensorNames(); // Print the sensor names helper
-      Serial.println(mySensors.readings);
-      mySensors.getSenseNames(); // Print the sense names helper
-      Serial.println(mySensors.readings);
-    }
-      
-    else if ((choice == 's') || (choice == 'S'))
-      mySensors.settingMenu();
-
-    else if ((choice == 'w') || (choice == 'W'))
-    {
-      mySensors.getSensorConfiguration();
-      mySensors.writeConfigurationToStorage(false); // Set append to false - overwrite the configuration
-    }
-
-    else if ((choice == 'r') || (choice == 'R'))
-    {
-      mySensors.readConfigurationFromStorage();
-      mySensors.applySensorConfiguration();
-    }
+    mySensors.theMenu.openMenu(); // If so, open the menu
   }
 
   delay(500);
+}
+
+void openLoggingMenu(void)
+{
+  mySensors.loggingMenu();
+  
+  mySensors.getSensorNames(); // Print the sensor names helper - it may have changed
+  Serial.println(mySensors.readings);
+  
+  mySensors.getSenseNames(); // Print the sense names helper - it may have changed
+  Serial.println(mySensors.readings);  
+}
+
+void openSettingMenu(void)
+{
+  mySensors.settingMenu();
+}
+
+void writeConfig(void)
+{
+  mySensors.getSensorAndMenuConfiguration();
+  mySensors.writeConfigurationToStorage(false); // Set append to false - overwrite the configuration  
+}
+
+void readConfig(void)
+{
+  mySensors.readConfigurationFromStorage();
+  mySensors.applySensorAndMenuConfiguration();
 }
