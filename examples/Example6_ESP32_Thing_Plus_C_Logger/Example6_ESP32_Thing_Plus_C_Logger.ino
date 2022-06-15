@@ -38,8 +38,6 @@ int qwiicPower = 0; //Thing Plus C digital pin 0 is connected to the v-reg that 
 #define LED_BUILTIN 13 // The Thing Plus C STAT LED is connected to digital pin 13
 #endif
 
-const unsigned long loggingInterval = 1000; //This defines the logging interval in milliseconds. Change this if required.
-
 
 // Define the log file type - use the same type as the Qwiic Universal Auto-Detect library
 #if SFE_QUAD_SD_FAT_TYPE == 1

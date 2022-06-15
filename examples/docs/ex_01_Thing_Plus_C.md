@@ -107,7 +107,7 @@ menu and sub-menus quickly and easily. Each menu item can be:
 | Menu Item | E.g. | SFE_QUAD_Menu_Variable_Type_e |
 | :--- | :--- | :--- |
 | A simple line of text | The name of the menu | `SFE_QUAD_MENU_VARIABLE_TYPE_NONE` |
-| A link to a sub-menu | | `SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_START` |
+| A link to a sub-menu | A WiFi settings sub-menu | `SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_START` |
 | A link to a piece of code | Code which is called when you select that menu option | `SFE_QUAD_MENU_VARIABLE_TYPE_CODE` |
 | A text variable | A WiFi SSID or password | `SFE_QUAD_MENU_VARIABLE_TYPE_TEXT` |
 | bool data | A menu setting which can be toggled true/false | `SFE_QUAD_MENU_VARIABLE_TYPE_BOOL` |
