@@ -38,7 +38,6 @@ We are using Bill Greiman's SdFat library as it: is very fast; and supports FAT1
 One of the key differences in this example is that it uses the built-in menu to control the logging rate. You will notice that the menu definition contains extra lines:
 
 ```C++
-  mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   mySensors.theMenu.addMenuItem("Logging interval (ms)", SFE_QUAD_MENU_VARIABLE_TYPE_ULONG);  
   SFE_QUAD_Menu_Every_Type_t defaultValue;
   defaultValue.ULONG = 1000;
@@ -47,7 +46,6 @@ One of the key differences in this example is that it uses the built-in menu to 
   mySensors.theMenu.setMenuItemVariableMin("Logging interval (ms)", &defaultValue); // Set the minimum logging interval - this will be updated by readConfig
   defaultValue.ULONG = 3600000;
   mySensors.theMenu.setMenuItemVariableMax("Logging interval (ms)", &defaultValue); // Set the maximum logging interval - this will be updated by readConfig
-  mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
 ```
 
 As before, most of the menu items are **SFE_QUAD_MENU_VARIABLE_TYPE_NONE** (for the lines of plain text) or **SFE_QUAD_MENU_VARIABLE_TYPE_CODE** (a function which is called by the menu).
@@ -110,16 +108,16 @@ In the main ```loop()```, we can read whatever value ```Logging interval (ms)```
 ```
 
 ```lastRead``` is a **static** variable which holds a copy of ```millis()```. Because it is **static**, it retains its value each time the code goes around the ```loop()```.
-(We could have declared it as a global variable, before ```setup()```, instead.)
+(It is only set to zero the first time around the loop.) (We could have declared it as a global variable, before ```setup()```, instead.)
 
-```loggingInterval``` is another ```SFE_QUAD_Menu_Every_Type_t```. We read the value of ```Logging interval (ms)``` and copy it into ```loggingInterval``` with this line of code:
+```loggingInterval``` is another ```SFE_QUAD_Menu_Every_Type_t```. We read the value of ```Logging interval (ms)``` from the menu linked-list and copy it into ```loggingInterval``` with this line of code:
 * ```mySensors.theMenu.getMenuItemVariable("Logging interval (ms)", &loggingInterval);```
 
 We then compare ```loggingInterval``` to the copy of ```millis()```, held in ```lastRead```, to decide when to take the next reading.
 
-If we change ```loggingInterval``` by opening the menu and selecting option , the code will automatically use the new interval from then on!
+If we change ```loggingInterval``` by opening the menu and selecting option 1, the code will automatically use the new interval from then on!
 
-Here is the value being changed from the default 1000ms to 500ms:
+Here is the value being changed from the default 1000ms to 500ms. Note the minimum and maximum values we set earlier. The menu will reject any values outside of those.
 
 ```
 Menu
