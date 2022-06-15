@@ -13,8 +13,8 @@ This example was written for the [*SparkFun ESP32 Thing Plus C (SPX-18018)*](htt
 * Configuring the WiFi SSID and password through the menu system
 * Configuring the sensor settings through the menu
 * Publishing the sensor readings to ThingSpeak
-* Writing the settings to microSD card using SdFat
-* Reading the settings back from microSD card and applying them
+* Writing the settings to EEPROM
+* Reading the settings back from EEPROM
 
 This example is very similar to [Example7](ex_06_Thing_Plus_C_Logger.md). Please see the Example 1, 6 and 7 documentation for a full walk-through of the code.
 
@@ -23,8 +23,8 @@ Let's walk through the key differences:
 ## EEPROM
 
 In this example, we store the sensor and menu settings in EEPROM, instead of on microSD card.
-We don't need the microSD card as this example as not logging any data as such, the sensor data is uploaded to ThingSpeak.
-(This allows the example to run on ESP32 boards which don't have microSD on-board!)
+We don't need the microSD card as this example as not logging any data as such, the sensor data is uploaded to ThingSpeak and they log it for us.
+(This allows this example to run on ESP32 boards which don't have microSD on-board!)
 
 ```C++
 #include <EEPROM.h> // Include EEPROM.h to enable support for SFE_QUAD_Sensors__EEPROM. Do this before #include "SFE_QUAD_Sensors.h"
