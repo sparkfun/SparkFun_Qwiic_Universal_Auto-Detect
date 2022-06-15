@@ -30,12 +30,12 @@ Each ```SFE_QUAD_Sensor``` contains a pointer named ```_next``` which points to 
 
 The ```_next``` of the final ```SFE_QUAD_Sensor``` in the list is ```NULL```.
 
-```detectSensors``` discovers which individual sensors are attached on the selected Wire port. ```detectSensors``` has built-in Qwiic Mux support
-and will discover all muxes, and all sensors connected to the ports on those muxes.
+```detectSensors``` discovers which individual sensors are attached on the selected Wire port and adds them to the linked-list.
+```detectSensors``` has built-in Qwiic Mux support and will discover all muxes, and all sensors connected to the ports on those muxes.
 
 ```beginSensors``` will call the ```.begin``` method of each attached sensor in turn.
 
-```initialzeSensors``` will perform any additional initialization (if any) required by those sensors.
+```initializeSensors``` will perform any additional initialization (if any) required by those sensors.
 
 It is possible to override the initialization code for each sensor type, or individual sensor objects, by calling ```setCustomInitialize```.
 (You must call ```setCustomInitialize``` _before_ ```initialzeSensors```.)
@@ -80,7 +80,7 @@ void setWirePort(TwoWire &port)
 
 This method is called to enable debugging messages on the chosen Stream (usually a Serial port).
 
-```C+
+```c++
 void enableDebugging(Stream &port)
 ```
 
@@ -90,7 +90,7 @@ void enableDebugging(Stream &port)
 
 There is no method to disable the debug messages. The messages can be disabled by setting ```_printDebug``` to false:
 
-```C++
+```c++
 mySensors._printDebug = false;
 ```
 
@@ -100,7 +100,7 @@ This method also enables debug messages on the ```theMenu``` object. The menu de
 
 This method sets the Stream (usually a Serial port) for the built-in menus.
 
-```C+
+```c++
 void setMenuPort(Stream &port)
 ```
 
@@ -114,7 +114,7 @@ void setMenuPort(Stream &port)
 
 This method is used internally by the ```detectSensors``` method. It returns a pointer to a new instance of a ```SFE_QUAD_Sensor``` for the selected type.
 
-```C++
+```c++
 SFE_QUAD_Sensor *sensorFactory(SFEQUADSensorType type)
 ```
 
@@ -132,7 +132,7 @@ It has built-in Qwiic Mux support and will discover all muxes, and all sensors c
 
 The detected sensors are stored internally as a linked-list, pointed to by ```_head```.
 
-```C++
+```c++
 bool detectSensors(void)
 ```
 
@@ -144,7 +144,7 @@ bool detectSensors(void)
 
 This method begins all detected sensors using each sensor's individual ```.begin``` method.
 
-```C++
+```c++
 bool beginSensors(void)
 ```
 
@@ -158,7 +158,7 @@ This method initializes any detected sensors if required:
 * only if the library contains initialization code for that sensor type
 * and/or a custom initializer has been defined for that individual sensor or sensor type
 
-```C++
+```c++
 bool initializeSensors(void)
 ```
 
@@ -170,7 +170,7 @@ bool initializeSensors(void)
 
 This method defines custom initialization code for all instances of ```sensorName```.
 
-```C++
+```c++
 bool setCustomInitialize(void (*pointer)(uint8_t sensorAddress, TwoWire &port, void *_classPtr), const char *sensorName)
 ```
 
@@ -195,7 +195,7 @@ Please see Example4_CustomInitialization for more details.
 
 This method defines custom initialization code for the instance of ```sensorName``` at the specified mux address and port.
 
-```C++
+```c++
 bool setCustomInitialize(void (*pointer)(uint8_t sensorAddress, TwoWire &port, void *_classPtr), const char *sensorName, uint8_t i2cAddress, uint8_t muxAddress, uint8_t muxPort)
 ```
 
@@ -226,7 +226,7 @@ Please see Example4_CustomInitialization for more details.
 This method collects the readings from all enabled senses on all enabled sensors. The readings are returned in the dynamic
 char array ```readings``` in CSV format.
 
-```C++
+```c++
 bool getSensorReadings(void)
 ```
 
@@ -239,7 +239,7 @@ bool getSensorReadings(void)
 This method collects the names of all enabled sensors (for all enabled senses). The names are returned in the dynamic
 char array ```readings``` in CSV format.
 
-```C++
+```c++
 bool getSensorNames(void)
 ```
 
@@ -252,7 +252,7 @@ bool getSensorNames(void)
 This method collects the names of all enabled senses (for all enabled sensors). The names are returned in the dynamic
 char array ```readings``` in CSV format.
 
-```C++
+```c++
 bool getSenseNames(void)
 ```
 
@@ -267,7 +267,7 @@ bool getSenseNames(void)
 This method opens the logging menu on the specified Stream (Serial port) to set the configuration of which sensors and senses are
 enabled or disabled for logging.
 
-```C++
+```c++
 bool loggingMenu(void)
 ```
 
@@ -279,7 +279,7 @@ bool loggingMenu(void)
 
 This method opens the setting menu on the specified Stream (Serial port) to apply settings to any sensors which have them.
 
-```C++
+```c++
 bool settingMenu(void)
 ```
 
@@ -295,7 +295,7 @@ This method assembles the combined sensor and menu configuration in text CSV for
 
 The configuration is returned in the dynamic char array ```configuration```.
 
-```C++
+```c++
 bool getSensorAndMenuConfiguration(void)
 ```
 
@@ -311,7 +311,7 @@ The configuration must be read from storage media by the appropriate class befor
 
 The configuration is stored in media in text CSV format.
 
-```C++
+```c++
 bool applySensorAndMenuConfiguration(void)
 ```
 
@@ -321,11 +321,27 @@ bool applySensorAndMenuConfiguration(void)
 
 ## Helper Methods
 
+### sensorExists()
+
+This method steps through the sensor linked-list, starting at ```_head```, checking if the specified sensor exists.
+If it does, it returns a pointer to its ```SFE_QUAD_Sensor``` instance.
+
+```c++
+SFE_QUAD_Sensor *sensorExists(const char *sensorName, uint8_t i2cAddress, uint8_t muxAddress, uint8_t muxPort)
+```
+| Parameter | Type | Description |
+| :-------- | :--- | :---------- |
+| `sensorName` | `const char` | The name of the sensor type |
+| `i2cAddress` | `uint8_t` | The I2C address of the target sensor |
+| `muxAddress` | `uint8_t` | The I2C address of the mux the sensor is connected to. The default value is 0 (no mux) |
+| `muxPort` | `uint8_t` | The mux port the sensor is connected to. The default value is 0 (no mux) |
+| return value | `SFE_QUAD_Sensor *` | A pointer to the ```SFE_QUAD_Sensor``` instance, ```NULL``` otherwise |
+
 ### getMenuChoice()
 
 This method is used by ```settingMenu``` and ```loggingMenu``` to select one of the menu items. 
 
-```C++
+```c++
 uint32_t getMenuChoice(unsigned long timeout)
 ```
 
@@ -339,7 +355,7 @@ uint32_t getMenuChoice(unsigned long timeout)
 This method is used by ```settingMenu``` and ```loggingMenu```. The user enters a ```double``` value. Exponent-format entries are accepted.
 (```settingMenu``` and ```loggingMenu``` will cast the ```double``` to the required type.)
 
-```C++
+```c++
 bool getSettingValueDouble(double *value, unsigned long timeout)
 ```
 
