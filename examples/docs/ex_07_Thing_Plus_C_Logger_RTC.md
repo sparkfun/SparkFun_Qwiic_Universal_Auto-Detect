@@ -68,7 +68,7 @@ You will notice that the menu definition contains a complete sub-menu for the Wi
 ```
 
 The sub-menu contains several **SFE_QUAD_MENU_VARIABLE_TYPE_TEXT** items to hold:
-* The WiFi SSID (the name of the WiFi netowrk you want to connect to)
+* The WiFi SSID (the name of the WiFi network you want to connect to)
 * The WiFi password
 * The names of the NTP servers
 * The Time Zone Rule (which will automatically set the RTC to local time and adjust for daylight saving)

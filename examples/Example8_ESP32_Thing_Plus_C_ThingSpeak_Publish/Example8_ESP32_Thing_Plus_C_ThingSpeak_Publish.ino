@@ -205,7 +205,7 @@ void loop()
     // Extract up to 8 Strings from mySensors.readings using strtok_r
     unsigned int fieldNum = 1;
     char *preserve;
-    char *field = strtok_r(mySensors.readings, ",", &preserve);
+    char *field = strtok_r(mySensors.readings, ",", &preserve); // Separate the CSV data into keys at each comma
     int result = TS_OK_SUCCESS;
     
     while ((field != NULL) && (fieldNum <= 8) && (result == TS_OK_SUCCESS))
@@ -213,8 +213,8 @@ void loop()
       if ((strchr(field, 'e') != NULL) || (strchr(field, 'E') != NULL)) // Does field contain exponent-format data?
       {
         double val;
-        if (mySensors._sprintf.expStrToDouble(field, &val))
-          result = ThingSpeak.setField(fieldNum, (float)val);
+        if (mySensors._sprintf.expStrToDouble(field, &val)) // Convert exponent-format string to double
+          result = ThingSpeak.setField(fieldNum, (float)val); // Cast double to float
         else
           result = TS_ERR_NOT_INSERTED;
       }

@@ -8,3 +8,4 @@ nav:
   - Example 5 - Memory Leak Test - how to test for a memory leak: "ex_05_Memory_Leak_Test.md"
   - Example 6 - Thing Plus C Logger - logging sensor data to microSD card: "ex_06_Thing_Plus_C_Logger.md"
   - Example 7 - Thing Plus C Logger RTC - logging sensor data with Real Time Clock support: "ex_07_Thing_Plus_C_Logger_RTC.md"
+  - Example 8 - Thing Plus C Logger ThingSpeak Publish - publishing sensor data to ThingSpeak: "ex_08_Thing_Plus_C_ThingSpeak.md"
