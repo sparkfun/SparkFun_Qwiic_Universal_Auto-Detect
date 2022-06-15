@@ -50,10 +50,10 @@ One of the key differences in this example is that it uses the built-in menu to 
   mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
 ```
 
-As before, most of the menu items are **SFE_QUAD_MENU_VARIABLE_TYPE_NONE** (for the lines plain text) or **SFE_QUAD_MENU_VARIABLE_TYPE_CODE** (a function which is called by the menu).
+As before, most of the menu items are **SFE_QUAD_MENU_VARIABLE_TYPE_NONE** (for the lines of plain text) or **SFE_QUAD_MENU_VARIABLE_TYPE_CODE** (a function which is called by the menu).
 In this example we have added an **SFE_QUAD_MENU_VARIABLE_TYPE_ULONG** item and have given it the name ```Logging interval (ms)```.
 
-All Arduino platforms provide a millisecond counter called ```millis()```. It returns a count or milliseconds as an **unsigned long** (usually 32-bit) number.
+All Arduino platforms provide a millisecond counter called ```millis()```. It returns a count of milliseconds as an **unsigned long** (usually 32-bit) number.
 We use that to control the logging rate by comparing it to the ```Logging interval (ms)```.
 
 This line creates the logging interval menu item:
@@ -154,12 +154,12 @@ Menu
 Enter a number, or enter 0 to exit:
 ```
 
-We can save that value to SD card by selecting option 5.
+We can save the new value to SD card by selecting option 5.
 
 ## Logging data to SD card
 
-The previous examples have not actually logged (saved or recorded) any sensor readings. They have only been printed to Serial.
-But we do of course want to _save_ (write) that data to SD card so we can study it later. Here is the extra code which let's us do that.
+The previous examples have not actually logged (saved or recorded) any sensor readings. They have only printed them to Serial.
+But we do of course want to _save_ (write) that data to SD card so we can study it later. Here is the extra code which lets us do that.
 
 ### Creating a File object
 
@@ -183,7 +183,7 @@ char sensorDataFileName[30] = ""; // This will hold the name of the sensorDataFi
 bool onlineDataLogging; //This flag indicates if we are logging data to sensorDataFile
 ```
 
-This creates a ```FsFile``` object called ```sensorDataFile```. We have not yet openend the file, or given it a name. We do that within ```setup()```:
+This creates a ```FsFile``` object called ```sensorDataFile```. We have not yet opened the file, or given it a name. We do that within ```setup()```:
 
 ```C++
   // mySensors.beginStorage has done the sd.begin for us
@@ -216,11 +216,13 @@ etc.. You will find the code for ```findNextAvailableLog``` at the bottom of the
 The sensor and sense helper text is written into the log file by these lines:
 
 ```C++
+  mySensors.getSensorNames(); // Print the sensor names helper
   if (onlineDataLogging)
     sensorDataFile.println(mySensors.readings);
 ```
 
 ```C++
+  mySensors.getSenseNames(); // Print the sense names helper
   if (onlineDataLogging)
     sensorDataFile.println(mySensors.readings);
 ```
