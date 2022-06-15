@@ -68,7 +68,7 @@ Those classes provide additional methods named ```writeConfigurationToStorage```
 
 This method is called to set the I2C Wire (```TwoWire```) port to which the sensors are connected.
 
-```C+
+```c++
 void setWirePort(TwoWire &port)
 ```
 
