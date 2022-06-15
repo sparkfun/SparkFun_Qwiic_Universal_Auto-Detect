@@ -1,6 +1,6 @@
 # API Reference for the SFE_QUAD_Sensors class
 
-Methods to setup the SFE_QUAD_Sensor object:
+Methods to setup the ```SFE_QUAD_Sensor``` object:
 * Return a pointer to the specified sensor class so it can be added to the linked-list of sensors
 * Define which Wire port will be used
 * Define which Serial port will be used for the built-in menus
@@ -22,13 +22,13 @@ Methods to setup the SFE_QUAD_Sensor object:
 The ```SFE_QUAD_Sensors``` class allows a linked-list of individual ```SFE_QUAD_Sensor``` objects to be generated and maintained.
 
 A ```SFE_QUAD_Sensors``` object contains a pointer to a ```SFE_QUAD_Sensor``` named ```_head```.
-```_head``` the the head of a linked-list of ```SFE_QUAD_Sensor``` objects.
+```_head``` the the head (start) of a linked-list of ```SFE_QUAD_Sensor``` objects.
 
 ```_head``` is ```NULL``` initially. After calling ```detectSensors```, it contains the address of the first ```SFE_QUAD_Sensor``` in the linked-list.
 
-Each ```SFE_QUAD_Sensor``` conatins a pointer named ```_next``` which points to the next ```SFE_QUAD_Sensor``` in the linked-list.
+Each ```SFE_QUAD_Sensor``` contains a pointer named ```_next``` which points to the next ```SFE_QUAD_Sensor``` in the linked-list.
 
-```_next``` of the final ```SFE_QUAD_Sensor``` in the list is ```NULL```.
+The ```_next``` of the final ```SFE_QUAD_Sensor``` in the list is ```NULL```.
 
 ```detectSensors``` discovers which individual sensors are attached on the selected Wire port. ```detectSensors``` has built-in Qwiic Mux support
 and will discover all muxes, and all sensors connected to the ports on those muxes.
@@ -38,6 +38,7 @@ and will discover all muxes, and all sensors connected to the ports on those mux
 ```initialzeSensors``` will perform any additional initialization (if any) required by those sensors.
 
 It is possible to override the initialization code for each sensor type, or individual sensor objects, by calling ```setCustomInitialize```.
+(You must call ```setCustomInitialize``` _before_ ```initialzeSensors```.)
 
 ```loggingMenu``` and ```settingMenu``` are methods which open built-in menus to:
 * Configure which senses on each sensor are enabled for logging
@@ -52,7 +53,7 @@ The names of all enabled sensors, together with their I2C and Mux addresses (if 
 The names of all enabled senses can be read with ```getSenseNames```. The names are returned in ```readings```.
 
 The sensor and menu configuration can be stored temporarily in a dynamic char array named ```configuration```.
-The text ```configuration``` is written to storage and read from storage by the individual classes for EEPROM, LittleFS, SD and SdFat:
+The text CSV ```configuration``` is written to storage and read from storage by the individual classes for EEPROM, LittleFS, SD and SdFat:
 * ```SFE_QUAD_Sensors__EEPROM```
 * ```SFE_QUAD_Sensors__LittleFS```
 * ```SFE_QUAD_Sensors__SD```
