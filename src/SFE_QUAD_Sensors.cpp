@@ -1064,7 +1064,7 @@ bool SFE_QUAD_Sensors::loggingMenu(void)
     if (menuChoice == 0)
     {
       _menuPort->println(F("loggingMenu: exiting..."));
-      return (false);
+      return (true);
     }
 
     thisSensor = _head; // Point to the first sensor
@@ -1227,7 +1227,7 @@ bool SFE_QUAD_Sensors::settingMenu(void)
     if (menuChoice == 0)
     {
       _menuPort->println(F("settingMenu: exiting..."));
-      return (false);
+      return (true);
     }
 
     thisSensor = _head; // Point to the first sensor

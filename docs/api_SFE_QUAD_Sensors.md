@@ -1,6 +1,6 @@
 # API Reference for the SFE_QUAD_Sensors class
 
-Methods to setup the ```SFE_QUAD_Sensor``` object:
+Methods to setup, configure and query the ```SFE_QUAD_Sensor``` object:
 * Return a pointer to the specified sensor class so it can be added to the linked-list of sensors
 * Define which Wire port will be used
 * Define which Serial port will be used for the built-in menus
@@ -61,3 +61,290 @@ The text CSV ```configuration``` is written to storage and read from storage by 
 
 Those classes provide additional methods named ```writeConfigurationToStorage```, ```readConfigurationFromStorage``` etc. which write and read
 ```configuration``` to and from the appropriate storage medium.
+
+## Initialization / Configuration
+
+### setWirePort()
+
+This method is called to set the I2C Wire (```TwoWire```) port to which the sensors are connected.
+
+```C+
+void setWirePort(TwoWire &port)
+```
+
+| Parameter | Type | Description |
+| :-------- | :--- | :---------- |
+| `port` | `TwoWire` | The Wire port |
+
+### enableDebugging()
+
+This method is called to enable debugging messages on the chosen Stream (usually a Serial port).
+
+```C+
+void enableDebugging(Stream &port)
+```
+
+| Parameter | Type | Description |
+| :-------- | :--- | :---------- |
+| `port` | `Stream` | The Stream (Serial port) |
+
+There is no method to disable the debug messages. The messages can be disabled by setting ```_printDebug``` to false:
+
+```C++
+mySensors._printDebug = false;
+```
+
+This method also enables debug messages on the ```theMenu``` object. The menu debug messages can be changed / disabled with the ```theMenu.setDebugPort``` method.
+
+### setMenuPort()
+
+This method sets the Stream (usually a Serial port) for the built-in menus.
+
+```C+
+void setMenuPort(Stream &port)
+```
+
+| Parameter | Type | Description |
+| :-------- | :--- | :---------- |
+| `port` | `Stream` | The Stream (Serial port) |
+
+## Sensor Factory
+
+### sensorFactory()
+
+This method is used internally by the ```detectSensors``` method. It returns a pointer to a new instance of a ```SFE_QUAD_Sensor``` for the selected type.
+
+```C++
+SFE_QUAD_Sensor *sensorFactory(SFEQUADSensorType type)
+```
+
+| Parameter | Type | Description |
+| :-------- | :--- | :---------- |
+| `type` | `SFEQUADSensorType` | The enumerated type of the sensor |
+| return value | `SFE_QUAD_Sensor *` | A pointer to the new sensor instance |
+
+## Sensor Detection / Initialization
+
+### detectSensors()
+
+This method discovers which individual sensors are attached on the selected Wire port.
+It has built-in Qwiic Mux support and will discover all muxes, and all sensors connected to the ports on those muxes.
+
+The detected sensors are stored internally as a linked-list, pointed to by ```_head```.
+
+```C++
+bool detectSensors(void)
+```
+
+| Parameter | Type | Description |
+| :-------- | :--- | :---------- |
+| return value | `bool` | ```false``` if the Wire port is not defined or a memory-allocation error occurred, otherwise ```true``` |
+
+### beginSensors()
+
+This method begins all detected sensors using each sensor's individual ```.begin``` method.
+
+```C++
+bool beginSensors(void)
+```
+
+| Parameter | Type | Description |
+| :-------- | :--- | :---------- |
+| return value | `bool` | ```false``` if no sensors have been detected or a memory-allocation error occurred, otherwise ```true``` |
+
+### initializeSensors()
+
+This method initializes any detected sensors if required:
+* only if the library contains initialization code for that sensor type
+* and/or a custom initializer has been defined for that individual sensor or sensor type
+
+```C++
+bool initializeSensors(void)
+```
+
+| Parameter | Type | Description |
+| :-------- | :--- | :---------- |
+| return value | `bool` | ```false``` if no sensors have been detected or a memory-allocation error occurred, otherwise ```true``` |
+
+### setCustomInitialize()
+
+This method defines custom initialization code for all instances of ```sensorName```.
+
+```C++
+bool setCustomInitialize(void (*pointer)(uint8_t sensorAddress, TwoWire &port, void *_classPtr), const char *sensorName)
+```
+
+| Parameter | Type | Description |
+| :-------- | :--- | :---------- |
+| `pointer` | `void` | The address of the custom initialization method |
+| `sensorName` | `const char` | The name of the sensor type |
+| return value | `bool` | ```false``` if no sensors have been detected, otherwise ```true``` |
+
+The parameters for the custom initializer method are:
+
+| Parameter | Type | Description |
+| :-------- | :--- | :---------- |
+| `sensorAddress` | `uint8_t` | The I2C address of this sensor |
+| `port` | `TwoWire` | The Wire port this sensor is connected to |
+| `_classPtr` | `void` | A pointer to the class for this sensor type |
+| return value | `bool` | ```false``` if no sensors have been detected, otherwise ```true``` |
+
+Please see Example4_CustomInitialization for more details.
+
+### setCustomInitialize()
+
+This method defines custom initialization code for the instance of ```sensorName``` at the specified mux address and port.
+
+```C++
+bool setCustomInitialize(void (*pointer)(uint8_t sensorAddress, TwoWire &port, void *_classPtr), const char *sensorName, uint8_t i2cAddress, uint8_t muxAddress, uint8_t muxPort)
+```
+
+| Parameter | Type | Description |
+| :-------- | :--- | :---------- |
+| `pointer` | `void` | The address of the custom initialization method |
+| `sensorName` | `const char` | The name of the sensor type |
+| `i2cAddress` | `uint8_t` | The I2C address of the target sensor |
+| `muxAddress` | `uint8_t` | The I2C address of the mux the sensor is connected to. The default value is 0 (no mux) |
+| `muxPort` | `uint8_t` | The mux port the sensor is connected to. The default value is 0 (no mux) |
+| return value | `bool` | ```false``` if no sensors have been detected, otherwise ```true``` |
+
+The parameters for the custom initializer method are:
+
+| Parameter | Type | Description |
+| :-------- | :--- | :---------- |
+| `sensorAddress` | `uint8_t` | The I2C address of this sensor |
+| `port` | `TwoWire` | The Wire port this sensor is connected to |
+| `_classPtr` | `void` | A pointer to the class for this sensor type |
+| return value | `bool` | ```false``` if no sensors have been detected, otherwise ```true``` |
+
+Please see Example4_CustomInitialization for more details.
+
+## Sensor Names and Readings
+
+### getSensorReadings()
+
+This method collects the readings from all enabled senses on all enabled sensors. The readings are returned in the dynamic
+char array ```readings``` in CSV format.
+
+```C++
+bool getSensorReadings(void)
+```
+
+| Parameter | Type | Description |
+| :-------- | :--- | :---------- |
+| return value | `bool` | ```false``` if no sensors have been detected or a memory-allocation error occurred, otherwise ```true``` |
+
+### getSensorNames()
+
+This method collects the names of all enabled sensors (for all enabled senses). The names are returned in the dynamic
+char array ```readings``` in CSV format.
+
+```C++
+bool getSensorNames(void)
+```
+
+| Parameter | Type | Description |
+| :-------- | :--- | :---------- |
+| return value | `bool` | ```false``` if no sensors have been detected or a memory-allocation error occurred, otherwise ```true``` |
+
+### getSenseNames()
+
+This method collects the names of all enabled senses (for all enabled sensors). The names are returned in the dynamic
+char array ```readings``` in CSV format.
+
+```C++
+bool getSenseNames(void)
+```
+
+| Parameter | Type | Description |
+| :-------- | :--- | :---------- |
+| return value | `bool` | ```false``` if no sensors have been detected or a memory-allocation error occurred, otherwise ```true``` |
+
+## Menus
+
+### loggingMenu()
+
+This method opens the logging menu on the specified Stream (Serial port) to set the configuration of which sensors and senses are
+enabled or disabled for logging.
+
+```C++
+bool loggingMenu(void)
+```
+
+| Parameter | Type | Description |
+| :-------- | :--- | :---------- |
+| return value | `bool` | ```false``` if no sensors have been detected or the Stream is undefined, otherwise ```true``` (when the menu is closed) |
+
+### settingMenu()
+
+This method opens the setting menu on the specified Stream (Serial port) to apply settings to any sensors which have them.
+
+```C++
+bool settingMenu(void)
+```
+
+| Parameter | Type | Description |
+| :-------- | :--- | :---------- |
+| return value | `bool` | ```false``` if no sensors have been detected or the Stream is undefined or the detected sensors have no settings, otherwise ```true``` (when the menu is closed) |
+
+## Sensor and Menu Configuration
+
+### getSensorAndMenuConfiguration()
+
+This method assembles the combined sensor and menu configuration in text CSV format so it can be written to storage media by the appropriate class.
+
+The configuration is returned in the dynamic char array ```configuration```.
+
+```C++
+bool getSensorAndMenuConfiguration(void)
+```
+
+| Parameter | Type | Description |
+| :-------- | :--- | :---------- |
+| return value | `bool` | ```false``` if no sensors or menu items are found or a memory-allocation error occurred, otherwise ```true``` |
+
+### applySensorAndMenuConfiguration()
+
+This method applies the configuration in the dynamic char array ```configuration``` to the sensors and menu linked-list.
+
+The configuration must be read from storage media by the appropriate class before ```applySensorAndMenuConfiguration``` is called.
+
+The configuration is stored in media in text CSV format.
+
+```C++
+bool applySensorAndMenuConfiguration(void)
+```
+
+| Parameter | Type | Description |
+| :-------- | :--- | :---------- |
+| return value | `bool` | ```false``` if no sensors are found or a memory-allocation error occurred, otherwise ```true``` |
+
+## Helper Methods
+
+### getMenuChoice()
+
+This method is used by ```settingMenu``` and ```loggingMenu``` to select one of the menu items. 
+
+```C++
+uint32_t getMenuChoice(unsigned long timeout)
+```
+
+| Parameter | Type | Description |
+| :-------- | :--- | :---------- |
+| `timeout` | `unsigned long` | The menu timeout in milliseconds |
+| return value | `uint32_t` | The menu choice (>= 1). 0 if the timeout expires |
+
+### getSettingValueDouble()
+
+This method is used by ```settingMenu``` and ```loggingMenu```. The user enters a ```double``` value. Exponent-format entries are accepted.
+(```settingMenu``` and ```loggingMenu``` will cast the ```double``` to the required type.)
+
+```C++
+bool getSettingValueDouble(double *value, unsigned long timeout)
+```
+
+| Parameter | Type | Description |
+| :-------- | :--- | :---------- |
+| `value` | `double *` | A pointer to the ```double``` to hold the value |
+| `timeout` | `unsigned long` | The menu timeout in milliseconds |
+| return value | `bool` | ```false``` if no input is received or the Stream is undefined, otherwise ```true``` |
