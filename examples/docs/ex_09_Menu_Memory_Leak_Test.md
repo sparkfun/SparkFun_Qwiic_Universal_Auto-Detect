@@ -6,6 +6,12 @@ the SparkFun Qwiic Universal Auto-Detect object ```mySensors``` _inside_ the ```
 This example does the same thing but for the ```SFE_QUAD_Menu``` class.
 We run it on a RedBoard to make sure the library menus have no memory leaks. (Actually, we did find one in the TEXT variable - and we fixed it!)
 
+The code only includes the ```SFE_QUAD_Menus``` header file, not the full ```SFE_QUAD_Sensors``` header:
+
+```C++
+#include "SFE_QUAD_Menus.h"
+```
+
 In this example, the ```theMenu``` object is destructed and (re)instantiated each time the code goes around the ```loop()```:
 
 ```C++
