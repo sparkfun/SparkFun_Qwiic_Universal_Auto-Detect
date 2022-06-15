@@ -1,33 +1,14 @@
-/*
-  SFE QUAD Menu Memory Leak Test
-  By: Paul Clark
-  SparkFun Electronics
-  Date: June 2022
-  
-  This example checks for a memory leak by instantiating a SFE_QUAD_Menu inside the main loop.
-  It should run forever, even on boards with limited RAM like the ATmega328P (Uno).
-                                  
-  License: MIT
-  Please see LICENSE.md for more details
-  
-*/
+# Example 9 - Menu Memory Leak Test
 
-#include "SFE_QUAD_Menus.h" // Click here to get the library:  http://librarymanager/All#SparkFun_Qwiic_Universal_Auto-Detect
+In [Example5](ex_05_Memory_Leak_Test.md), we learned how to test the ```SFE_QUAD_Sensors``` class for a memory leak, by declaring
+the SparkFun Qwiic Universal Auto-Detect object ```mySensors``` _inside_ the ```loop()```.
 
-#ifndef LED_BUILTIN
-#define LED_BUILTIN 13 // The Thing Plus C STAT LED is connected to digital pin 13
-#endif
+This example does the same thing but for the ```SFE_QUAD_Menu``` class.
+We run it on a RedBoard to make sure the library menus have no memory leaks. (Actually, we did find one in the TEXT variable - and we fixed it!)
 
-void setup()
-{
-  pinMode (LED_BUILTIN, OUTPUT);
-  
-  Serial.begin(115200);
-  delay(1000);
-  Serial.println(F("SparkFun Qwiic Universal Auto-Detect Example"));
-  Serial.println();
-}
+In this example, the ```theMenu``` object is destructed and (re)instantiated each time the code goes around the ```loop()```:
 
+```C++
 void loop()
 {
   SFE_QUAD_Menu theMenu;
@@ -79,8 +60,4 @@ void loop()
 
   theMenu.openMenu();
 }
-
-void blink(void)
-{
-  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-}
+```
