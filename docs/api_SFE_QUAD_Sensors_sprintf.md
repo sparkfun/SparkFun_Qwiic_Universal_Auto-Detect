@@ -18,7 +18,7 @@ char *_dtostrf(double value, char *buffer)
 | :-------- | :--- | :---------- |
 | `value` | `double` | The double to be converted to string |
 | `buffer` | `char *` | A pointer to a char array to hold the text |
-| return value | `char *` | A pointer to char _after_ the final one printed |
+| return value | `char *` | A pointer to the char _after_ the final one printed |
 
 ### _etoa()
 
@@ -34,7 +34,7 @@ char *_etoa(double value, char *buffer)
 | :-------- | :--- | :---------- |
 | `value` | `double` | The double to be converted to string |
 | `buffer` | `char *` | A pointer to a char array to hold the text |
-| return value | `char *` | A pointer to char _after_ the final one printed |
+| return value | `char *` | A pointer to the char _after_ the final one printed |
 
 ### expStrToDouble()
 
