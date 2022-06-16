@@ -30,6 +30,8 @@ Each ```SFE_QUAD_Sensor``` contains a pointer named ```_next``` which points to 
 
 The ```_next``` of the final ```SFE_QUAD_Sensor``` in the list is ```NULL```.
 
+The possible (known) sensor types are defined in the ```enum SFEQUADSensorType```.
+
 ```detectSensors``` discovers which individual sensors are attached on the selected Wire port and adds them to the linked-list.
 ```detectSensors``` has built-in Qwiic Mux support and will discover all muxes, and all sensors connected to the ports on those muxes.
 
@@ -74,7 +76,7 @@ void setWirePort(TwoWire &port)
 
 | Parameter | Type | Description |
 | :-------- | :--- | :---------- |
-| `port` | `TwoWire` | The Wire port |
+| `port` | `TwoWire &` | The Wire port |
 
 ### enableDebugging()
 
@@ -86,7 +88,7 @@ void enableDebugging(Stream &port)
 
 | Parameter | Type | Description |
 | :-------- | :--- | :---------- |
-| `port` | `Stream` | The Stream (Serial port) |
+| `port` | `Stream &` | The Stream (Serial port) |
 
 There is no method to disable the debug messages. The messages can be disabled by setting ```_printDebug``` to false:
 
@@ -106,7 +108,7 @@ void setMenuPort(Stream &port)
 
 | Parameter | Type | Description |
 | :-------- | :--- | :---------- |
-| `port` | `Stream` | The Stream (Serial port) |
+| `port` | `Stream &` | The Stream (Serial port) |
 
 ## Sensor Factory
 
@@ -176,8 +178,8 @@ bool setCustomInitialize(void (*pointer)(uint8_t sensorAddress, TwoWire &port, v
 
 | Parameter | Type | Description |
 | :-------- | :--- | :---------- |
-| `pointer` | `void` | The address of the custom initialization method |
-| `sensorName` | `const char` | The name of the sensor type |
+| `pointer` | `void (*)()` | The address of the custom initialization method |
+| `sensorName` | `const char *` | The name of the sensor type |
 | return value | `bool` | ```false``` if no sensors have been detected, otherwise ```true``` |
 
 The parameters for the custom initializer method are:
@@ -185,8 +187,8 @@ The parameters for the custom initializer method are:
 | Parameter | Type | Description |
 | :-------- | :--- | :---------- |
 | `sensorAddress` | `uint8_t` | The I2C address of this sensor |
-| `port` | `TwoWire` | The Wire port this sensor is connected to |
-| `_classPtr` | `void` | A pointer to the class for this sensor type |
+| `port` | `TwoWire &` | The Wire port this sensor is connected to |
+| `_classPtr` | `void *` | A pointer to the class for this sensor type |
 | return value | `bool` | ```false``` if no sensors have been detected, otherwise ```true``` |
 
 Please see Example4_CustomInitialization for more details.
@@ -201,8 +203,8 @@ bool setCustomInitialize(void (*pointer)(uint8_t sensorAddress, TwoWire &port, v
 
 | Parameter | Type | Description |
 | :-------- | :--- | :---------- |
-| `pointer` | `void` | The address of the custom initialization method |
-| `sensorName` | `const char` | The name of the sensor type |
+| `pointer` | `void (*)()` | The address of the custom initialization method |
+| `sensorName` | `const char *` | The name of the sensor type |
 | `i2cAddress` | `uint8_t` | The I2C address of the target sensor |
 | `muxAddress` | `uint8_t` | The I2C address of the mux the sensor is connected to. The default value is 0 (no mux) |
 | `muxPort` | `uint8_t` | The mux port the sensor is connected to. The default value is 0 (no mux) |
@@ -213,9 +215,8 @@ The parameters for the custom initializer method are:
 | Parameter | Type | Description |
 | :-------- | :--- | :---------- |
 | `sensorAddress` | `uint8_t` | The I2C address of this sensor |
-| `port` | `TwoWire` | The Wire port this sensor is connected to |
-| `_classPtr` | `void` | A pointer to the class for this sensor type |
-| return value | `bool` | ```false``` if no sensors have been detected, otherwise ```true``` |
+| `port` | `TwoWire &` | The Wire port this sensor is connected to |
+| `_classPtr` | `void *` | A pointer to the class for this sensor type |
 
 Please see Example4_CustomInitialization for more details.
 
@@ -331,7 +332,7 @@ SFE_QUAD_Sensor *sensorExists(const char *sensorName, uint8_t i2cAddress, uint8_
 ```
 | Parameter | Type | Description |
 | :-------- | :--- | :---------- |
-| `sensorName` | `const char` | The name of the sensor type |
+| `sensorName` | `const char *` | The name of the sensor type |
 | `i2cAddress` | `uint8_t` | The I2C address of the target sensor |
 | `muxAddress` | `uint8_t` | The I2C address of the mux the sensor is connected to. The default value is 0 (no mux) |
 | `muxPort` | `uint8_t` | The mux port the sensor is connected to. The default value is 0 (no mux) |
@@ -364,3 +365,17 @@ bool getSettingValueDouble(double *value, unsigned long timeout)
 | `value` | `double *` | A pointer to the ```double``` to hold the value |
 | `timeout` | `unsigned long` | The menu timeout in milliseconds |
 | return value | `bool` | ```false``` if no input is received or the Stream is undefined, otherwise ```true``` |
+
+## Member Variables
+
+| Parameter | Type | Description |
+| :-------- | :--- | :---------- |
+| `_head` | `SFE_QUAD_Sensor *` | The head (start) of the linked-list of ```SFE_QUAD_Sensor``` objects |
+| `readings` | `char *` | Pointer to a dynamic char array which holds the sensor readings, names or sense names in CSV format |
+| `configuration` | `char *` | Pointer to a dynamic char array which holds the sensor and menu configuration |
+| `_printDebug` | `bool` | ```true``` is debug messages are to be printed to ```_debugPort```, ```false``` otherwise |
+| `_i2cPort` | `TwoWire *` | Pointer to the Wire port for I2C communication |
+| `_menuPort` | `Stream *` | Pointer to the Stream (Serial port) for the built-in menus |
+| `_debugPort` | `Stream *` | Pointer to the Stream (Serial port) for the debug messages (if enabled) |
+| `theMenu` | `SFE_QUAD_Menu` | Instance of ```SFE_QUAD_Menu``` which can be used to create additional menus |
+| `_sprintf` | `SFE_QUAD_Sensors_sprintf` | Instance of ```SFE_QUAD_Sensors_sprintf``` to aid printing of doubles and exponent-format data |
