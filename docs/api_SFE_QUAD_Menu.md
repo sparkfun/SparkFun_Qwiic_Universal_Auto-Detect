@@ -36,14 +36,14 @@ The menu variable can be read with ```getMenuItemVariable```. The value is retur
 An overloaded method allows ```TEXT``` values to be read.
 
 The menu variable can be set with ```setMenuItemVariable```, typically to set its default or initial value.
-An overloaded methods ```TEXT``` to be set with a ```const char *```.
+An overloaded method allows ```TEXT``` to be set with a ```const char *```.
 
 Numeric menu items can have minimum and maximum values assigned using ```setMenuItemVariableMin``` and ```setMenuItemVariableMax```.
 The built-in ```getValueDouble``` method will then only allow values between the min and max to be entered.
 
 ```setMenuPort``` defines which ```Stream``` (Serial port) will be used for the menu.
 
-Debug messages can be displayed if required. ```setDebugPort``` set the ```Stream``` (Serial port) for those.
+Debug messages can be displayed if required. ```setDebugPort``` sets the ```Stream``` (Serial port) for those.
 
 The ```SFE_QUAD_Menu``` is not aware of what storage medium is being used by ```SFE_QUAD_Sensors```.
 The menu variables can be extracted as CSV text using ```getMenuVariableAsCSV```. Higher methods are then
@@ -66,7 +66,7 @@ void setMenuPort(Stream &port, bool supportsBackspace)
 | Parameter | Type | Description |
 | :-------- | :--- | :---------- |
 | `port` | `Stream &` | The address of the ```Stream``` (Serial port) |
-| `supportsBackspace` | `bool` | Default if ```false```. If ```true```, existing ```TEXT``` items can be _edited_ |
+| `supportsBackspace` | `bool` | Default is ```false```. If ```true```, existing ```TEXT``` items can be _edited_ |
 
 ### setDebugPort()
 
@@ -169,7 +169,7 @@ bool setMenuItemVariable(const char *itemName, const SFE_QUAD_Menu_Every_Type_t 
 
 ### setMenuItemVariable()
 
-This method sets the menu item variable in the linked-list with the ```TEXT``` value passed in ```theValue```.
+This method sets the menu item variable in the linked-list with the ```TEXT``` passed in ```theValue```.
 
 ```c++
 bool setMenuItemVariable(const char *itemName, const char *theValue)
@@ -192,7 +192,7 @@ bool setMenuItemVariableMin(const char *itemName, const SFE_QUAD_Menu_Every_Type
 | Parameter | Type | Description |
 | :-------- | :--- | :---------- |
 | `itemName` | `const char *` | The name of the menu item |
-| `theValue` | `const SFE_QUAD_Menu_Every_Type_t *` | A pointer to the struct holding the minimum value |
+| `minVal` | `const SFE_QUAD_Menu_Every_Type_t *` | A pointer to the struct holding the minimum value |
 | return value | `bool` | ```true``` if the item exists and the minimum value is updated successfully, otherwise ```false``` |
 
 ### setMenuItemVariableMax()
@@ -206,7 +206,7 @@ bool setMenuItemVariableMax(const char *itemName, const SFE_QUAD_Menu_Every_Type
 | Parameter | Type | Description |
 | :-------- | :--- | :---------- |
 | `itemName` | `const char *` | The name of the menu item |
-| `theValue` | `const SFE_QUAD_Menu_Every_Type_t *` | A pointer to the struct holding the maximum value |
+| `maxVal` | `const SFE_QUAD_Menu_Every_Type_t *` | A pointer to the struct holding the maximum value |
 | return value | `bool` | ```true``` if the item exists and the maximum value is updated successfully, otherwise ```false``` |
 
 ## The Menu
@@ -333,7 +333,7 @@ size_t getMenuItemNameMaxLen(void)
 
 ### getMenuVariablesMaxLen()
 
-Retrun the likely maximum combined length of a full menu item (including min and max values if present).
+Returns the likely maximum combined length of a full menu item (including min and max values if present).
 This is used to determine how much memory should be allocated to hold a menu item in CSV format.
 
 ```c++
@@ -402,4 +402,4 @@ void setSupportsBackspace(bool support)
 | `_debugPort` | `Stream *` | The address of the ```Stream``` (Serial port) to be used for debug messages (if desired) |
 | `_menuTimeout` | `unsigned long` | The default menu timeout in milliseconds. Default is 10000 |
 | `_maxTextChars` | `uint16_t` | The maximum length of ```TEXT``` value entries. Default is 32 |
-| `_supportsBackspace` | `bool` | ```true``` in the port supports backspace, otherwise ```false```. Default is ```false``` |
+| `_supportsBackspace` | `bool` | ```true``` if the port supports backspace, otherwise ```false```. Default is ```false``` |
