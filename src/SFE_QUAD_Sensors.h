@@ -52,10 +52,10 @@
 class SFE_QUAD_Sensors_sprintf
 {
 public:
-  char *_dtostrf(double value, char *buffer);          // Convert double to string (included because not all platforms support dtostrf correctly)
-  char *_etoa(double value, char *buffer);             // Convert double to ASCII text using exponent format
+  char *_dtostrf(double value, char *buffer);             // Convert double to string (included because not all platforms support dtostrf correctly)
+  char *_etoa(double value, char *buffer);                // Convert double to ASCII text using exponent format
   bool expStrToDouble(const char *str, double *value);    // Convert exponent-format string to double
-  unsigned char _prec = 7;                                // precision
+  unsigned char _prec = 3;                                // precision
   void setPrecision(unsigned char prec) { _prec = prec; } // Call setPrecision to change the number of decimal places for the readings
   unsigned char getPrecision(void) { return (_prec); }
 };

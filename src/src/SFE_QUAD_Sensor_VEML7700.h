@@ -148,7 +148,7 @@ public:
     return (NULL);
   }
 
-  // Return the specified sense reading as exponential format text. ===> Adapt this to match the sensor type <===
+  // Return the specified sense reading as text. ===> Adapt this to match the sensor type <===
   bool getSenseReading(uint8_t sense, char *reading)
   {
     CLASSNAME *device = (CLASSNAME *)_classPtr;
@@ -163,7 +163,7 @@ public:
       return (true);
       break;
     case 2:
-      _sprintf._etoa((double)device->getLux(), reading); // Get the Lux
+      _sprintf._dtostrf((double)device->getLux(), reading); // Get the Lux
       return (true);
       break;
     default:

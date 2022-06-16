@@ -157,7 +157,7 @@ public:
     return (NULL);
   }
 
-  // Return the specified sense reading as exponential format text. ===> Adapt this to match the sensor type <===
+  // Return the specified sense reading as text. ===> Adapt this to match the sensor type <===
   bool getSenseReading(uint8_t sense, char *reading)
   {
     CLASSNAME *device = (CLASSNAME *)_classPtr;
@@ -182,7 +182,7 @@ public:
         _rh = true;
       }
       _temp = false;
-      _sprintf._etoa((double)device->getTemperature(), reading); // Get the temperature
+      _sprintf._dtostrf((double)device->getTemperature(), reading); // Get the temperature
       return (true);
       break;
     case 2:
@@ -193,7 +193,7 @@ public:
         _temp = true;
       }
       _rh = false;
-      _sprintf._etoa((double)device->getHumidity(), reading); // Get the humidity
+      _sprintf._dtostrf((double)device->getHumidity(), reading); // Get the humidity
       return (true);
       break;
     default:

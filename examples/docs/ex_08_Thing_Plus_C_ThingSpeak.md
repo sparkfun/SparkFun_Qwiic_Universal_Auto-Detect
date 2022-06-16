@@ -111,10 +111,6 @@ The fastest you can send data to ThingSpeak is once every 15 seconds, so we set 
 
 The code uses the ThingSpeak ```setField``` and ```writeFields``` methods to upload up to eight sense readings to your channel.
 
-Remember how SparkFun Qwiic Universal Auto-Detect uses **exponent**-format data (because it is compact and offers good resolution)?
-It turns out that the ```setField``` (String) method does not understand exponent-format text. So, the code uses the ```expStrToDouble``` helper,
-if required, to convert exponent-format text to a ```double```.
-
 ```C++
     // ThingSpeak channels can have up to 8 fields
     // Extract up to 8 Strings from mySensors.readings using strtok_r

@@ -320,20 +320,14 @@ The helper text and readings become:
 ```
 MS8607_64_0_0,MS8607_64_0_0
 Pressure (mbar),Humidity (%)
-1.0110200e+3,4.1237396e+1
-1.0109800e+3,4.1237396e+1
-1.0109800e+3,4.1222137e+1
-1.0109800e+3,4.1206879e+1
-1.0109500e+3,4.1199249e+1
+1011.020,41.237
+1010.980,41.237
 ```
 
 We can see that only Pressure and Humidity are enabled.
-The pressure and temperature are logged in _**exponent**_ format as it is compact yet provides good precision / resolution.
-The pressure is 1.011e+3 mbar = 1011 mbar.
-The humidity is 4.12e+1 % = 41.2 %.
-The default precision (number of decimal places) is 7.
+The default precision (number of decimal places) is 3.
 You can adjust the precision by calling the method ```_sprintf.setPrecision```.
-E.g. to change the precision to 5 decimal places, call:
+E.g. to change the precision to 5 decimal places, insert this _before_ the ```mySensors.detectSensors();```:
 * ```mySensors._sprintf.setPrecision(5);```
 
 There is a helper method ```_sprintf.expStrToDouble``` which you can use to convert exponent-format text into a double.
@@ -343,10 +337,8 @@ If two MS8607s are connected via a Mux, the helper text, readings and menus beco
 ```
 MS8607_64_113_0,MS8607_64_113_0,MS8607_64_113_0,MS8607_64_113_1,MS8607_64_113_1,MS8607_64_113_1
 Pressure (mbar),Temperature (C),Humidity (%),Pressure (mbar),Temperature (C),Humidity (%)
-1.0100100e+3,2.0540001e+1,4.6127838e+1,1.0096700e+3,2.0670000e+1,4.1237396e+1
-1.0100000e+3,2.0559999e+1,4.6127838e+1,1.0097000e+3,2.0690001e+1,4.1237396e+1
-1.0099900e+3,2.0559999e+1,4.6120209e+1,1.0096900e+3,2.0690001e+1,4.1245026e+1
-1.0099800e+3,2.0559999e+1,4.6127838e+1,1.0096800e+3,2.0690001e+1,4.1237396e+1
+1010.010,20.540,46.127,1009.670,20.670,41.237
+1010.000,20.559,46.127,1009.700,20.690,41.237
 
 Menu
 ====
@@ -460,11 +452,10 @@ Menu
 
 Enter a number, or enter 0 to exit:
 
-1.0056678e+2
+100.566
 ```
 
-The load cell has been successfully calibrated. The first reading is:
-* 1.0056678e+2 = 100.56678g
+The load cell has been successfully calibrated. The first reading is 100.566g.
 
 Another of the fantastic things about SparkFun Qwiic Universal Auto-Detect is that we can now store that calibration to SD card by selecting
 **Write the sensor configuration to SD** (Option 3) from the main menu.
@@ -473,10 +464,10 @@ Next time we power up the system, we can restore the calibration by selecting
 **Read the sensor configuration from SD** (Option 4):
 
 ```
-1.5076448e+5
-1.5081995e+5
-1.5078534e+5
-1.5074564e+5
+150764.48
+150819.95
+150785.34
+150745.64
 
 Menu
 ====
@@ -499,9 +490,9 @@ Menu
 
 Enter a number, or enter 0 to exit:
 
-1.1137814e+2
-1.0925388e+2
-1.1440324e+2
+111.378
+109.253
+114.403
 ```
 
 Storing the configuration was not possible with [OpenLog Artemis](https://www.sparkfun.com/products/19426). We are very pleased that
