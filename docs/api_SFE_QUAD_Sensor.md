@@ -38,7 +38,7 @@ E.g. the NAU7802 scale has two : zero offset (```calculateZeroOffset```) and cal
 
 **Configuration items** can be written to and read from storage (SD, EEPROM, LittleFS).
 They are used to record the sensor configuration and restore the configuration.
-Note: Configuration items _may_ or _**may not**_ be the same as the settings.
+Note: configuration items _may_ or _**may not**_ be the same as the settings.
 
 Individual ```SFE_QUAD_Sensor``` instances are connected in a linked-list. The ```SFE_QUAD_Sensor``` object contains a pointer to the
 ```_next``` object in the list. The ```_next``` of the final ```SFE_QUAD_Sensor``` in the list is ```NULL```.
@@ -56,15 +56,15 @@ Sensor detection and initialization will typically be performed as follows:
   * Once detection is complete, each sensor is initialized using ```initializeSensor```.
   * If a custom initializer has been defined, that is used in place of the standard initializer.
 
-Readings the senses will typically be performed as follows:
+Reading the senses will typically be performed as follows:
 * For each sensor in the linked-list:
   * ```getSenseCount``` returns the number of senses this sensor has
   * ```_logSense``` (an array of ```bool```) records if each individual sense is enabled for logging
-  * All enabled sense are read using ```getSenseReading```
+  * All enabled senses are read using ```getSenseReading```
 
 The sense names can be read using ```getSenseName```. ```getSenseNameMaxLen``` aids menu formatting (space padding).
 
-The class destructor ensures that all memory used by the linked-list is deleted (freed) correctly. This has been tested - see Example5 for details.
+The class destructor ensures that all memory used by the linked-list is deleted (freed) correctly. This has been fully tested - see Example5 for details.
 
 Most ```SFE_QUAD_Sensor``` methods are ```virtual``` as they need to be redefined by the methods of the individual sensors.
 The individual sensor classes (e.g. ```SFE_QUAD_Sensor_ADS122C04```) are derived. They inherit ```SFE_QUAD_Sensor``` and then redefine each method with their own.
@@ -222,7 +222,7 @@ virtual bool getSenseReading(uint8_t sense, char *reading)
 | Parameter | Type | Description |
 | :-------- | :--- | :---------- |
 | `sense` | `uint8_t` | The sense index |
-| `reading` | `char *` | A pointer to char array to hold the reading (ASCII text, null-terminated) |
+| `reading` | `char *` | A pointer to a char array to hold the reading (ASCII text, null-terminated) |
 | return value | `bool` | ```true``` is the read is successful, ```false``` otherwise |
 
 ### getSettingCount()
@@ -394,3 +394,35 @@ virtual void deleteSensorStorage(void)
 | `_logSense` | `bool *` | A dynamic array of ```bool``` indicating if individual senses are enabled for logging |
 | `_customInitializePtr` | `void (*)()` | A pointer to the custom initializer for this sensor, ```NULL``` if none |
 | `_sprintf` | `SFE_QUAD_Sensors_sprintf` | An instance of ```SFE_QUAD_Sensors_sprintf``` to aid printing of double and exponent data |
+
+## Data Types
+
+### SFE_QUAD_Sensor_Every_Type_t
+
+As the name suggests, this structure contains one of every data type used by the underlying Arduino Libraries.
+It allows values to be passed between classes in a homogeneous, non-type-specific way.
+The data type is defined by the associated ```SFE_QUAD_Sensor_Setting_Type_e``` enum.
+
+```c++
+  typedef struct
+  {
+    bool BOOL;
+    float FLOAT;
+    double DOUBLE;
+    int INT;
+    uint8_t UINT8_T;
+    uint16_t UINT16_T;
+    uint32_t UINT32_T;
+  } SFE_QUAD_Sensor_Every_Type_t;
+```
+
+| Member | Type | Description |
+| :-------- | :--- | :---------- |
+| `BOOL` | `bool` | A ```bool``` |
+| `FLOAT` | `float` | A ```float``` |
+| `DOUBLE` | `double` | A ```double``` |
+| `INT` | `int` | An ```int``` |
+| `UINT8_T` | `uint8_t` | A ```uint8_t``` |
+| `UINT16_T` | `uint16_t` | A ```uint16_t``` |
+| `UINT32_T` | `uint32_t` | A ```uint32_t``` |
+
