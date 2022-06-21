@@ -19,13 +19,13 @@ _That's all folks!_
 
 A description of each step is included below:
 
-## The **SFE_QUAD_Sensor_NewSensorName.h** File
+## SFE_QUAD_Sensor_NewSensorName.h
 
 The **SFE_QUAD_Sensor_NewSensorName.h** file is the interface between the SparkFun Qwiic Universal Auto-Detect **SFE_QUAD_Sensor** class
 and the underlying Arduino Library for that sensor.
 
 One of the requirements for SparkFun Qwiic Universal Auto-Detect was to be able to use the existing Arduino Library for any sensor
-_as-is_ and without modification. It provides a standard set of methods to allow the sensor's senses to be: configured; enabled; and read.
+_as-is_ and without modification. The header file provides a standard set of methods to allow the sensor's senses to be: configured; enabled; and read.
 
 You can use the existing **SFE_QUAD_Sensor_SensorName.h** files as a template for the new sensor.
 
@@ -47,6 +47,8 @@ If you are adding a new sensor called **FOO**, the first two lines become:
 #ifndef SPARKFUN_QUAD_SENSOR_HEADER_FOO_H // <=== Update this with the new sensor type
 #define SPARKFUN_QUAD_SENSOR_HEADER_FOO_H // <=== Update this with the new sensor type
 ```
+
+### Header File Name
 
 Now is a good time to save the header file using its new name. In this case the file will be saved as: **src/src/SFE_QUAD_Sensor_FOO.h**
 
@@ -101,7 +103,7 @@ Sensors can also have one or more _**Configuration Items**_. These are _**Settin
 
 _**Settings**_ are applied manually and individually via the **settingMenu**. _**Configuration Items**_  are applied all together with a single call of ```applySensorAndMenuConfiguration```.
 
-__**Settings**_ are _usually_ also _**Configuration Items**_, but not always. The number of _**Settings**_ is usually equal to, or greater than, the number of _**Configuration Items**_, but not always.
+_**Settings**_ are _usually_ also _**Configuration Items**_, but not always. The number of _**Settings**_ is usually equal to, or greater than, the number of _**Configuration Items**_, but not always.
 
 A simple sensor, like the BME280, has zero settings and zero configuration items.
 
@@ -124,7 +126,7 @@ The VL53L1X has five settings:
 * Crosstalk
 * Offset
 
-But it only has four cofiguration items requiring storage:
+But it only has four configuration items requiring storage:
 * Distance Mode
 * Intermeasurement Period
 * Crosstalk
@@ -169,6 +171,7 @@ for (int i = 1; i < 127; i++)
     Serial.println(i, HEX);
   }
 }
+```
 
 However:
 * Getting an acknowledgement does not tell us what type of sensor was detected at that address, just that _something_ was detected

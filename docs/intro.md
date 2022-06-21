@@ -2,7 +2,7 @@
 
 The SparkFun Qwiic Universal Auto-Detect library makes it easy to create a scalable Qwiic (I<sup>2</sup>C) sensing and logging device on a wide range of platforms.
 
-We are very proud of [OpenLog Artemis](https://www.sparkfun.com/products/16832). The aim of OLA is simple: provide a system which
+We are very proud of [OpenLog Artemis](https://www.sparkfun.com/products/19426). The aim of OLA is simple: provide a system which
 can automatically detect a wide range of Qwiic sensors and log data from them, all without writing a single line of code. It has been _very_ successful.
 However, adding new sensors to OLA is quite complicated. There are [six files to change](https://github.com/sparkfun/OpenLog_Artemis/blob/main/ADDING_SENSORS.md)
 and new code needs to be added in multiple places. Also, OLA is, by its nature, tied to the Artemis (Apollo3) platform.
