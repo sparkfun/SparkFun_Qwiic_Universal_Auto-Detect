@@ -180,7 +180,7 @@ However:
 A better way is to use the sensor's ```begin``` method. However, the ```begin``` can sometimes take a long time to complete if no sensor is connected.
 
 For the BME280, we use the ```beginTransmission``` + ```endTransmission``` test as it gives a fast indication of whether a device is connected (```beginI2C``` is slow if nothing is connected).
-Followed by its ```begin``` method for full confidence that we are detecting a BME280.
+Followed by its ```beginI2C``` method for full confidence that we are detecting a BME280.
 
 The BME280 has two valid I2C addresses, so we need to tell the code which address to use with the ```device->setI2CAddress(sensorAddress);```.
 
