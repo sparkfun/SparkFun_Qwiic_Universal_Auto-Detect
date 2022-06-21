@@ -221,7 +221,8 @@ Adapt the template code to match the new sensor.
 
 ### beginSensor
 
-Sensors almost always require their ```begin``` method to be called before communication can take place. Again, you should adapt the template code to match the new sensor:
+Sensors almost always require their ```begin``` method to be called before communication can take place. Again, you should adapt the template code to match the new sensor.
+The VL53L1X's ```begin``` method returns **0** when the device is begun successfully, so its ```beginSensor``` is:
 
 ```c++
   // Begin the sensor. ===> Adapt this to match the sensor type <===
@@ -232,10 +233,22 @@ Sensors almost always require their ```begin``` method to be called before commu
   }
 ```
 
+The BME280 returns ```true``` when successful, so its ```beginSensor``` is:
+
+```c++
+  // Begin the sensor. ===> Adapt this to match the sensor type <===
+  bool beginSensor(uint8_t sensorAddress, TwoWire &port)
+  {
+    CLASSNAME *device = (CLASSNAME *)_classPtr;
+    device->setI2CAddress(sensorAddress);
+    return (device->beginI2C(port));
+  }
+```
+
 The sensor has already been detected, so you do not need to 'scan' the address again, but you do need to call ```begin``` (again) here.
 (The ```begin``` in ```detectSensor``` is 'lost' as the sensor has not been added to the linked-list of sensors at that point.)
 
-
+### Work In Progress
 
 Here is the code for the two distance mode _**Settings**_:
 
