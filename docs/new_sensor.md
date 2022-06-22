@@ -67,7 +67,7 @@ See [below](#githubworkflowscompile-sketchyml) for details.
 Change line 4 so it will include the library header file correctly.
 
 ```c++
-#include "FOO/FOO.h" // <=== Update this with the new sensor library header file
+#include "FOO/SparkFun_FOO_Arduino_Library.h" // <=== Update this with the new sensor library header file
 ```
 
 !!! note:
@@ -957,18 +957,18 @@ If the Arduino Library contains more than the standard ```.h``` and ```.cpp``` f
 Finally, you need to check how the ```.cpp``` file includes its ```.h``` file. In Arduino examples, you will often see files included like this:
 
 ```c++
-#include <FOO.h>
+#include <SparkFun_FOO_Arduino_Library.h>
 ```
 
-The less-than and greater-than tell the Arduino IDE compiler to search its **PATH** for ```FOO.h```. ```FOO.h``` will normally be
-in a ```\library``` sub-folder.
+The less-than and greater-than tell the Arduino IDE compiler to search its **PATH** for ```SparkFun_FOO_Arduino_Library.h```.
+```SparkFun_FOO_Arduino_Library.h``` will normally be in a ```\library``` sub-folder.
 
 For this library, we want to ensure the copy of the Arduino Library in the ```src\src``` sub-folder is used, not the copy from the IDE **PATH**.
 
 Look inside the ```.cpp``` file. If you see:
 
 ```c++
-#include <FOO.h>
+#include <SparkFun_FOO_Arduino_Library.h>
 ```
 
 the you need to include one extra line in **compile-sketch.yml** so that the less-than and greater-than are changed automatically to double-quotes:
