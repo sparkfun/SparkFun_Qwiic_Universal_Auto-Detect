@@ -62,7 +62,7 @@ This will allow the code to compile while you are testing it.
 However, the [.github/workflows/compile-sketch.yml](./.github/workflows/compile-sketch.yml) file will do this for you automatically once you have edited it.
 **compile-sketch.yml** also ensures that the copy of the Arduino Library stays up to date. Any changes to the main Arduino Library are automatically merged into this library
 whenever changes are pushed.
-See [below](#update-compile-sketch-yml) for details.
+See [below](#githubworkflowscompile-sketchyml) for details.
 
 Change line 4 so it will include the library header file correctly.
 
@@ -182,7 +182,7 @@ A better way is to use the sensor's ```begin``` method. However, the ```begin```
 For the BME280, we use the ```beginTransmission``` + ```endTransmission``` test as it gives a fast indication of whether a device is connected (```beginI2C``` is slow if nothing is connected).
 Followed by its ```beginI2C``` method for full confidence that we are detecting a BME280.
 
-The BME280 has two valid I2C addresses, so we need to tell the code which address to use with the ```device->setI2CAddress(sensorAddress);```.
+The BME280 has two valid I<sup>2</sup>C addresses, so we need to tell the code which address to use with the ```device->setI2CAddress(sensorAddress);```.
 
 ```c++
   // Detect the sensor. ===> Adapt this to match the sensor type <===
@@ -734,7 +734,7 @@ appropriate field of the ```SFE_QUAD_Sensor_Every_Type_t```.
 For the VL53L1X, the three ```uint16_t``` configuration items are returned in ```value->UINT16_T```.
 
 The distance mode (config item 0) is simply read from the ```_shortDistanceMode``` member variable. We _could_ have made use of the Library's
-```getDistanceMode``` method and converted the return value (1 or 2) to ```bool```. Doing it this way avoids an unnecessary I2C bus transaction.
+```getDistanceMode``` method and converted the return value (1 or 2) to ```bool```. Doing it this way avoids an unnecessary I<sup>2</sup>C bus transaction.
 
 ```c++
   // Get (read) the sensor configuration item
@@ -896,7 +896,7 @@ The order here is not important. Insert the new sensor alphabetically (unless th
 
 ## SFE_QUAD_Headers.h
 
-When adding a new sensor, [SFE_QUAD_Headers.h](../src/SFE_QUAD_Headers.h) needs to be modified to include the header file new sensor.
+When adding a new sensor, [SFE_QUAD_Headers.h](../src/SFE_QUAD_Headers.h) needs to be modified to include the header file for the new sensor.
 
 The order here is not important. Insert the new sensor alphabetically (unless there is a good reason not to):
 
@@ -960,7 +960,7 @@ Finally, you need to check how the ```.cpp``` file includes its ```.h``` file. I
 #include <FOO.h>
 ```
 
-The less-than and greater-than tell (usually) the Arduino IDE compiler to search its **PATH** for ```FOO.h```. ```FOO.h``` will normally be
+The less-than and greater-than tell the Arduino IDE compiler to search its **PATH** for ```FOO.h```. ```FOO.h``` will normally be
 in a ```\library``` sub-folder.
 
 For this library, we want to ensure the copy of the Arduino Library in the ```src\src``` sub-folder is used, not the copy from the IDE **PATH**.
