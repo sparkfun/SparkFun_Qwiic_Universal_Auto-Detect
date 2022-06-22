@@ -971,7 +971,7 @@ Look inside the ```.cpp``` file. If you see:
 #include <SparkFun_FOO_Arduino_Library.h>
 ```
 
-the you need to include one extra line in **compile-sketch.yml** so that the less-than and greater-than are changed automatically to double-quotes:
+then you need to include one extra line in **compile-sketch.yml** so that the less-than and greater-than are replaced automatically with double-quotes:
 
 ```c++
       - name: Update FOO
