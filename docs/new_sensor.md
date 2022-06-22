@@ -245,8 +245,373 @@ The BME280 returns ```true``` when successful, so its ```beginSensor``` is:
   }
 ```
 
-The sensor has already been detected, so you do not need to 'scan' the address again, but you do need to call ```begin``` (again) here.
-(The ```begin``` in ```detectSensor``` is 'lost' as the sensor has not been added to the linked-list of sensors at that point.)
+The sensor has already been detected, so you do not need to 'scan' the address again, but you do need to call ```begin``` again here.
+The ```begin``` in ```detectSensor``` is 'lost' as the sensor has not been added to the linked-list of sensors at that point.
+
+### initializeSensor
+
+Each sensor is initialized - if required - when ```mySensors.initializeSensors();``` is called.
+
+Some sensors - like the BME280 - don't require initialization. So its ```initializeSensor``` is essentially 'empty'. Unless a custom initializer
+has been defined (see Example4), it simply returns ```true```. If a custom initializer has been defined, then that is called before returning ```true```.
+
+```c++
+  // Initialize the sensor. ===> Adapt this to match the sensor type <===
+  bool initializeSensor(uint8_t sensorAddress, TwoWire &port)
+  {
+    if (_customInitializePtr == NULL) // Has a custom initialize function been defined?
+    {
+      return (true);
+    }
+    else
+    {
+      _customInitializePtr(sensorAddress, port, _classPtr); // Call the custom initialize function
+      return (true);
+    }
+  }
+```
+
+The VL53L1X does require initialization. As a minimum, we need to set the distance mode and instruct it to ```startRanging```:
+
+```c++
+  // Initialize the sensor. ===> Adapt this to match the sensor type <===
+  bool initializeSensor(uint8_t sensorAddress, TwoWire &port)
+  {
+    if (_customInitializePtr == NULL) // Has a custom initialize function been defined?
+    {
+      CLASSNAME *device = (CLASSNAME *)_classPtr;
+      if (_shortDistanceMode)
+        device->setDistanceModeShort();
+      else
+        device->setDistanceModeLong();
+      device->startRanging();
+      return (true);
+    }
+    else
+    {
+      _customInitializePtr(sensorAddress, port, _classPtr); // Call the custom initialize function
+      return (true);
+    }
+  }
+```
+
+```_shortDistanceMode``` is an extra bool member variable we've added to the sensor class. It is initialized to ```true``` when the sensor object is created and added to the linked list:
+
+```c++
+  bool _shortDistanceMode;
+
+  CLASSTITLE(TwoWire &port)
+  {
+    _sensorAddress = 0;
+    _muxAddress = 0;
+    _muxPort = 0;
+    _classPtr = new CLASSNAME(port);
+    _next = NULL;
+    _logSense = new bool[SENSE_COUNT + 1];
+    for (size_t i = 0; i <= SENSE_COUNT; i++)
+      _logSense[i] = true;
+    _customInitializePtr = NULL;
+    _shortDistanceMode = true;
+  }
+```
+
+```_shortDistanceMode```  records or indicates whether the sensor is in short or long distance mode.
+
+Why did we do it this way? Couldn't we have used a ```BOOL``` configuration item for it instead? Yes, we could have done it that way, but, as we explained above:
+* The user would have had to select the distance mode setting
+* Then enter a valid ```BOOL``` (0 or 1)
+* The code in ```setSetting``` would have had to validate the choice before applying it
+
+By using two ```NONE``` choices, and storing the choice in ```_shortDistanceMode```, we both make things easier for the user and simplify the code.
+
+### getSenseName
+
+```getSenseName``` returns the name of each sense as ```const char *``` as it will appear in ```loggingMenu```.
+
+The number of ```case``` statements must match **SENSE_COUNT**. Adapt the template code
+to match the number of senses for the new sensor; add or remove ```case``` statements as necessary.
+
+```c++
+  // Return the name of the name of the specified sense. ===> Adapt this to match the sensor type <===
+  const char *getSenseName(uint8_t sense)
+  {
+    switch (sense)
+    {
+    case 0:
+      return ("Pressure (Pa)");
+      break;
+    case 1:
+      return ("Temperature (C)");
+      break;
+    case 2:
+      return ("Humidity (%)");
+      break;
+    default:
+      return (NULL);
+      break;
+    }
+    return (NULL);
+  }
+```
+
+### getSenseReading
+
+```getSenseReading``` is the method which calls the appropriate 'read' method for the selected ```sense```.
+It is called by ```getSensorReadings```.
+
+```getSenseReading``` calls the Arduino Library method to read that sense and converts the reading into text format:
+
+```c++
+  // Return the specified sense reading as text. ===> Adapt this to match the sensor type <===
+  bool getSenseReading(uint8_t sense, char *reading)
+  {
+    CLASSNAME *device = (CLASSNAME *)_classPtr;
+    switch (sense)
+    {
+    case 0:
+      _sprintf._dtostrf((double)device->readFloatPressure(), reading); // Get the pressure
+      return (true);
+      break;
+    case 1:
+      _sprintf._dtostrf((double)device->readTempC(), reading); // Get the temperature
+      return (true);
+      break;
+    case 2:
+      _sprintf._dtostrf((double)device->readFloatHumidity(), reading); // Get the humidity
+      return (true);
+      break;
+    default:
+      return (false);
+      break;
+    }
+    return (false);
+  }
+```
+
+Again, the number of ```case``` statements must match **SENSE_COUNT**. And, of course, the order of the ```case``` statements must
+be the same as ```getSenseName```.
+
+Looking closely at the code for the **Pressure** (sense 0):
+
+```_sprintf._dtostrf((double)device->readFloatPressure(), reading);```
+
+The code is:
+* Calling the Arduino Library ```readFloatPressure()``` method, using the ```_classPtr```
+* The result is being cast to double
+* _sprintf._dtostrf is a helper function from the ```SFE_QUAD_Sensors_sprintf``` class which converts the double to text
+  * ```sprintf``` is not supported correctly on all platforms (Artemis / Apollo3 especially) so we added the helper method to the sensor class to ensure doubles are always converted to text correctly
+* The text is copied into the char array ```reading```
+
+If you like **exponent-format**, there is an additional helper function named ```_sprintf._etoa``` which will convert a double to exponent-format text.
+
+```getSensorReadings``` pieces the text readings together in CSV format and retruns them in ```readings```.
+
+If the sense methods return an integer (instead of float or double), then ```getSensorReadings``` does use ```sprintf``` to print the reading as text:
+
+```c++
+  // Return the specified sense reading as text. ===> Adapt this to match the sensor type <===
+  bool getSenseReading(uint8_t sense, char *reading)
+  {
+    CLASSNAME *device = (CLASSNAME *)_classPtr;
+    switch (sense)
+    {
+    case 0:
+      sprintf(reading, "%d", device->getDistance());
+      return (true);
+      break;
+    case 1:
+      sprintf(reading, "%d", device->getRangeStatus());
+      return (true);
+      break;
+    case 2:
+      sprintf(reading, "%d", device->getSignalRate());
+      return (true);
+      break;
+    default:
+      return (false);
+      break;
+    }
+    return (false);
+  }
+```
+
+### getSettingName
+
+Simple sensors, like the BME280, have no settings or configuration items. ```getSettingName``` simply returns ```NULL```.
+
+```c++
+  // Return the name of the name of the specified setting. ===> Adapt this to match the sensor type <===
+  const char *getSettingName(uint8_t setting)
+  {
+    switch (setting)
+    {
+    default:
+      return (NULL);
+      break;
+    }
+    return (NULL);
+  }
+```
+
+For the VL53L1X, ```getSettingName``` returns the name of each setting as it will appear in ```settingMenu```:
+
+```c++
+  // Return the name of the name of the specified setting. ===> Adapt this to match the sensor type <===
+  const char *getSettingName(uint8_t setting)
+  {
+    switch (setting)
+    {
+    case 0:
+      return ("Distance Mode: Short");
+      break;
+    case 1:
+      return ("Distance Mode: Long");
+      break;
+    case 2:
+      return ("Intermeasurement Period");
+      break;
+    case 3:
+      return ("Crosstalk");
+      break;
+    case 4:
+      return ("Offset");
+      break;
+    default:
+      return (NULL);
+      break;
+    }
+    return (NULL);
+  }
+```
+
+The number of ```case``` statements must match **SETTING_COUNT**.
+
+### getSettingType
+
+```getSettingType``` returns the ```SFE_QUAD_Sensor_Setting_Type_e``` data type for the setting.
+
+If the sensor has no settings (**SETTING_COUNT** is zero), then ```getSettingType``` simply returns false:
+
+```c++
+  // Return the type of the specified setting. ===> Adapt this to match the sensor type <===
+  bool getSettingType(uint8_t setting, SFE_QUAD_Sensor_Setting_Type_e *type)
+  {
+    switch (setting)
+    {
+    default:
+      return (false);
+      break;
+    }
+    return (true);
+  }
+```
+
+But if there are settings, it returns the data type which matches the type required by the Arduino Library setting method:
+
+```c++
+  // Return the type of the specified setting. ===> Adapt this to match the sensor type <===
+  bool getSettingType(uint8_t setting, SFE_QUAD_Sensor_Setting_Type_e *type)
+  {
+    switch (setting)
+    {
+    case 0:
+    case 1:
+      *type = SFE_QUAD_SETTING_TYPE_NONE;
+      break;
+    case 2:
+    case 3:
+    case 4:
+      *type = SFE_QUAD_SETTING_TYPE_UINT16_T;
+      break;
+    default:
+      return (false);
+      break;
+    }
+    return (true);
+  }
+```
+
+The ```SFE_QUAD_Sensor_Setting_Type_e``` setting types are:
+
+```c++
+    SFE_QUAD_SETTING_TYPE_NONE
+    SFE_QUAD_SETTING_TYPE_BOOL
+    SFE_QUAD_SETTING_TYPE_FLOAT
+    SFE_QUAD_SETTING_TYPE_DOUBLE
+    SFE_QUAD_SETTING_TYPE_INT
+    SFE_QUAD_SETTING_TYPE_UINT8_T
+    SFE_QUAD_SETTING_TYPE_UINT16_T
+    SFE_QUAD_SETTING_TYPE_UINT32_T
+```
+
+All except ```NONE``` are self explanatory. If the Arduino Library setting method requires an ```int``` then set ```*type``` to ```SFE_QUAD_SETTING_TYPE_INT```. Etc..
+
+If the setting type is anything other than ```NONE```, the ```settingMenu``` will call ```getSettingValueDouble```
+and cast the result to the appropriate type before calling ```setSetting```.
+
+The ```NONE``` type has no value, it simply causes the menu to do something when that menu option is selected.
+
+Looking at the code above, the ```NONE``` type is used for settings 0 and 1: "Distance Mode: Short" and "Distance Mode: Long".
+The matching code in ```setSetting``` then does something without needing a value from ```getSettingValueDouble```.
+
+For the other three cases, a ```uint16_t``` will be passed to ```setSetting``` since that is what the Arduino Library methods require.
+
+### setSetting
+
+If the sensor has no settings (**SETTING_COUNT** is zero), then ```setSetting``` simply returns false:
+
+```c++
+  // Set the specified setting. ===> Adapt this to match the sensor type <===
+  bool setSetting(uint8_t setting, SFE_QUAD_Sensor_Every_Type_t *value)
+  {
+    CLASSNAME *device = (CLASSNAME *)_classPtr;
+    switch (setting)
+    {
+    default:
+      return (false);
+      break;
+    }
+    return (true);
+  }
+```
+
+But for sensors like the VL53L1X, we do of course want ```setSettings``` to do something. Let's break it down into case 0/1 and 2-4:
+
+```c++
+ // Set the specified setting. ===> Adapt this to match the sensor type <===
+  bool setSetting(uint8_t setting, SFE_QUAD_Sensor_Every_Type_t *value)
+  {
+    CLASSNAME *device = (CLASSNAME *)_classPtr;
+    switch (setting)
+    {
+    case 0:
+      device->stopRanging();
+      _shortDistanceMode = true;
+      device->setDistanceModeShort();
+      device->startRanging();
+      break;
+    case 1:
+      device->stopRanging();
+      _shortDistanceMode = false;
+      device->setDistanceModeLong();
+      if (device->getIntermeasurementPeriod() < 140)
+        device->setIntermeasurementPeriod(140);
+      device->startRanging();
+      break;
+```
+
+For the two ```NONE``` types, settings 0 and 1: "Distance Mode: Short" and "Distance Mode: Long" the code in the case statement changes the sensor's distance mode accordingly.
+
+For case 0 ("Distance Mode: Short"), ```setSetting```:
+* Stops the sensor with its ```stopRanging()``` method
+* Sets the member variable ```_shortDistanceMode``` to ```true``` so we have a record of the mode
+* Sets the distance mode to short with ```setDistanceModeShort()```
+* (Re)starts the sensor with ```startRanging()```
+
+The code for case 1 ("Distance Mode: Long") is similar, except:
+* ```_shortDistanceMode``` is set to ```false```
+* For the long distance mode, the sensor's measurement period cannot be shorter than 140. The measurement period is increased is necessary
+  * 
 
 ### Work In Progress
 
