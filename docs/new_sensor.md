@@ -398,7 +398,7 @@ Looking closely at the code for the **Pressure** (sense 0):
 The code is:
 * Calling the Arduino Library ```readFloatPressure()``` method, using the ```_classPtr```
 * The result is being cast to double
-* _sprintf._dtostrf is a helper function from the ```SFE_QUAD_Sensors_sprintf``` class which converts the double to text
+* ```_sprintf._dtostrf``` is a helper function from the ```SFE_QUAD_Sensors_sprintf``` class which converts the double to text
   * ```sprintf``` is not supported correctly on all platforms (Artemis / Apollo3 especially) so we added the helper method to the sensor class to ensure doubles are always converted to text correctly
 * The text is copied into the char array ```reading```
 
@@ -575,7 +575,7 @@ If the sensor has no settings (**SETTING_COUNT** is zero), then ```setSetting```
   }
 ```
 
-But for sensors like the VL53L1X, we do of course want ```setSettings``` to do something. Let's break it down into case 0/1 and 2-4:
+But for sensors like the VL53L1X, we do of course want ```setSettings``` to do something. Let's break it down into case 0-1 and 2-4:
 
 ```c++
  // Set the specified setting. ===> Adapt this to match the sensor type <===
@@ -610,33 +610,172 @@ For case 0 ("Distance Mode: Short"), ```setSetting```:
 
 The code for case 1 ("Distance Mode: Long") is similar, except:
 * ```_shortDistanceMode``` is set to ```false```
-* For the long distance mode, the sensor's measurement period cannot be shorter than 140. The measurement period is increased is necessary
-  * 
+* For the long distance mode, the sensor's measurement period cannot be shorter than 140. The measurement period is increased if necessary
 
-### Work In Progress
-
-Here is the code for the two distance mode _**Settings**_:
+For settings cases 2-4, the ```UINT16_T``` setting value is checked to make sure it is within the correct limits and is then passed to the Arduino Library set method:
 
 ```c++
-   case 0: // Distance Mode: Short
+   case 2:
       device->stopRanging();
-      _shortDistanceMode = true;
-      device->setDistanceModeShort();
+      if (value->UINT16_T < 20)
+        value->UINT16_T = 20;
+      if (!_shortDistanceMode)
+        if (value->UINT16_T < 140)
+          value->UINT16_T = 140;
+      if (value->UINT16_T > 1000)
+        value->UINT16_T = 1000;
+      device->setIntermeasurementPeriod(value->UINT16_T);
       device->startRanging();
       break;
-    case 1: // Distance Mode: Long
+    case 3:
       device->stopRanging();
-      _shortDistanceMode = false;
-      device->setDistanceModeLong();
-      if (device->getIntermeasurementPeriod() < 140)
-        device->setIntermeasurementPeriod(140);
+      if (value->UINT16_T > 4000)
+        value->UINT16_T = 4000;
+      device->setXTalk(value->UINT16_T);
       device->startRanging();
       break;
+    case 4:
+      device->stopRanging();
+      if (value->UINT16_T > 4000)
+        value->UINT16_T = 4000;
+      device->setOffset(value->UINT16_T);
+      device->startRanging();
+      break;
+    default:
+      return (false);
+      break;
+    }
+    return (true);
+  }
 ```
 
-And here is the code for the setting (applying) the single distance mode _**Configuration Item**_:
+### getConfigurationItemName
+
+The **Configuration Item** methods are almost identical to the **Settings** methods. Remember that Configuration Items are simply Settings
+which can be written to and read from storage.
+
+For the VL53L1X, "Distance Mode: Short" and "Distance Mode: Long" are combined into a ```BOOL``` for storage. But, other than that,
+the Configuration Items match the Settings.
+
+```getConfigurationItemName``` returns a pointer to the name of each configuration item.
+
+The number of ```case``` statements must match **CONFIGURATION_ITEM_COUNT**.
+
+Some important points:
+* Configuration Item names must not contain spaces
+  * Use underscores where necessary
+* The names should be unique
+* Keep the names short but meaningful
+  * Use abbreviations where possible
+  * These names occupy storage media space which - for EEPROM - can be limited
+* Never use commas in the names
+  * The configurations are stored in CSV format
 
 ```c++
+  // Return the name of the configuration item
+  // Use underscores, not spaces
+  const char *getConfigurationItemName(uint8_t configItem)
+  {
+    switch (configItem)
+    {
+    case 0:
+      return ("Dist_Mode");
+      break;
+    case 1:
+      return ("IM_Period");
+      break;
+    case 2:
+      return ("Xtalk");
+      break;
+    case 3:
+      return ("Offset");
+      break;
+    default:
+      return (NULL);
+      break;
+    }
+    return (NULL);
+  }
+```
+
+### getConfigurationItemType
+
+```getConfigurationItemType``` is very similar to ```getSettingType```.
+
+For the VL53L1X, the only difference is that the two distance mode ```NONE``` types have been integrated into a single ```BOOL```
+
+```c++
+  // Return the type of the specified configuration item
+  bool getConfigurationItemType(uint8_t configItem, SFE_QUAD_Sensor_Setting_Type_e *type)
+  {
+    switch (configItem)
+    {
+    case 0:
+      *type = SFE_QUAD_SETTING_TYPE_BOOL;
+      break;
+    case 1:
+    case 2:
+    case 3:
+      *type = SFE_QUAD_SETTING_TYPE_UINT16_T;
+      break;
+    default:
+      return (false);
+      break;
+    }
+    return (true);
+  }
+```
+
+### getConfigurationItem
+
+```getConfigurationItem``` calls the Arduino Library's ```get``` function for that configuration item. The value is returned in the
+appropriate field of the ```SFE_QUAD_Sensor_Every_Type_t```.
+
+For the VL53L1X, the three ```uint16_t``` configuration items are returned in ```value->UINT16_T```.
+
+The distance mode (config item 0) is simply read from the ```_shortDistanceMode``` member variable. We _could_ have made use of the Library's
+```getDistanceMode``` method and converted the return value (1 or 2) to ```bool```. Doing it this way avoids an unnecessary I2C bus transaction.
+
+```c++
+  // Get (read) the sensor configuration item
+  bool getConfigurationItem(uint8_t configItem, SFE_QUAD_Sensor_Every_Type_t *value)
+  {
+    CLASSNAME *device = (CLASSNAME *)_classPtr;
+    switch (configItem)
+    {
+    case 0:
+      value->BOOL = _shortDistanceMode;
+      break;
+    case 1:
+      value->UINT16_T = device->getIntermeasurementPeriod();
+      break;
+    case 2:
+      value->UINT16_T = device->getXTalk();
+      break;
+    case 3:
+      value->UINT16_T = device->getOffset();
+      break;
+    default:
+      return (false);
+      break;
+    }
+    return (true);
+  }
+```
+
+### setConfigurationItem
+
+```setConfigurationItem``` is very similar to ```setSetting```.
+
+For the VL53L1X's distance mode, we use the value read from storage to update the ```_shortDistanceMode``` member variable.
+
+```c++
+  // Set (write) the sensor configuration item
+  bool setConfigurationItem(uint8_t configItem, SFE_QUAD_Sensor_Every_Type_t *value)
+  {
+    CLASSNAME *device = (CLASSNAME *)_classPtr;
+    switch (configItem)
+    {
     case 0:
       _shortDistanceMode = value->BOOL;
       device->stopRanging();
@@ -646,6 +785,204 @@ And here is the code for the setting (applying) the single distance mode _**Conf
         device->setDistanceModeLong();
       device->startRanging();
       break;
+    case 1:
+      device->stopRanging();
+      device->setIntermeasurementPeriod(value->UINT16_T);
+      device->startRanging();
+      break;
+    case 2:
+      device->stopRanging();
+      device->setXTalk(value->UINT16_T);
+      device->startRanging();
+      break;
+    case 3:
+      device->stopRanging();
+      device->setOffset(value->UINT16_T);
+      device->startRanging();
+      break;
+    default:
+      return (false);
+      break;
+    }
+    return (true);
+  }
+```
+
+## SFE_QUAD_Sensors.h
+
+When adding a new sensor, [SFE_QUAD_Sensors.h](../src/SFE_QUAD_Sensors.h) needs to be modified in three places:
+
+### INCLUDE_SFE_QUAD_SENSOR_NewSensorName
+
+Add a ```#define INCLUDE_SFE_QUAD_SENSOR_NewSensorName``` for the new sensor. This allows the user to select which sensors to include in the code build.
+By default, all sensors are included. Only including selected sensors speeds up the compilation time and reduces the amount of program memory used.
+
+However, **SFE_QUAD_Sensors.h** will be overwritten each time the library is updated. We have not (yet) been able to find a way of defining which sensors to include
+in the main **.ino** file. If you can think of a way of doing this - which works on all platforms - then please send us a Pull Request!
+
+For our fictitious **FOO** sensor, we would insert the #define in alphabetical order after **CCS811**:
+
+```c++
+// To select which sensors to include:
+//   comment #define INCLUDE_SFE_QUAD_SENSOR_ALL
+//   uncomment one or more #define INCLUDE_SFE_QUAD_SENSOR_
+
+//#define INCLUDE_SFE_QUAD_SENSOR_ADS122C04 // Include individual sensors
+//#define INCLUDE_SFE_QUAD_SENSOR_AHT20
+//#define INCLUDE_SFE_QUAD_SENSOR_BME280
+//#define INCLUDE_SFE_QUAD_SENSOR_CCS811_5A
+//#define INCLUDE_SFE_QUAD_SENSOR_CCS811_5B
+//#define INCLUDE_SFE_QUAD_SENSOR_FOO
+```
+
+The alphabetical ordering is not important, it just makes the list quicker to read.
+
+### SFEQUADSensorType
+
+Scrolling ~halfway down **SFE_QUAD_Sensors.h**, you will find ```enum SFEQUADSensorType``` near the start of the ```class SFE_QUAD_Sensors```.
+
+We need to add three lines for the new sensor. The ordering here is important as the ```enum SFEQUADSensorType``` is stored with each **Configuration Item**.
+The new sensor _must_ be added to the end of the ```enum``` just before ```SFE_QUAD_Sensor_Number_Of_Sensors```. Inserting it anywhere else will prevent existing saved configurations being used with the
+updated library.
+
+```c++
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_VL53L1X)
+    Sensor_VL53L1X,
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_FOO)
+    Sensor_FOO,
+#endif
+    SFE_QUAD_Sensor_Number_Of_Sensors // Must be last. <=== Add new sensors _above this line_ to preserve the existing enum values
+  };
+```
+
+However, if you look closely at ```enum SFEQUADSensorType```, you will see that the **MS8607** appears before the **MS5637**.
+
+```c++
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MS8607) // MS8607 must be before MS5637 (otherwise MS8607 will appear as a MS5637)
+    Sensor_MS8607,
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MS5637)
+    Sensor_MS5637,
+#endif
+```
+
+This is because the MS8607 is essentially a MS5637 with an additional built-in humidity sensor (with its own I<sup>2</sup>C address). The MS8607 must be detected before the MS5637 otherwise it will appear as a MS5637 _and_ a MS8607. ```detectSensors``` contains some additional code to prevent the re-detection of an MS8607 as a MS5637.
+
+There may be similar cases where it is necessary to detect sensors in a particular order and for the new sensor to be inserted part-way through ```enum SFEQUADSensorType```.
+If that happens, and you are sending us a Pull Request, please make this clear in the notes.
+We may still be able to merge your Pull Request, but we will need to make everyone aware that the new version is not backward-compatible with saved configurations from previous versions.
+
+### sensorFactory
+
+The final change to **SFE_QUAD_Sensors.h** is to add the new sensor to the ```sensorFactory```. This is the method which returns a new object of the requested sensor class.
+
+The order here is not important. Insert the new sensor alphabetically (unless there is a good reason not to):
+
+```c++
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_CCS811_5B)
+    if (type == Sensor_CCS811_5B)
+      return new SFE_QUAD_Sensor_CCS811_5B;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_FOO)
+    if (type == Sensor_FOO)
+      return new SFE_QUAD_Sensor_FOO;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_LPS25HB)
+    if (type == Sensor_LPS25HB)
+      return new SFE_QUAD_Sensor_LPS25HB;
+#endif
+```
+
+## SFE_QUAD_Headers.h
+
+When adding a new sensor, [SFE_QUAD_Headers.h](../src/SFE_QUAD_Headers.h) needs to be modified to include the header file new sensor.
+
+The order here is not important. Insert the new sensor alphabetically (unless there is a good reason not to):
+
+```c++
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_CCS811_5B)
+#include "src/SFE_QUAD_Sensor_CCS811_5B.h"
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_FOO)
+#include "src/SFE_QUAD_Sensor_FOO.h"
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_LPS25HB)
+#include "src/SFE_QUAD_Sensor_LPS25HB.h"
+#endif
+```
+
+## .github/workflows/compile-sketch.yml
+
+The final change is to update [.github/workflows/compile-sketch.yml](../.github/workflows/compile-sketch.yml) to include the new sensor's Arduino Library.
+
+Any changes to the sensor's Arduino Library are automatically merged into the copy in this library. That way, this library stays up to date with any and all changes to the
+individual Arduino Libraries.
+
+The entry for our fictitious **FOO** sensor would be something like:
+
+```c++
+      - name: Update FOO
+        run: |
+          cd ./src/src/
+          mkdir -p FOO
+          cd FOO
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_FOO_Arduino_Library/main/src/SparkFun_FOO_Arduino_Library.h
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_FOO_Arduino_Library/main/src/SparkFun_FOO_Arduino_Library.cpp
+```
+
+You need to include the full **raw.githubusercontent.com** address for the library files:
+* Navigate to the Arduino Library on GitHub
+* Navigate to the ```src``` sub-folder
+* Open the ```.h``` file
+* Click the **RAW** button to view the file's raw content
+* Copy and paste the address from your browser into **compile-sketch.yml**
+* Repeat for the ```.cpp``` file
+
+If the Arduino Library contains more than the standard ```.h``` and ```.cpp``` files, include those too. E.g. looking at the SGP40:
+
+```c++
+      - name: Update SGP40
+        run: |
+          cd ./src/src/
+          mkdir -p SGP40
+          cd SGP40
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SGP40_Arduino_Library/main/src/SparkFun_SGP40_Arduino_Library.h
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SGP40_Arduino_Library/main/src/SparkFun_SGP40_Arduino_Library.cpp
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SGP40_Arduino_Library/main/src/sensirion_arch_config.h
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SGP40_Arduino_Library/main/src/sensirion_voc_algorithm.h
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SGP40_Arduino_Library/main/src/sensirion_voc_algorithm.cpp
+```
+
+Finally, you need to check how the ```.cpp``` file includes its ```.h``` file. In Arduino examples, you will often see files included like this:
+
+```c++
+#include <FOO.h>
+```
+
+The less-than and greater-than tell (usually) the Arduino IDE compiler to search its **PATH** for ```FOO.h```. ```FOO.h``` will normally be
+in a ```\library``` sub-folder.
+
+For this library, we want to ensure the copy of the Arduino Library in the ```src\src``` sub-folder is used, not the copy from the IDE **PATH**.
+
+Look inside the ```.cpp``` file. If you see:
+
+```c++
+#include <FOO.h>
+```
+
+the you need to include one extra line in **compile-sketch.yml** so that the less-than and greater-than are changed automatically to double-quotes:
+
+```c++
+      - name: Update FOO
+        run: |
+          cd ./src/src/
+          mkdir -p FOO
+          cd FOO
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_FOO_Arduino_Library/main/src/SparkFun_FOO_Arduino_Library.h
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_FOO_Arduino_Library/main/src/SparkFun_FOO_Arduino_Library.cpp
+          # SparkFun_FOO_Arduino_Library.cpp uses #include <SparkFun_FOO_Arduino_Library.h>. We need to replace the < and > with double quotes
+          sed -i 's/<SparkFun_FOO_Arduino_Library.h>/'\"'SparkFun_FOO_Arduino_Library.h'\"'/g' SparkFun_FOO_Arduino_Library.cpp
 ```
 
 
