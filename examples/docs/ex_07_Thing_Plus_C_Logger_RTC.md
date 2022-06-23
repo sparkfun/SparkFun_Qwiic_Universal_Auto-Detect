@@ -1,5 +1,4 @@
-# Example 7 - ESP32 Thing Plus C Logger RTC
-# Logging sensor data with Real Time Clock support
+# Example 7 - ESP32 Thing Plus C Logger RTC - Logging sensor data with Real Time Clock support
 
 A more complex example to show how to log sensor data to microSD card using SparkFun Qwiic Universal Auto-Detect. This example includes Real Time Clock (RTC) support.
 

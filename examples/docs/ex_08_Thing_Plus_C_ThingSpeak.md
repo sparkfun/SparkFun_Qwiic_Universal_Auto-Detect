@@ -1,5 +1,4 @@
-# Example 8 - ESP32 Thing Plus C ThingSpeak Publish
-# Publishing sensor data to ThingSpeak
+# Example 8 - ESP32 Thing Plus C ThingSpeak Publish - Publishing sensor data to ThingSpeak
 
 A more complex example to show how to publish sensor data to ThingSpeak using SparkFun Qwiic Universal Auto-Detect.
 

@@ -1,5 +1,4 @@
-# Example 9 - Menu Memory Leak Test
-# How to test for a menu memory leak
+# Example 9 - Menu Memory Leak Test - How to test for a menu memory leak
 
 In [Example5](ex_05_Memory_Leak_Test.md), we learned how to test the ```SFE_QUAD_Sensors``` class for a memory leak, by declaring
 the SparkFun Qwiic Universal Auto-Detect object ```mySensors``` _inside_ the ```loop()```.

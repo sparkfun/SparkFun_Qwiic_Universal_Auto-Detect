@@ -1,5 +1,4 @@
-# Example 5 - Memory Leak Test
-# How to test for a memory leak
+# Example 5 - Memory Leak Test - How to test for a memory leak
 
 In most Arduino code, it is usual to declare an object at a global scope (after the include file declaration), not within the ```setup()``` or ```loop()``` functions.
 Because the object is global, both ```setup()``` and ```loop()``` can access it.
