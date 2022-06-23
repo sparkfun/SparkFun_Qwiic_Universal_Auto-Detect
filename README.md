@@ -21,6 +21,7 @@
 
 The SparkFun Qwiic Universal Auto-Detect library makes it easy to create a scalable Qwiic (I<sup>2</sup>C) sensing and logging device on a wide range of platforms.
 
+
 ## Key Features
 
 * Automatic detection of a wide range of Qwiic sensors
