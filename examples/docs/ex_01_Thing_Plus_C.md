@@ -1,4 +1,5 @@
 # Example 1 - ESP32 Thing Plus C
+# Using SD for setting storage
 
 A simple example to show the basic setup and use of SparkFun Qwiic Universal Auto-Detect.
 This example was written for the [*SparkFun ESP32 Thing Plus C (SPX-18018)*](https://www.sparkfun.com/products/18018) but can be adapted for many platforms.

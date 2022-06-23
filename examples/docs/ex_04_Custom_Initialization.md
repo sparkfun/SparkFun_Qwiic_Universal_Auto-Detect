@@ -1,4 +1,5 @@
 # Example 4 - Custom Initialization
+# How to change the sensor initialization
 
 Another of the fantastic things about SparkFun Qwiic Universal Auto-Detect is that it will automatically initialize the sensors for you.
 Based on our experience with [OpenLog Artemis](https://www.sparkfun.com/products/19426), we have included initialization code for the sensors

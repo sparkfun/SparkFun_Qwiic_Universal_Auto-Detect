@@ -1,4 +1,5 @@
 # Example 6 - ESP32 Thing Plus C Logger
+# Logging sensor data to microSD card
 
 A more complex example to show how to log sensor data to microSD card using the SparkFun Qwiic Universal Auto-Detect and SdFat libraries.
 This example was written for the [*SparkFun ESP32 Thing Plus C (SPX-18018)*](https://www.sparkfun.com/products/18018) but can be adapted for many platforms.

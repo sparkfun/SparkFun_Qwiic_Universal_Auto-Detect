@@ -1,12 +1,12 @@
 site_name: SparkFun Qwiic Universal Auto-Detect - Examples
 
 nav:
-  - Example 1 - Thing Plus C - using SD for setting storage: "ex_01_Thing_Plus_C.md"
-  - Example 2 - ESP32 LittleFS - using LittleFS for setting storage: "ex_02_ESP32_LittleFS.md"
-  - Example 3 - EEPROM - using EEPROM for setting storage: "ex_03_EEPROM.md"
-  - Example 4 - Custom Initialization - how to change the sensor initialization: "ex_04_Custom_Initialization.md"
-  - Example 5 - Memory Leak Test - how to test for a memory leak: "ex_05_Memory_Leak_Test.md"
-  - Example 6 - Thing Plus C Logger - logging sensor data to microSD card: "ex_06_Thing_Plus_C_Logger.md"
-  - Example 7 - Thing Plus C Logger RTC - logging sensor data with Real Time Clock support: "ex_07_Thing_Plus_C_Logger_RTC.md"
-  - Example 8 - Thing Plus C Logger ThingSpeak Publish - publishing sensor data to ThingSpeak: "ex_08_Thing_Plus_C_ThingSpeak.md"
-  - Example 9 - Menu Memory Leak Test - how to test for a menu memory leak: "ex_09_Menu_Memory_Leak_Test.md"
+  - Example 1 - Thing Plus C: "ex_01_Thing_Plus_C.md"
+  - Example 2 - ESP32 LittleFS: "ex_02_ESP32_LittleFS.md"
+  - Example 3 - EEPROM: "ex_03_EEPROM.md"
+  - Example 4 - Custom Initialization: "ex_04_Custom_Initialization.md"
+  - Example 5 - Memory Leak Test: "ex_05_Memory_Leak_Test.md"
+  - Example 6 - Thing Plus C Logger: "ex_06_Thing_Plus_C_Logger.md"
+  - Example 7 - Thing Plus C Logger RTC: "ex_07_Thing_Plus_C_Logger_RTC.md"
+  - Example 8 - Thing Plus C Logger ThingSpeak Publish: "ex_08_Thing_Plus_C_ThingSpeak.md"
+  - Example 9 - Menu Memory Leak Test: "ex_09_Menu_Memory_Leak_Test.md"

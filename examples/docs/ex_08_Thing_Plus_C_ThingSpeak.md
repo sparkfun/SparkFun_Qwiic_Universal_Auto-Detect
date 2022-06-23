@@ -1,4 +1,5 @@
 # Example 8 - ESP32 Thing Plus C ThingSpeak Publish
+# Publishing sensor data to ThingSpeak
 
 A more complex example to show how to publish sensor data to ThingSpeak using SparkFun Qwiic Universal Auto-Detect.
 
@@ -16,7 +17,7 @@ This example was written for the [*SparkFun ESP32 Thing Plus C (SPX-18018)*](htt
 * Writing the settings to EEPROM
 * Reading the settings back from EEPROM
 
-This example is very similar to [Example7](ex_06_Thing_Plus_C_Logger.md). Please see the Example 1, 6 and 7 documentation for a full walk-through of the code.
+This example is very similar to [Example7](ex_07_Thing_Plus_C_Logger_RTC.md). Please see the Example 1, 6 and 7 documentation for a full walk-through of the code.
 
 Let's walk through the key differences:
 
