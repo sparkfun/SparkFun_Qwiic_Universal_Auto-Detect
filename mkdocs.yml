@@ -1,7 +1,7 @@
 
-site_name: SparkFun Qwiic Universal Auto-Detect - Hookup Guide
+site_name: SparkFun Qwiic Universal Auto-Detect - Documentation
 site_description: SparkFun Qwiic Universal Auto-Detect. A library which makes it easy to create a scalable Qwiic (I2C) sensing and logging device on a wide range of platforms
-site_url: https://github.com/sparkfun/SparkFun_Qwiic_Universal_Auto-Detect
+site_url: https://sparkfun.github.io/SparkFun_Qwiic_Universal_Auto-Detect/
 
 
 theme:
