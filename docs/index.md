@@ -39,7 +39,7 @@ The SparkFun Qwiic Universal Auto-Detect library makes it easy to create a scala
 
 The [Getting Started Page](intro.md) outlines library installation and the general use of the SparkFun Qwiic Universal Auto-Detect library. 
 
-Detailed [`examples`](https://github.com/sparkfun/SparkFun_Qwiic_Universal_Auto-Detect/blob/main/examples) are included as part of the library installation process and available in the Arduino IDE `File > Examples >` menu. A walk-thru of key examples is contained in the [Examples](ex_01_Thing_Plus_C.md) section of this documentation set. 
+Detailed [`examples`](https://github.com/sparkfun/SparkFun_Qwiic_Universal_Auto-Detect/blob/main/examples) are included as part of the library installation process and available in the Arduino IDE `File > Examples >` menu. A walk-thru of key examples is contained in the [Examples](../examples/docs/ex_01_Thing_Plus_C.md) section of this documentation set. 
 
 A full [API Reference](api_SFE_QUAD_Sensors.md) is also provided for the library.
 

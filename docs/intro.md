@@ -20,7 +20,7 @@ The built-in menus make it easy to define and store thing like: the logging inte
 
 If your platform has (e.g.) WiFi or BLE connectivity, this library makes it easy to access the sensor data over those connections. However, you won't find
 any WiFi or BLE code in this library. Those are layers you can add yourself depending on which hardware platform you are using. As time goes on, we will expand the provided
-[_examples_](ex_01_Thing_Plus_C.md) showing how you can (e.g.) access the sensor data via an ESP32 WiFi web page. But we won't ever build that functionality directly into the library itself.
+[_examples_](../examples/docs/ex_01_Thing_Plus_C.md) showing how you can (e.g.) access the sensor data via an ESP32 WiFi web page. But we won't ever build that functionality directly into the library itself.
 It then becomes hardware-dependent and that goes against what this library sets out to achieve: hardware-independence!
 
 This library contains everything you need to log data from all supported sensors. You do not _need_ a WiFi connection and it does not need to connect to an IO server
@@ -29,7 +29,7 @@ or dashboard before you can access your sensor data. No account required!
 When it comes to storing the sensor configuration and menu settings, we've made that as hardware-independent as possible too. You will find support and examples
 showing how you can store the configuration on microSD card, LittleFS or in EEPROM memory.
 
-The [examples](ex_01_Thing_Plus_C.md) in this library were written for the [SparkFun Thing Plus C - ESP32 WROOM (SPX-18018)](https://www.sparkfun.com/products/18018)
+The [examples](../examples/docs/ex_01_Thing_Plus_C.md) in this library were written for the [SparkFun Thing Plus C - ESP32 WROOM (SPX-18018)](https://www.sparkfun.com/products/18018)
 but can be adapted for just about any platform.
 
 We've even tested it on the good old ATmega328P (as used on the original Uno and RedBoards). The 328P does not have enough memory to hold all of the sensor libraries,
