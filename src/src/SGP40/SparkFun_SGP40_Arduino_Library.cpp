@@ -347,11 +347,11 @@ uint8_t SGP40::_CRC8(uint16_t data)
 //Generates CRC8 for SGP40 from lookup table
 uint8_t SGP40::_CRC8(uint16_t data)
 {
-  uint8_t CRC = 0xFF; //inital value
-  CRC ^= (uint8_t)(data >> 8); //start with MSB
-  CRC = _CRC8LookupTable[CRC >> 4][CRC & 0xF]; //look up table [MSnibble][LSnibble]
-  CRC ^= (uint8_t)data; //use LSB
-  CRC = _CRC8LookupTable[CRC >> 4][CRC & 0xF]; //look up table [MSnibble][LSnibble]
-  return CRC;
+  uint8_t crc = 0xFF; //inital value
+  crc ^= (uint8_t)(data >> 8); //start with MSB
+  crc = _CRC8LookupTable[crc >> 4][crc & 0xF]; //look up table [MSnibble][LSnibble]
+  crc ^= (uint8_t)data; //use LSB
+  crc = _CRC8LookupTable[crc >> 4][crc & 0xF]; //look up table [MSnibble][LSnibble]
+  return crc;
 }
 #endif

@@ -33,4 +33,4 @@ The [examples](../examples/) in this library were written for the [SparkFun Thin
 but can be adapted for just about any platform.
 
 We've even tested it on the good old ATmega328P (as used on the original Uno and RedBoards). The 328P does not have enough memory to hold all of the sensor libraries,
-but you can enable a small sub-set of sensors (by editing [SFE_QUAD_Sensors.h](../src/SFE_QUAD_Sensors.h)) and still make use of the bulit-in menus!
+but you can enable a small sub-set of sensors (by editing [SFE_QUAD_Sensors.h](../src/SFE_QUAD_Sensors.h/)) and still make use of the bulit-in menus!

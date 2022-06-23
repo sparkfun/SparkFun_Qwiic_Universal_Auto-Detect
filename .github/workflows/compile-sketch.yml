@@ -71,11 +71,11 @@ jobs:
           # SparkFun_LPS25HB_Arduino_Library.cpp uses #include <SparkFun_LPS25HB_Arduino_Library.h>. We need to replace the < and > with double quotes
           sed -i 's/<SparkFun_LPS25HB_Arduino_Library.h>/'\"'SparkFun_LPS25HB_Arduino_Library.h'\"'/g' SparkFun_LPS25HB_Arduino_Library.cpp
 
-      - name: Update MAX17048
+      - name: Update MAX1704X
         run: |
           cd ./src/src/
-          mkdir -p MAX17048
-          cd MAX17048
+          mkdir -p MAX1704X
+          cd MAX1704X
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_MAX1704x_Fuel_Gauge_Arduino_Library/main/src/SparkFun_MAX1704x_Fuel_Gauge_Arduino_Library.h
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_MAX1704x_Fuel_Gauge_Arduino_Library/main/src/SparkFun_MAX1704x_Fuel_Gauge_Arduino_Library.cpp
 
@@ -140,11 +140,11 @@ jobs:
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SCD30_Arduino_Library/main/src/SparkFun_SCD30_Arduino_Library.h
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SCD30_Arduino_Library/main/src/SparkFun_SCD30_Arduino_Library.cpp
 
-      - name: Update SCD40
+      - name: Update SCD4X
         run: |
           cd ./src/src/
-          mkdir -p SCD40
-          cd SCD40
+          mkdir -p SCD4X
+          cd SCD4X
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SCD4x_Arduino_Library/main/src/SparkFun_SCD4x_Arduino_Library.h
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SCD4x_Arduino_Library/main/src/SparkFun_SCD4x_Arduino_Library.cpp
 
@@ -173,7 +173,7 @@ jobs:
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SGP40_Arduino_Library/main/src/SparkFun_SGP40_Arduino_Library.cpp
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SGP40_Arduino_Library/main/src/sensirion_arch_config.h
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SGP40_Arduino_Library/main/src/sensirion_voc_algorithm.h
-          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SGP40_Arduino_Library/main/src/sensirion_voc_algorithm.cpp
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SGP40_Arduino_Library/main/src/sensirion_voc_algorithm.c
 
       - name: Update SHTC3
         run: |
@@ -250,7 +250,7 @@ jobs:
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_VL53L1X_Arduino_Library/master/src/st_src/vl53l1x_class.h
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_VL53L1X_Arduino_Library/master/src/st_src/vl53l1x_class.cpp
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_VL53L1X_Arduino_Library/master/src/st_src/RangeSensor.h
-          sed -i 's/<st_src/ComponentObject.h>/'\"'ComponentObject.h'\"'/g' RangeSensor.h
+          sed -i 's/<st_src\/ComponentObject.h>/'\"'ComponentObject.h'\"'/g' RangeSensor.h
 
       - name: Add and Commit
         uses: EndBug/add-and-commit@v9
