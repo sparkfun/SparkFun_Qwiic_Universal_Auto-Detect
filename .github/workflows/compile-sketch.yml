@@ -173,7 +173,7 @@ jobs:
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SGP40_Arduino_Library/main/src/SparkFun_SGP40_Arduino_Library.cpp
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SGP40_Arduino_Library/main/src/sensirion_arch_config.h
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SGP40_Arduino_Library/main/src/sensirion_voc_algorithm.h
-          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SGP40_Arduino_Library/main/src/sensirion_voc_algorithm.cpp
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SGP40_Arduino_Library/main/src/sensirion_voc_algorithm.c
 
       - name: Update SHTC3
         run: |

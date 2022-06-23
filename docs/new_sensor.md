@@ -3,16 +3,16 @@
 Adding a new sensor is easy! Here is a summary of the steps:
 
 * Create an _**SFE_QUAD_Sensor_NewSensorName.h**_ file for it, using the existing files as a template
-  * You will find the individual sensor header files in the library [src/src](../src/src) sub-folder
-* Edit [SFE_QUAD_Sensors.h](../src/SFE_QUAD_Sensors.h) :
+  * You will find the individual sensor header files in the library [src/src](../src/src/) sub-folder
+* Edit [SFE_QUAD_Sensors.h](../src/SFE_QUAD_Sensors.h/) :
   * Add a _**#define INCLUDE_SFE_QUAD_SENSOR_NewSensorName**_ for the new sensor - in case the user wants to select which sensors to include
   * Add a new entry for the sensor in _**enum SFEQUADSensorType**_ (3 lines for each new sensor)
   * Add a new entry for the sensor in _**SFE_QUAD_Sensor <b>*</b>sensorFactory**_ (4 lines for each new sensor)
-* Edit [SFE_QUAD_Headers.h](../src/SFE_QUAD_Headers.h) :
+* Edit [SFE_QUAD_Headers.h](../src/SFE_QUAD_Headers.h/) :
   * Add a new entry for the sensor (3 lines for each new sensor)
-* Edit [.github/workflows/compile-sketch.yml](../.github/workflows/compile-sketch.yml) :
+* Edit [.github/workflows/compile-sketch.yml](../.github/workflows/compile-sketch.yml/) :
   * Add a _**- name: Update NewSensorName**_ entry for the new sensor
-  * This automates copying the Arduino Library files into the [src/src](../src/src) sub-folder
+  * This automates copying the Arduino Library files into the [src/src](../src/src/) sub-folder
   * The latest versions of the library .h. and .cpp will be copied and added to a GitHub pull request automatically
 
 _That's all folks!_
@@ -29,10 +29,10 @@ _as-is_ and without modification. The header file provides a standard set of met
 
 You can use the existing **SFE_QUAD_Sensor_SensorName.h** files as a template for the new sensor.
 
-If you are adding support for a 'simple' sensor which has no settings and requires no configuration, then the [BME280 header file](../src/src/SFE_QUAD_Sensor_BME280.h)
+If you are adding support for a 'simple' sensor which has no settings and requires no configuration, then the [BME280 header file](../src/src/SFE_QUAD_Sensor_BME280.h/)
 is a good choice.
 
-For a more complex sensor, the [VL53L1X header file](../src/src/SFE_QUAD_Sensor_VL53L1X.h) is a good starting point.
+For a more complex sensor, the [VL53L1X header file](../src/src/SFE_QUAD_Sensor_VL53L1X.h/) is a good starting point.
 
 ### Compiler Guard
 
@@ -810,7 +810,7 @@ For the VL53L1X's distance mode, we use the value read from storage to update th
 
 ## SFE_QUAD_Sensors.h
 
-When adding a new sensor, [SFE_QUAD_Sensors.h](../src/SFE_QUAD_Sensors.h) needs to be modified in three places:
+When adding a new sensor, [SFE_QUAD_Sensors.h](../src/SFE_QUAD_Sensors.h/) needs to be modified in three places:
 
 ### INCLUDE_SFE_QUAD_SENSOR_NewSensorName
 
@@ -896,7 +896,7 @@ The order here is not important. Insert the new sensor alphabetically (unless th
 
 ## SFE_QUAD_Headers.h
 
-When adding a new sensor, [SFE_QUAD_Headers.h](../src/SFE_QUAD_Headers.h) needs to be modified to include the header file for the new sensor.
+When adding a new sensor, [SFE_QUAD_Headers.h](../src/SFE_QUAD_Headers.h/) needs to be modified to include the header file for the new sensor.
 
 The order here is not important. Insert the new sensor alphabetically (unless there is a good reason not to):
 
@@ -914,7 +914,7 @@ The order here is not important. Insert the new sensor alphabetically (unless th
 
 ## .github/workflows/compile-sketch.yml
 
-The final change is to update [.github/workflows/compile-sketch.yml](../.github/workflows/compile-sketch.yml) to include the new sensor's Arduino Library.
+The final change is to update [.github/workflows/compile-sketch.yml](../.github/workflows/compile-sketch.yml/) to include the new sensor's Arduino Library.
 
 Any changes to the sensor's Arduino Library are automatically merged into the copy in this library. That way, this library stays up to date with any and all changes to the
 individual Arduino Libraries.
