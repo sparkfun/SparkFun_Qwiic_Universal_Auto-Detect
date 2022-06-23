@@ -60,7 +60,7 @@ bool SFEVL53L1X::checkID()
 {
 	uint16_t sensorId;
 	_device->VL53L1X_GetSensorId(&sensorId);
-	if ((sensorId == 0xEACC) || (sensorId == 0xEBAA) || (sensorId == 0xEAAA)) // 0xEAAA is a temporary hack to allow a VL53L3CX to be detected as a VL53L1X
+	if ((sensorId == 0xEACC) || (sensorId == 0xEBAA))
 		return true;
 	return false;
 }
