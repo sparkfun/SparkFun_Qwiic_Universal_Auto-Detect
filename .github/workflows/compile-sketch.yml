@@ -250,7 +250,7 @@ jobs:
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_VL53L1X_Arduino_Library/master/src/st_src/vl53l1x_class.h
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_VL53L1X_Arduino_Library/master/src/st_src/vl53l1x_class.cpp
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_VL53L1X_Arduino_Library/master/src/st_src/RangeSensor.h
-          sed -i 's/<st_src/ComponentObject.h>/'\"'ComponentObject.h'\"'/g' RangeSensor.h
+          sed -i 's/<st_src\/ComponentObject.h>/'\"'ComponentObject.h'\"'/g' RangeSensor.h
 
       - name: Add and Commit
         uses: EndBug/add-and-commit@v9
