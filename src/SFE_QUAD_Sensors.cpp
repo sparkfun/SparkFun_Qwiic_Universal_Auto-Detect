@@ -515,6 +515,7 @@ bool SFE_QUAD_Sensors::detectSensors(void)
                       _head->_sensorAddress = tryThisAddress;
                       _head->_muxAddress = muxAddr == 0x6F ? 0 : muxAddr;
                       _head->_muxPort = muxAddr == 0x6F ? 0 : muxPort;
+                      _head->_sprintf._prec = _sprintf._prec; // Inherit _prec from the Sensors
                     }
                     else
                     {
@@ -527,6 +528,7 @@ bool SFE_QUAD_Sensors::detectSensors(void)
                       nextSensor->_next->_sensorAddress = tryThisAddress;
                       nextSensor->_next->_muxAddress = muxAddr == 0x6F ? 0 : muxAddr;
                       nextSensor->_next->_muxPort = muxAddr == 0x6F ? 0 : muxPort;
+                      nextSensor->_next->_sprintf._prec = _sprintf._prec; // Inherit _prec from the Sensors
                     }
                   }
                 }
@@ -1064,7 +1066,7 @@ bool SFE_QUAD_Sensors::loggingMenu(void)
     if (menuChoice == 0)
     {
       _menuPort->println(F("loggingMenu: exiting..."));
-      return (false);
+      return (true);
     }
 
     thisSensor = _head; // Point to the first sensor
@@ -1227,7 +1229,7 @@ bool SFE_QUAD_Sensors::settingMenu(void)
     if (menuChoice == 0)
     {
       _menuPort->println(F("settingMenu: exiting..."));
-      return (false);
+      return (true);
     }
 
     thisSensor = _head; // Point to the first sensor

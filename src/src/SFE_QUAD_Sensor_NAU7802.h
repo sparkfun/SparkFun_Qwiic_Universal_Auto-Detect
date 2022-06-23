@@ -138,14 +138,14 @@ public:
     return (NULL);
   }
 
-  // Return the specified sense reading as exponential format text. ===> Adapt this to match the sensor type <===
+  // Return the specified sense reading as text. ===> Adapt this to match the sensor type <===
   bool getSenseReading(uint8_t sense, char *reading)
   {
     CLASSNAME *device = (CLASSNAME *)_classPtr;
     switch (sense)
     {
     case 0:
-      _sprintf._etoa((double)device->getWeight(true), reading); // Get the weight. Allow negative weights
+      _sprintf._dtostrf((double)device->getWeight(true), reading); // Get the weight. Allow negative weights
       return (true);
       break;
     default:

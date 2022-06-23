@@ -148,7 +148,7 @@ public:
     return (NULL);
   }
 
-  // Return the specified sense reading as exponential format text. ===> Adapt this to match the sensor type <===
+  // Return the specified sense reading as text. ===> Adapt this to match the sensor type <===
   bool getSenseReading(uint8_t sense, char *reading)
   {
     CLASSNAME *device = (CLASSNAME *)_classPtr;
@@ -161,7 +161,7 @@ public:
       {
         pressedPopped = device->popPressedQueue();
       }
-      _sprintf._etoa(((double)pressedPopped) / 1000.0, reading); // Get the pressure
+      _sprintf._dtostrf(((double)pressedPopped) / 1000.0, reading); // Get the pressure
       return (true);
     }
       break;
@@ -173,7 +173,7 @@ public:
         clickedPopped = device->popClickedQueue();
         _ledState ^= 1; // Toggle ledState
       }
-      _sprintf._etoa(((double)clickedPopped) / 1000.0, reading); // Get the pressure
+      _sprintf._dtostrf(((double)clickedPopped) / 1000.0, reading); // Get the pressure
       if (_toggleLEDOnClick)
       {
         if (_ledState)

@@ -14,6 +14,10 @@
 
 #include "SFE_QUAD_Menus.h" // Click here to get the library:  http://librarymanager/All#SparkFun_Qwiic_Universal_Auto-Detect
 
+#ifndef LED_BUILTIN
+#define LED_BUILTIN 13 // The Thing Plus C STAT LED is connected to digital pin 13
+#endif
+
 void setup()
 {
   pinMode (LED_BUILTIN, OUTPUT);

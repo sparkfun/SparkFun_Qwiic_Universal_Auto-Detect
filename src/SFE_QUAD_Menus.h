@@ -13,7 +13,6 @@ typedef enum
   SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END,
   SFE_QUAD_MENU_VARIABLE_TYPE_CODE,
   SFE_QUAD_MENU_VARIABLE_TYPE_TEXT,
-  SFE_QUAD_MENU_VARIABLE_TYPE_TEXT_EDIT,
   SFE_QUAD_MENU_VARIABLE_TYPE_BOOL,
   SFE_QUAD_MENU_VARIABLE_TYPE_FLOAT,
   SFE_QUAD_MENU_VARIABLE_TYPE_DOUBLE,
@@ -47,7 +46,7 @@ class SFE_QUAD_Menu_sprintf
 public:
   void printDouble(double value, Print *pr);
   char *_dtostrf(double value, char *buffer);
-  unsigned char _prec = 7;                                // precision
+  unsigned char _prec = 3;                                // precision
   void setPrecision(unsigned char prec) { _prec = prec; } // Call setPrecision to change the number of decimal places for the readings
   unsigned char getPrecision(void) { return (_prec); }
 };

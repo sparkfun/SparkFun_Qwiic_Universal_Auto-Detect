@@ -2,7 +2,7 @@
   SFE QUAD Logger - ESP32 Thing Plus C
   By: Paul Clark
   SparkFun Electronics
-  Date: May 2022
+  Date: June 2022
   
   This code is a proof-of-concept demonstration of a scalable I2C sensing and logging device,
   based initially on the SparkFun Thing Plus C - ESP32 WROOM (SPX-18018):
@@ -27,7 +27,7 @@
 SFE_QUAD_Sensors__SdFat mySensors;
 
 
-const char configurationFileName[] = "OLconfig.csv"; //The sensor configuration will be stored in this file
+const char configurationFileName[] = "Config.csv"; //The sensor configuration will be stored in this file
 
 const int sd_cs = 5; //Define the microSD chip select pin (e.g. pin 5 on the Thing Plus C)
 
@@ -37,8 +37,6 @@ int qwiicPower = 0; //Thing Plus C digital pin 0 is connected to the v-reg that 
 #ifndef LED_BUILTIN
 #define LED_BUILTIN 13 // The Thing Plus C STAT LED is connected to digital pin 13
 #endif
-
-const unsigned long loggingInterval = 1000; //This defines the logging interval in milliseconds. Change this if required.
 
 
 // Define the log file type - use the same type as the Qwiic Universal Auto-Detect library
@@ -58,8 +56,9 @@ bool onlineDataLogging; //This flag indicates if we are logging data to sensorDa
 
 void setup()
 {
+  delay(1000); //Give the sensors time to power on
+
   Serial.begin(115200);
-  delay(1000);
   Serial.println(F("SparkFun Qwiic Universal Auto-Detect - ESP32 Thing Plus C Logger"));
 
   // Enable power for the Qwiic bus
@@ -71,16 +70,13 @@ void setup()
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
 
-  Wire.begin();
+  Wire.begin(); // Begin the Wire port at the default speed (usually 100kHz)
 
   mySensors.setWirePort(Wire); // Tell the class which Wire port to use
 
   //mySensors.enableDebugging(Serial); // Uncomment this line to enable debug messages on Serial
 
   mySensors.setMenuPort(Serial); // Use Serial for the logging menu
-
-  while (mySensors._menuPort->available()) // Clear the menu serial buffer
-    mySensors._menuPort->read();
 
   mySensors.detectSensors(); // Detect which sensors are connected
 
@@ -89,15 +85,17 @@ void setup()
   mySensors.initializeSensors(); // Initialize all the sensors
 
   if (!mySensors.beginStorage(sd_cs, (const char *)configurationFileName))
+  {
     Serial.println(F("beginStorage failed! You will not be able to read or write the sensor configuration..."));
+  }
 
   // Read the configuration file and configure the sensors
-  mySensors.readConfigurationFromStorage();
-  mySensors.applySensorConfiguration();
+  readConfig();
 
   // mySensors.beginStorage has done the sd.begin for us
   // Open the next available log file
   onlineDataLogging = false;
+  Serial.println(F("Finding the next available log file..."));
   if (findNextAvailableLog(sensorDataFileName, "dataLog", false)) // Do not reuse empty files - to save time
   {
     // O_CREAT - create the file if it does not exist
@@ -116,11 +114,32 @@ void setup()
     Serial.println(F("Failed to open sensor data log file"));
   }
 
-  Serial.println(F("Press L to open the logging menu"));
-  Serial.println(F("Press S to open the setting menu"));
-  Serial.println(F("Press W to write the sensor configuration to file"));
-  if (onlineDataLogging)
-    Serial.println(F("Press Q or the BOOT button to stop logging"));
+  // Create the menu
+  mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  mySensors.theMenu.addMenuItem("Menu", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  mySensors.theMenu.addMenuItem("====", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  mySensors.theMenu.addMenuItem("Logging interval (ms)", SFE_QUAD_MENU_VARIABLE_TYPE_ULONG);  
+  SFE_QUAD_Menu_Every_Type_t defaultValue;
+  defaultValue.ULONG = 1000;
+  mySensors.theMenu.setMenuItemVariable("Logging interval (ms)", &defaultValue); // Set the default logging interval - this will be updated by readConfig
+  defaultValue.ULONG = 100;
+  mySensors.theMenu.setMenuItemVariableMin("Logging interval (ms)", &defaultValue); // Set the minimum logging interval - this will be updated by readConfig
+  defaultValue.ULONG = 3600000;
+  mySensors.theMenu.setMenuItemVariableMax("Logging interval (ms)", &defaultValue); // Set the maximum logging interval - this will be updated by readConfig
+  mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  mySensors.theMenu.addMenuItem("Stop logging", stopLogging);
+  mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  mySensors.theMenu.addMenuItem("Open the sensor logging menu", openLoggingMenu);
+  mySensors.theMenu.addMenuItem("Open the sensor settings menu", openSettingMenu);
+  mySensors.theMenu.addMenuItem("Write the logger configuration to SD", writeConfig);
+  mySensors.theMenu.addMenuItem("Read the logger configuration from SD", readConfig);
+  mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
+  
+  while (mySensors.theMenu._menuPort->available()) // Clear the menu serial buffer
+    mySensors.theMenu._menuPort->read();
+
+  Serial.println(F("Press any key to open the menu"));
 
   mySensors.getSensorNames(); // Print the sensor names helper
   Serial.println(mySensors.readings);
@@ -135,9 +154,11 @@ void setup()
 
 void loop()
 {
-  static unsigned long lastRead;
-
-  if (millis() > (lastRead + loggingInterval))
+  // Logging interval - read the sensors every loggingInterval milliseconds
+  static unsigned long lastRead = 0;
+  SFE_QUAD_Menu_Every_Type_t loggingInterval;
+  mySensors.theMenu.getMenuItemVariable("Logging interval (ms)", &loggingInterval); // Get the logging interval from theMenu
+  if (millis() > (lastRead + loggingInterval.ULONG)) // Is it time to read the sensors?
   {
     lastRead = millis(); // Update the time of the last read
     
@@ -154,74 +175,79 @@ void loop()
     }
   }
 
-  if (mySensors._menuPort->available()) // Has the user pressed a key?
+  if (mySensors.theMenu._menuPort->available()) // Has the user pressed a key?
   {
-    char choice = mySensors._menuPort->read();
-    
-    if ((choice == 'l') || (choice == 'L')) // Open the logging menu
-    {
-      mySensors.loggingMenu();
-      
-      if (onlineDataLogging) // Open a new log file - the sense names may have changed
-      {
-        sensorDataFile.close();
-        
-        if (findNextAvailableLog(sensorDataFileName, "dataLog", false)) // Do not reuse empty files - to save time
-        {
-          onlineDataLogging = sensorDataFile.open(sensorDataFileName, O_CREAT | O_APPEND | O_WRITE) == true;
-        }
-        
-        if (onlineDataLogging)
-        {
-          Serial.print(F("Logging sensor data to: "));
-          Serial.println(sensorDataFileName);
-        }
-        else
-        {
-          Serial.println(F("Failed to open new sensor data log file"));
-        }
-      }
-
-      mySensors.getSensorNames(); // Print the sensor names helper - it may have changed
-      Serial.println(mySensors.readings);
-      if (onlineDataLogging)
-        sensorDataFile.println(mySensors.readings);
-
-      mySensors.getSenseNames(); // Print the sense names helper - it may have changed
-      Serial.println(mySensors.readings);
-      if (onlineDataLogging)
-        sensorDataFile.println(mySensors.readings);
-    }
-      
-    else if ((choice == 's') || (choice == 'S')) // Open the setting menu
-      mySensors.settingMenu();
-
-    else if ((choice == 'w') || (choice == 'W')) // Write the sensor configuration to microSD
-    {
-      mySensors.getSensorConfiguration();
-      if (mySensors.writeConfigurationToStorage(false)) // Set append to false - overwrite the configuration
-        Serial.println(F("Sensor configuration written to file"));
-    }
-
-    else if ((choice == 'q') || (choice == 'Q')) // Close the log file
-    {
-      if (onlineDataLogging)
-      {
-        sensorDataFile.close();
-        onlineDataLogging = false;
-        Serial.println(F("Log file closed"));
-      }
-    }
+    mySensors.theMenu.openMenu(); // If so, open the menu
   }
 
   if (digitalRead(qwiicPower) == LOW) // Check if the user has pressed the stop logging button
   {
+    stopLogging();
+  }
+}
+
+void openLoggingMenu(void)
+{
+  mySensors.loggingMenu();
+  
+  if (onlineDataLogging) // Open a new log file - the sense names may have changed
+  {
+    sensorDataFile.close();
+    
+    Serial.println(F("Finding the next available log file..."));
+    
+    if (findNextAvailableLog(sensorDataFileName, "dataLog", false)) // Do not reuse empty files - to save time
+    {
+      onlineDataLogging = sensorDataFile.open(sensorDataFileName, O_CREAT | O_APPEND | O_WRITE) == true;
+    }
+    
     if (onlineDataLogging)
     {
-      sensorDataFile.close();
-      onlineDataLogging = false;
-      Serial.println(F("Log file closed"));
+      Serial.print(F("Logging sensor data to: "));
+      Serial.println(sensorDataFileName);
     }
+    else
+    {
+      Serial.println(F("Failed to open new sensor data log file"));
+    }
+  }
+
+  mySensors.getSensorNames(); // Print the sensor names helper - it may have changed
+  Serial.println(mySensors.readings);
+  if (onlineDataLogging)
+    sensorDataFile.println(mySensors.readings);
+
+  mySensors.getSenseNames(); // Print the sense names helper - it may have changed
+  Serial.println(mySensors.readings);
+  if (onlineDataLogging)
+    sensorDataFile.println(mySensors.readings);
+}
+
+void openSettingMenu(void)
+{
+  mySensors.settingMenu();
+}
+
+void writeConfig(void)
+{
+  mySensors.getSensorAndMenuConfiguration();
+  if (mySensors.writeConfigurationToStorage(false)) // Set append to false - overwrite the configuration
+    Serial.println(F("Logger configuration written to file"));
+}
+
+void readConfig(void)
+{
+  mySensors.readConfigurationFromStorage();
+  mySensors.applySensorAndMenuConfiguration();
+}
+
+void stopLogging(void)
+{
+  if (onlineDataLogging)
+  {
+    sensorDataFile.close();
+    onlineDataLogging = false;
+    Serial.println(F("Log file closed"));
   }
 }
 

@@ -188,7 +188,7 @@ public:
     return (NULL);
   }
 
-  // Return the specified sense reading as exponential format text. ===> Adapt this to match the sensor type <===
+  // Return the specified sense reading as text. ===> Adapt this to match the sensor type <===
   bool getSenseReading(uint8_t sense, char *reading)
   {
     CLASSNAME *device = (CLASSNAME *)_classPtr;

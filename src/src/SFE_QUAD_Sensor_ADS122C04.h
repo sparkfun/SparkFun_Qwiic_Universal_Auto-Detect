@@ -145,7 +145,7 @@ public:
     return (NULL);
   }
 
-  // Return the specified sense reading as exponential format text. ===> Adapt this to match the sensor type <===
+  // Return the specified sense reading as text. ===> Adapt this to match the sensor type <===
   // Note: these are hard-wired to 20Hz sampling. TODO: allow the sample rate to be changed
   bool getSenseReading(uint8_t sense, char *reading)
   {
@@ -153,19 +153,19 @@ public:
     switch (sense)
     {
     case 0:
-      _sprintf._etoa((double)device->readPT100Centigrade(), reading); // Get the temperature
+      _sprintf._dtostrf((double)device->readPT100Centigrade(), reading); // Get the temperature
       return (true);
       break;
     case 1:
-      _sprintf._etoa((double)device->readPT100Fahrenheit(), reading); // Get the temperature
+      _sprintf._dtostrf((double)device->readPT100Fahrenheit(), reading); // Get the temperature
       return (true);
       break;
     case 2:
-      _sprintf._etoa((double)device->readInternalTemperature(), reading); // Get the temperature
+      _sprintf._dtostrf((double)device->readInternalTemperature(), reading); // Get the temperature
       return (true);
       break;
     case 3:
-      _sprintf._etoa((double)device->readRawVoltage() * 0.000000244140625, reading); // Get the raw voltage. Convert to volts
+      _sprintf._dtostrf((double)device->readRawVoltage() * 0.000000244140625, reading); // Get the raw voltage. Convert to volts
       return (true);
       break;
     default:

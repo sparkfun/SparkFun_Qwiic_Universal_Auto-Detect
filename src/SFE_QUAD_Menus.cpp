@@ -709,7 +709,7 @@ bool SFE_QUAD_Menu::openMenu(SFE_QUAD_Menu_Item *start)
     _menuPort->println();
 
     if (menuChoice == 0)
-      return (false);
+      return (true);
 
     menuItemPtr = start;     // Go back to the start
     if (menuItemPtr == NULL) // Default to _head if required

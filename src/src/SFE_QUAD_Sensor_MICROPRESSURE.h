@@ -156,38 +156,38 @@ public:
     return (NULL);
   }
 
-  // Return the specified sense reading as exponential format text. ===> Adapt this to match the sensor type <===
+  // Return the specified sense reading as text. ===> Adapt this to match the sensor type <===
   bool getSenseReading(uint8_t sense, char *reading)
   {
     CLASSNAME *device = (CLASSNAME *)_classPtr;
     switch (sense)
     {
     case 0:
-      _sprintf._etoa((double)device->readPressure(), reading); // Get the pressure
+      _sprintf._dtostrf((double)device->readPressure(), reading); // Get the pressure
       return (true);
       break;
     case 1:
-      _sprintf._etoa((double)device->readPressure(PA), reading); // Get the pressure
+      _sprintf._dtostrf((double)device->readPressure(PA), reading); // Get the pressure
       return (true);
       break;
     case 2:
-      _sprintf._etoa((double)device->readPressure(KPA), reading); // Get the pressure
+      _sprintf._dtostrf((double)device->readPressure(KPA), reading); // Get the pressure
       return (true);
       break;
     case 3:
-      _sprintf._etoa((double)device->readPressure(TORR), reading); // Get the pressure
+      _sprintf._dtostrf((double)device->readPressure(TORR), reading); // Get the pressure
       return (true);
       break;
     case 4:
-      _sprintf._etoa((double)device->readPressure(INHG), reading); // Get the pressure
+      _sprintf._dtostrf((double)device->readPressure(INHG), reading); // Get the pressure
       return (true);
       break;
     case 5:
-      _sprintf._etoa((double)device->readPressure(ATM), reading); // Get the pressure
+      _sprintf._dtostrf((double)device->readPressure(ATM), reading); // Get the pressure
       return (true);
       break;
     case 6:
-      _sprintf._etoa((double)device->readPressure(BAR), reading); // Get the pressure
+      _sprintf._dtostrf((double)device->readPressure(BAR), reading); // Get the pressure
       return (true);
       break;
     default:
