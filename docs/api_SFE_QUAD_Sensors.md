@@ -1,6 +1,7 @@
 # API Reference for the SFE_QUAD_Sensors class
 
 Methods to setup, configure and query the ```SFE_QUAD_Sensor``` object:
+
 - Return a pointer to the specified sensor class so it can be added to the linked-list of sensors
 - Define which Wire port will be used
 - Define which Serial port will be used for the built-in menus
@@ -43,6 +44,7 @@ It is possible to override the initialization code for each sensor type, or indi
 (You must call ```setCustomInitialize``` _before_ ```initialzeSensors```.)
 
 ```loggingMenu``` and ```settingMenu``` are methods which open built-in menus to:
+
 - Configure which senses on each sensor are enabled for logging
 - Call any settings methods the sensors may have (if any)
 
@@ -56,6 +58,7 @@ The names of all enabled senses can be read with ```getSenseNames```. The names 
 
 The sensor and menu configuration can be stored temporarily in a dynamic char array named ```configuration```.
 The text CSV ```configuration``` is written to storage and read from storage by the individual classes for EEPROM, LittleFS, SD and SdFat:
+
 - ```SFE_QUAD_Sensors__EEPROM```
 - ```SFE_QUAD_Sensors__LittleFS```
 - ```SFE_QUAD_Sensors__SD```
@@ -157,6 +160,7 @@ bool beginSensors(void)
 ### initializeSensors()
 
 This method initializes any detected sensors if required:
+
 - only if the library contains initialization code for that sensor type
 - and/or a custom initializer has been defined for that individual sensor or sensor type
 

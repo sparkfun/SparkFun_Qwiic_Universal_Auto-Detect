@@ -13,6 +13,7 @@ The ```_next``` of the final ```SFE_QUAD_Menu_Item``` in the list is ```NULL```.
 ```_head``` is initially ```NULL```. It is set the the address of the first ```SFE_QUAD_Menu_Item``` when ```addMenuItem``` is called.
 
 There are several different types of menu item, as defined by the ```SFE_QUAD_Menu_Variable_Type_e``` enum:
+
 - ```SFE_QUAD_MENU_VARIABLE_TYPE_NONE``` contains only the ```_itemName``` as text
     - The name of the menu and perhaps some underscoring can be defined using this type
     - This can be used to include 'empty' lines to separate parts of the menu
