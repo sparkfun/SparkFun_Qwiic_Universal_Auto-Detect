@@ -71,8 +71,8 @@ Change line 4 so it will include the library header file correctly.
 ```
 
 !!! note:
-  Always enclose the include file folder and name in double quotes. Do not use less-than and greater-than.
-  This ensures that the copy of the library in the **src/src/FOO** sub-folder is included, not a copy pointed to by the Arduino IDE path.
+    Always enclose the include file folder and name in double quotes. Do not use less-than and greater-than.
+    This ensures that the copy of the library in the **src/src/FOO** sub-folder is included, not a copy pointed to by the Arduino IDE path.
 
 ### CLASSNAME and CLASSTITLE
 
@@ -120,6 +120,7 @@ Change the definitions to match the new sensor:
 ### Settings vs. Configuration Items
 
 The VL53L1X has five settings:
+
 - Distance Mode: Short
 - Distance Mode: Long
 - Intermeasurement Period
@@ -127,6 +128,7 @@ The VL53L1X has five settings:
 - Offset
 
 But it only has four configuration items requiring storage:
+
 - Distance Mode
 - Intermeasurement Period
 - Crosstalk
@@ -135,6 +137,7 @@ But it only has four configuration items requiring storage:
 We do it this way so that the user can change the distance mode with a single key press.
 
 We could have used a single distance mode ```BOOL``` setting, representing Short vs. Long, but:
+
 - The user would have had to select the distance mode setting
 - Then enter a valid ```BOOL``` (0 or 1)
 - The code in ```setSetting``` would have had to validate the choice before applying it
@@ -174,6 +177,7 @@ for (int i = 1; i < 127; i++)
 ```
 
 However:
+
 - Getting an acknowledgement does not tell us what type of sensor was detected at that address, just that _something_ was detected
 - The ```beginTransmission``` + ```endTransmission``` test can cause some sensors to produce errors
 
@@ -318,6 +322,7 @@ The VL53L1X does require initialization. As a minimum, we need to set the distan
 ```_shortDistanceMode```  records or indicates whether the sensor is in short or long distance mode.
 
 Why did we do it this way? Couldn't we have used a ```BOOL``` configuration item for it instead? Yes, we could have done it that way, but, as we explained above:
+
 - The user would have had to select the distance mode setting
 - Then enter a valid ```BOOL``` (0 or 1)
 - The code in ```setSetting``` would have had to validate the choice before applying it
@@ -396,6 +401,7 @@ Looking closely at the code for the **Pressure** (sense 0):
 ```_sprintf._dtostrf((double)device->readFloatPressure(), reading);```
 
 The code is:
+
 - Calling the Arduino Library ```readFloatPressure()``` method, using the ```_classPtr```
 - The result is being cast to double
 - ```_sprintf._dtostrf``` is a helper function from the ```SFE_QUAD_Sensors_sprintf``` class which converts the double to text
@@ -662,6 +668,7 @@ the Configuration Items match the Settings.
 The number of ```case``` statements must match **CONFIGURATION_ITEM_COUNT**.
 
 Some important points:
+
 - Configuration Item names must not contain spaces
     - Use underscores where necessary
 - The names should be unique
@@ -932,6 +939,7 @@ The entry for our fictitious **FOO** sensor would be something like:
 ```
 
 You need to include the full **raw.githubusercontent.com** address for the library files:
+
 - Navigate to the Arduino Library on GitHub
 - Navigate to the ```src``` sub-folder
 - Open the ```.h``` file

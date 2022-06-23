@@ -1,6 +1,7 @@
 # API Reference for the SFE_QUAD_Sensor class
 
 Methods to allow the sensor's underlying Arduino Library be accessed in a homogeneous way:
+
 - Return the sensor's name
 - Return which I2C addresses are valid for this sensor
 - Detect the sensor
@@ -48,6 +49,7 @@ The ```SFE_QUAD_Sensors``` object is responsible for creating the linked-list.
 The possible (known) sensor types are defined in the ```enum SFEQUADSensorType``` in the ```SFE_QUAD_Sensors``` class.
 
 Sensor detection and initialization will typically be performed as follows:
+
 - For each sensor type in ```enum SFEQUADSensorType```:
     - If any Qwiic Muxes are detected, sensor detection is performed on all ports of all muxes.
     - The possible I2C addresses for the sensor are requested using ```getNumI2cAddresses``` and ```getI2cAddress```.
@@ -57,6 +59,7 @@ Sensor detection and initialization will typically be performed as follows:
     - If a custom initializer has been defined, that is used in place of the standard initializer.
 
 Reading the senses will typically be performed as follows:
+
 - For each sensor in the linked-list:
     - ```getSenseCount``` returns the number of senses this sensor has
     - ```_logSense``` (an array of ```bool```) records if each individual sense is enabled for logging
