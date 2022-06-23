@@ -7,15 +7,15 @@ This example was written for the [*SparkFun ESP32 Thing Plus C (SPX-18018)*](htt
 
 ## Key Features
 
-* Declaring a SFE_QUAD_Sensors object
-* Detecting which sensors are connected
-* Initializing the sensors
-* Setting up a menu
-* Configuring the WiFi SSID and password through the menu system
-* Configuring the sensor settings through the menu
-* Publishing the sensor readings to ThingSpeak
-* Writing the settings to EEPROM
-* Reading the settings back from EEPROM
+- Declaring a SFE_QUAD_Sensors object
+- Detecting which sensors are connected
+- Initializing the sensors
+- Setting up a menu
+- Configuring the WiFi SSID and password through the menu system
+- Configuring the sensor settings through the menu
+- Publishing the sensor readings to ThingSpeak
+- Writing the settings to EEPROM
+- Reading the settings back from EEPROM
 
 This example is very similar to [Example7](ex_07_Thing_Plus_C_Logger_RTC.md). Please see the Example 1, 6 and 7 documentation for a full walk-through of the code.
 
@@ -102,9 +102,9 @@ The Write API Key and Channel ID are of course stored in the menu, together with
   mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END); // End of the sub-menu
 ```
 
-* ```Write API Key``` is **SFE_QUAD_MENU_VARIABLE_TYPE_TEXT**
-* ```Channel ID``` is **SFE_QUAD_MENU_VARIABLE_TYPE_ULONG** (unisgned long)
-* ```Publish interval (ms)``` is also **SFE_QUAD_MENU_VARIABLE_TYPE_ULONG** (unisgned long)
+- ```Write API Key``` is **SFE_QUAD_MENU_VARIABLE_TYPE_TEXT**
+- ```Channel ID``` is **SFE_QUAD_MENU_VARIABLE_TYPE_ULONG** (unisgned long)
+- ```Publish interval (ms)``` is also **SFE_QUAD_MENU_VARIABLE_TYPE_ULONG** (unisgned long)
 
 The fastest you can send data to ThingSpeak is once every 15 seconds, so we set the minimum ```Publish interval (ms)``` to 15000.
 

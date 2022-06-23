@@ -6,13 +6,13 @@ This example was written for the [*SparkFun ESP32 Thing Plus C (SPX-18018)*](htt
 
 ## Key Features
 
-* Declaring a SFE_QUAD_Sensors object
-* Detecting which sensors are connected
-* Initializing the sensors
-* Setting up a menu
-* Configuring the sensor settings through the menu system
-* Writing the settings to EEPROM
-* Reading the settings back from EEPROM and applying them
+- Declaring a SFE_QUAD_Sensors object
+- Detecting which sensors are connected
+- Initializing the sensors
+- Setting up a menu
+- Configuring the sensor settings through the menu system
+- Writing the settings to EEPROM
+- Reading the settings back from EEPROM and applying them
 
 This example is almost identical to [Example1](ex_01_Thing_Plus_C.md). Please see the Example1 documentation for a full walk-through of the code.
 

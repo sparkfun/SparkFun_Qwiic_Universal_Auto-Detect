@@ -6,13 +6,13 @@ This example was written for the [*SparkFun ESP32 Thing Plus C (SPX-18018)*](htt
 
 ## Key Features
 
-* Declaring a SFE_QUAD_Sensors object
-* Detecting which sensors are connected
-* Initializing the sensors
-* Setting up a menu
-* Configuring the sensor settings through the menu system
-* Writing the settings to microSD card using the standard Arduino SD library
-* Reading the settings back from microSD card and applying them
+- Declaring a SFE_QUAD_Sensors object
+- Detecting which sensors are connected
+- Initializing the sensors
+- Setting up a menu
+- Configuring the sensor settings through the menu system
+- Writing the settings to microSD card using the standard Arduino SD library
+- Reading the settings back from microSD card and applying them
 
 Later examples show how to store the sensor settings in EEPROM and LittleFS.
 
@@ -58,16 +58,17 @@ SFE_QUAD_Sensors__EEPROM mySensors;
 ## Initialization
 
 In the ```setup()``` function of this sketch, we need to do several things to:
-* Start ```Wire``` (I<sup>2</sup>C) communication
-* Tell the QUAD object which Wire port to use
-* Tell the QUAD object which Serial port to use for the menus and to display the sensor readings
-* Detect which sensors are attached
-* Initialize the sensors
-* Begin the microSD storage, so we can later write and read the settings to and from microSD card
-* Set up the menu
-* Display which sensors have been found and what the sense names are:
-    * A sensor can have multiple senses. E.g. a MS8607 sensor has three senses: Pressure, Temperature and Humidity
-    * You can tell the QUAD object which senses to enable through the menus. For the MS8607, the code can read: none, one, two or all three senses
+
+- Start ```Wire``` (I<sup>2</sup>C) communication
+- Tell the QUAD object which Wire port to use
+- Tell the QUAD object which Serial port to use for the menus and to display the sensor readings
+- Detect which sensors are attached
+- Initialize the sensors
+- Begin the microSD storage, so we can later write and read the settings to and from microSD card
+- Set up the menu
+- Display which sensors have been found and what the sense names are:
+    - A sensor can have multiple senses. E.g. a MS8607 sensor has three senses: Pressure, Temperature and Humidity
+    - You can tell the QUAD object which senses to enable through the menus. For the MS8607, the code can read: none, one, two or all three senses
 
 ```C++
 void setup()
@@ -120,10 +121,11 @@ Say you want to be able to set your WiFi SSID within the menu and have it saved 
 SparkFun Qwiic Universal Auto-Detect will let you do that with two lines of code!
 
 The later examples show how to create more complex menus. However, in this example we keep things simple. The menu here allows you to:
-* Open the sensor logging menu
-* Open the sensor settings menu
-* Write the sensor configuration to SD
-* Read the sensor configuration from SD
+
+- Open the sensor logging menu
+- Open the sensor settings menu
+- Write the sensor configuration to SD
+- Read the sensor configuration from SD
 
 ```C++
   // Create the menu
@@ -171,12 +173,13 @@ The names of all of the attached sensors are returned in ```mySensors.readings``
 ```
 
 The sensor name is made up from the following (separated by underscores):
-* The sensor type (e.g. MS8607)
-* Its I<sup>2</sup>C address
-* If the sensor is connected through a [Qwiic Mux](https://www.sparkfun.com/products/16784), the name also contains:
-    * The Mux I<sup>2</sup>C address
-    * The number of the Mux port which the sensor is attached to
-* If a Mux is not being used, the Mux address and port are both shown as **0**
+
+- The sensor type (e.g. MS8607)
+- Its I<sup>2</sup>C address
+- If the sensor is connected through a [Qwiic Mux](https://www.sparkfun.com/products/16784), the name also contains:
+    - The Mux I<sup>2</sup>C address
+    - The number of the Mux port which the sensor is attached to
+- If a Mux is not being used, the Mux address and port are both shown as **0**
 
 ## Sense Names
 
@@ -198,10 +201,11 @@ Pressure (mbar),Temperature (C),Humidity (%)
 ```
 
 The sensor name is the following (separated by underscores):
-* MS8607
-* The I<sup>2</sup>C address: 64 decimal (which is 0x40 hexadecimal (unshifted))
-* No mux (address is shown as zero)
-* No mux port (port number is shown as zero)
+
+- MS8607
+- The I<sup>2</sup>C address: 64 decimal (which is 0x40 hexadecimal (unshifted))
+- No mux (address is shown as zero)
+- No mux port (port number is shown as zero)
 
 The sense names are self-explanatory. Again, they are Comma-Separated.
 
@@ -213,8 +217,9 @@ Pressure (mbar),Temperature (C),Humidity (%),Pressure (mbar),Temperature (C),Hum
 ```
 
 The sensor names indicate that the two MS8607s are connected:
-* Using a mux with address 113 (which is 0x71 hexadecimal (unshifted))
-* Using ports 0 and 1
+
+- Using a mux with address 113 (which is 0x71 hexadecimal (unshifted))
+- Using ports 0 and 1
 
 ## Sensor Readings
 
@@ -329,7 +334,8 @@ We can see that only Pressure and Humidity are enabled.
 The default precision (number of decimal places) is 3.
 You can adjust the precision by calling the method ```_sprintf.setPrecision```.
 E.g. to change the precision to 5 decimal places, insert this _before_ the ```mySensors.detectSensors();```:
-* ```mySensors._sprintf.setPrecision(5);```
+
+- ```mySensors._sprintf.setPrecision(5);```
 
 There is a helper method ```_sprintf.expStrToDouble``` which you can use to convert exponent-format text into a double.
 
@@ -502,17 +508,19 @@ SparkFun Qwiic Universal Auto-Detect makes it so easy!
 You can load the settings by default by calling ```readConfig();``` in your ```setup()```.
 
 The stored configuration includes which mux port the sensor is connected to. So, you can:
-* Connect multiple NAU7802s via a [Qwiic Mux](https://www.sparkfun.com/products/16784)
-* Calibrate all of the sensors using the menus
-* Store the configuration for all the sensors
-* Restore the configuration for all the sensors
+
+- Connect multiple NAU7802s via a [Qwiic Mux](https://www.sparkfun.com/products/16784)
+- Calibrate all of the sensors using the menus
+- Store the configuration for all the sensors
+- Restore the configuration for all the sensors
 
 So long as you do not change which mux port each sensor is connected to, the correct configuration will be restored each time!
 
 ## Menu Timeout
 
 If the 10 second menu timeout is too short for you, you can change it to (e.g.) 20 seconds by calling:
-* ```mySensors.theMenu.setMenuTimeout(20000);```
+
+- ```mySensors.theMenu.setMenuTimeout(20000);```
 
 The menu timeout is set in milliseconds.
 

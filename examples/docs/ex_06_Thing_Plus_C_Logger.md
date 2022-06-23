@@ -6,15 +6,15 @@ This example was written for the [*SparkFun ESP32 Thing Plus C (SPX-18018)*](htt
 
 ## Key Features
 
-* Declaring a SFE_QUAD_Sensors object
-* Detecting which sensors are connected
-* Initializing the sensors
-* Setting up a menu
-* Configuring the sensor settings through the menu system
-* Log data to microSD card using the SdFat library
-    * The logging rate / interval is set by the menu
-* Writing the settings to microSD card using SdFat
-* Reading the settings back from microSD card and applying them
+- Declaring a SFE_QUAD_Sensors object
+- Detecting which sensors are connected
+- Initializing the sensors
+- Setting up a menu
+- Configuring the sensor settings through the menu system
+- Log data to microSD card using the SdFat library
+    - The logging rate / interval is set by the menu
+- Writing the settings to microSD card using SdFat
+- Reading the settings back from microSD card and applying them
 
 This example is very similar to [Example1](ex_01_Thing_Plus_C.md). Please see the Example1 documentation for a full walk-through of the code.
 
@@ -56,12 +56,14 @@ All Arduino platforms provide a millisecond counter called ```millis()```. It re
 We use that to control the logging rate by comparing it to the ```Logging interval (ms)```.
 
 This line creates the logging interval menu item:
-* ```mySensors.theMenu.addMenuItem("Logging interval (ms)", SFE_QUAD_MENU_VARIABLE_TYPE_ULONG);```
+
+- ```mySensors.theMenu.addMenuItem("Logging interval (ms)", SFE_QUAD_MENU_VARIABLE_TYPE_ULONG);```
 
 These three lines give ```Logging interval (ms)``` a default / initial value of 1000 (milliseconds):
-* ```SFE_QUAD_Menu_Every_Type_t defaultValue;```
-* ```defaultValue.ULONG = 1000;```
-* ```mySensors.theMenu.setMenuItemVariable("Logging interval (ms)", &defaultValue);```
+
+- ```SFE_QUAD_Menu_Every_Type_t defaultValue;```
+- ```defaultValue.ULONG = 1000;```
+- ```mySensors.theMenu.setMenuItemVariable("Logging interval (ms)", &defaultValue);```
 
 The first of those lines creates a variable called ```defaultValue``` of type ```SFE_QUAD_Menu_Every_Type_t```.
 ```SFE_QUAD_Menu_Every_Type_t``` is a struct containing, as the name suggests, one of every type. Here is its definition in the library:
@@ -91,10 +93,11 @@ This provides the default or initial value for ```Logging interval (ms)```, but 
 The next four lines re-use ```defaultValue``` to set minimum and maximum values / limits for ```Logging interval (ms)```.
 The minimum and maximum values are optional, but, if you do not include them, the code will accept any value from zero to the maximum an unsigned long can hold.
 The code sets sensible limits of 100ms and 3600000ms (one hour):
-* ```defaultValue.ULONG = 100;```
-* ```mySensors.theMenu.setMenuItemVariableMin("Logging interval (ms)", &defaultValue);```
-* ```defaultValue.ULONG = 3600000;```
-* ```mySensors.theMenu.setMenuItemVariableMax("Logging interval (ms)", &defaultValue);```
+
+- ```defaultValue.ULONG = 100;```
+- ```mySensors.theMenu.setMenuItemVariableMin("Logging interval (ms)", &defaultValue);```
+- ```defaultValue.ULONG = 3600000;```
+- ```mySensors.theMenu.setMenuItemVariableMax("Logging interval (ms)", &defaultValue);```
 
 In the main ```loop()```, we can read whatever value ```Logging interval (ms)``` has been set to, and use it to control when the sensors are read by comparing it to ```millis()```:
 
@@ -112,7 +115,8 @@ In the main ```loop()```, we can read whatever value ```Logging interval (ms)```
 (It is only set to zero the first time around the loop.) (We could have declared it as a global variable, before ```setup()```, instead.)
 
 ```loggingInterval``` is another ```SFE_QUAD_Menu_Every_Type_t```. We read the value of ```Logging interval (ms)``` from the menu linked-list and copy it into ```loggingInterval``` with this line of code:
-* ```mySensors.theMenu.getMenuItemVariable("Logging interval (ms)", &loggingInterval);```
+
+- ```mySensors.theMenu.getMenuItemVariable("Logging interval (ms)", &loggingInterval);```
 
 We then compare ```loggingInterval``` to the copy of ```millis()```, held in ```lastRead```, to decide when to take the next reading.
 
@@ -204,9 +208,10 @@ Normally we would need to call ```sd.begin``` but ```mySensors.beginStorage``` h
 
 ```findNextAvailableLog``` is a helper function which finds the name of the next available file, by adding a five digit sequential number to "dataLog".
 The data log files are called:
-* dataLog00000.csv
-* dataLog00001.csv
-* dataLog00002.csv
+
+- dataLog00000.csv
+- dataLog00001.csv
+- dataLog00002.csv
 
 etc.. You will find the code for ```findNextAvailableLog``` at the bottom of the example.
 

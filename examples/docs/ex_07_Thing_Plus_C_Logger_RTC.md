@@ -7,18 +7,18 @@ This example was written for the [*SparkFun ESP32 Thing Plus C (SPX-18018)*](htt
 
 ## Key Features
 
-* Declaring a SFE_QUAD_Sensors object
-* Detecting which sensors are connected
-* Initializing the sensors
-* Setting up a menu
-* Configuring the WiFi SSID and password through the menu system
-* Setting a Time Zone Rule through the menu
-* Connecting to WiFi and setting the ESP32 RTC using NTP
-* Configuring the sensor settings through the menu
-* Log data to microSD card using the SdFat library
-    * The logging rate / interval is set by the menu
-* Writing the settings to microSD card using SdFat
-* Reading the settings back from microSD card and applying them
+- Declaring a SFE_QUAD_Sensors object
+- Detecting which sensors are connected
+- Initializing the sensors
+- Setting up a menu
+- Configuring the WiFi SSID and password through the menu system
+- Setting a Time Zone Rule through the menu
+- Connecting to WiFi and setting the ESP32 RTC using NTP
+- Configuring the sensor settings through the menu
+- Log data to microSD card using the SdFat library
+    - The logging rate / interval is set by the menu
+- Writing the settings to microSD card using SdFat
+- Reading the settings back from microSD card and applying them
 
 This example is very similar to [Example6](ex_06_Thing_Plus_C_Logger.md). Please see the Example1 and Example6 documentation for a full walk-through of the code.
 
@@ -37,10 +37,11 @@ The code needs to include extra libraries to support ESP32 WiFi, RTC time and SN
 ## The Menu
 
 The main difference in this example is that it uses the built-in menu to:
-* Set the WiFi SSID and password
-* Set the names of the NTP (Network Time Protocol) servers
-* Set the RTC Time Zone Rule
-* Set whether to log local time
+
+- Set the WiFi SSID and password
+- Set the names of the NTP (Network Time Protocol) servers
+- Set the RTC Time Zone Rule
+- Set whether to log local time
 
 You will notice that the menu definition contains a complete sub-menu for the WiFi and NTP settings (note the **SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_START**):
 
@@ -69,10 +70,11 @@ You will notice that the menu definition contains a complete sub-menu for the Wi
 ```
 
 The sub-menu contains several **SFE_QUAD_MENU_VARIABLE_TYPE_TEXT** items to hold:
-* The WiFi SSID (the name of the WiFi network you want to connect to)
-* The WiFi password
-* The names of the NTP servers
-* The Time Zone Rule (which will automatically set the RTC to local time and adjust for daylight saving)
+
+- The WiFi SSID (the name of the WiFi network you want to connect to)
+- The WiFi password
+- The names of the NTP servers
+- The Time Zone Rule (which will automatically set the RTC to local time and adjust for daylight saving)
 
 The ```setMenuItemVariable``` lines define the default / initial values for the text items. But, again, these can be updated via the menu or by
 reading the configuration from SD card.
@@ -163,8 +165,9 @@ This allows you to edit existing TEXT values without having to re-enter the whol
 ## Setting the RTC
 
 Setting the RTC is a two-step process:
-* The ESP32 connects to WiFi
-* The ESP32 requests network time from the NTP server(s) and sets the RTC accordingly (using the Time Zone Rule)
+
+- The ESP32 connects to WiFi
+- The ESP32 requests network time from the NTP server(s) and sets the RTC accordingly (using the Time Zone Rule)
 
 The code in ```setRTC()``` is taken mostly from Espressif's SimpleTime example.
 

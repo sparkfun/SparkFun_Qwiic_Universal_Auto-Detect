@@ -20,9 +20,10 @@ The initialization code _inside this library_ looks like this:
 ```
 
 The code is doing three things which we (nearly) always need to do when communicating with a u-blox GNSS:
-* We disable the NMEA protocol on the I2C port, leaving only UBX enabled
-* We save the port configuration to battery-backed memory
-* We tell the u-blox module to output its position, velocity and time (PVT) message at the standard 1Hz navigation rate
+
+- We disable the NMEA protocol on the I2C port, leaving only UBX enabled
+- We save the port configuration to battery-backed memory
+- We tell the u-blox module to output its position, velocity and time (PVT) message at the standard 1Hz navigation rate
 
 The third thing prevents the u-blox GNSS library from stalling (blocking) while it waits for the next PVT message. ```setAutoPVT(true);``` causes
 the PVT messages to be generated periodically, and tells the library to return immediately using the data from the _most recent_ PVT message
@@ -75,12 +76,14 @@ Now that we have declared our custom initializer, we need to tell the library to
 
 If you have multiple sensors of the same type connected, you can apply the same custom initializer to all of them. This line of code
 causes the library to apply ```myCustomInitializer``` to all connected **SFE_UBLOX_GNSS** sensors:
-* ```setCustomInitialize(&myCustomInitializer, "SFE_UBLOX_GNSS");```
+
+- ```setCustomInitialize(&myCustomInitializer, "SFE_UBLOX_GNSS");```
 
 But, as the code suggests, you could also create separate custom initializers and apply them to the sensors individually based on their
 I2C address, Mux address and Mux Port (if present):
-* ```setCustomInitialize(&myCustomInitializer1, "SFE_UBLOX_GNSS", 0x42, 0x70, 0); // Apply myCustomInitializer1 to the GNSS on Mux 0x70 Port 0```
-* ```setCustomInitialize(&myCustomInitializer2, "SFE_UBLOX_GNSS", 0x42, 0x70, 1); // Apply myCustomInitializer2 to the GNSS on Mux 0x70 Port 1```
-* ```setCustomInitialize(&myCustomInitializer3, "SFE_UBLOX_GNSS", 0x42, 0x70, 2); // Apply myCustomInitializer3 to the GNSS on Mux 0x70 Port 2```
+
+- ```setCustomInitialize(&myCustomInitializer1, "SFE_UBLOX_GNSS", 0x42, 0x70, 0); // Apply myCustomInitializer1 to the GNSS on Mux 0x70 Port 0```
+- ```setCustomInitialize(&myCustomInitializer2, "SFE_UBLOX_GNSS", 0x42, 0x70, 1); // Apply myCustomInitializer2 to the GNSS on Mux 0x70 Port 1```
+- ```setCustomInitialize(&myCustomInitializer3, "SFE_UBLOX_GNSS", 0x42, 0x70, 2); // Apply myCustomInitializer3 to the GNSS on Mux 0x70 Port 2```
 
 Because the custom initializer code is stored in your .ino code, it will not be overwritten when the library is updated!
