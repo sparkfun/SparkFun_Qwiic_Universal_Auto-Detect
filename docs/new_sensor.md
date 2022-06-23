@@ -59,7 +59,7 @@ Line 4 includes the header file of the Arduino Library for the sensor.
 The Arduino Library files will be copied into a sub-folder called **src/src/FOO**.
 You can, if you wish, create the **FOO** sub-folder and add the library **.h** and **.cpp** files manually.
 This will allow the code to compile while you are testing it.
-However, the [.github/workflows/compile-sketch.yml](./.github/workflows/compile-sketch.yml) file will do this for you automatically once you have edited it.
+However, the [.github/workflows/compile-sketch.yml](./.github/workflows/compile-sketch.yml/) file will do this for you automatically once you have edited it.
 **compile-sketch.yml** also ensures that the copy of the Arduino Library stays up to date. Any changes to the main Arduino Library are automatically merged into this library
 whenever changes are pushed.
 See [below](#githubworkflowscompile-sketchyml) for details.
