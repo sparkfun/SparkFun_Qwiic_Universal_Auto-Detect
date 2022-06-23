@@ -1,21 +1,21 @@
 # API Reference for the SFE_QUAD_Sensors class
 
 Methods to setup, configure and query the ```SFE_QUAD_Sensor``` object:
-* Return a pointer to the specified sensor class so it can be added to the linked-list of sensors
-* Define which Wire port will be used
-* Define which Serial port will be used for the built-in menus
-* Detect which sensors are attached
-* Begin those sensors
-* Initialize those sensors (if required)
-* Get the sense readings from all enabled sensors
-* Get the names of all enabled sensors
-* Get the names of all enabled senses
-* Define a custom initializer for a sensor (if required / desired)
-* Determine if a sensor exists
-* Open the logging menu
-* Open the setting menu
-* Get the sensor and menu configuration in text format
-* Apply configuration settings to the sensors and menus
+- Return a pointer to the specified sensor class so it can be added to the linked-list of sensors
+- Define which Wire port will be used
+- Define which Serial port will be used for the built-in menus
+- Detect which sensors are attached
+- Begin those sensors
+- Initialize those sensors (if required)
+- Get the sense readings from all enabled sensors
+- Get the names of all enabled sensors
+- Get the names of all enabled senses
+- Define a custom initializer for a sensor (if required / desired)
+- Determine if a sensor exists
+- Open the logging menu
+- Open the setting menu
+- Get the sensor and menu configuration in text format
+- Apply configuration settings to the sensors and menus
 
 ## Brief Overview
 
@@ -43,8 +43,8 @@ It is possible to override the initialization code for each sensor type, or indi
 (You must call ```setCustomInitialize``` _before_ ```initialzeSensors```.)
 
 ```loggingMenu``` and ```settingMenu``` are methods which open built-in menus to:
-* Configure which senses on each sensor are enabled for logging
-* Call any settings methods the sensors may have (if any)
+- Configure which senses on each sensor are enabled for logging
+- Call any settings methods the sensors may have (if any)
 
 The sense readings are stored in a dynamic char array named ```readings```. The enabled senses are read with ```getSensorReadings```.
 Memory for ```readings``` is allocated dynamically (using ```new```). The memory is freed automatically by the class destructor.
@@ -56,10 +56,10 @@ The names of all enabled senses can be read with ```getSenseNames```. The names 
 
 The sensor and menu configuration can be stored temporarily in a dynamic char array named ```configuration```.
 The text CSV ```configuration``` is written to storage and read from storage by the individual classes for EEPROM, LittleFS, SD and SdFat:
-* ```SFE_QUAD_Sensors__EEPROM```
-* ```SFE_QUAD_Sensors__LittleFS```
-* ```SFE_QUAD_Sensors__SD```
-* ```SFE_QUAD_Sensors__SdFat```
+- ```SFE_QUAD_Sensors__EEPROM```
+- ```SFE_QUAD_Sensors__LittleFS```
+- ```SFE_QUAD_Sensors__SD```
+- ```SFE_QUAD_Sensors__SdFat```
 
 Those classes provide additional methods named ```writeConfigurationToStorage```, ```readConfigurationFromStorage``` etc. which write and read
 ```configuration``` to and from the appropriate storage medium.
@@ -157,8 +157,8 @@ bool beginSensors(void)
 ### initializeSensors()
 
 This method initializes any detected sensors if required:
-* only if the library contains initialization code for that sensor type
-* and/or a custom initializer has been defined for that individual sensor or sensor type
+- only if the library contains initialization code for that sensor type
+- and/or a custom initializer has been defined for that individual sensor or sensor type
 
 ```c++
 bool initializeSensors(void)

@@ -1,27 +1,27 @@
 # API Reference for the SFE_QUAD_Sensor class
 
 Methods to allow the sensor's underlying Arduino Library be accessed in a homogeneous way:
-* Return the sensor's name
-* Return which I2C addresses are valid for this sensor
-* Detect the sensor
-* Begin the sensor (usually by calling the underlying library's ```begin``` method)
-* Initialize the sensor (if required)
-* Set a pointer to custom initialization code for this sensor
-* Return the number of senses this sensor has
-* Return the names of the senses
-* Return the maximum length of the sense names (to aid menu formatting)
-* Return a sense reading
-* Return a count of the number of settings this sensor has (if any)
-* Return the names of the settings
-* Return the maximum length of the settings names (to aid menu formatting)
-* Return the setting type
-* Set a setting
-* Return a count of the number of things which can be configured on this sensor
-* Return the names of the things which can be configured on this sensor
-* Return the maximum length of the configuration item names
-* Return the configuration item type
-* Return the configuration item
-* Set the configuration item
+- Return the sensor's name
+- Return which I2C addresses are valid for this sensor
+- Detect the sensor
+- Begin the sensor (usually by calling the underlying library's ```begin``` method)
+- Initialize the sensor (if required)
+- Set a pointer to custom initialization code for this sensor
+- Return the number of senses this sensor has
+- Return the names of the senses
+- Return the maximum length of the sense names (to aid menu formatting)
+- Return a sense reading
+- Return a count of the number of settings this sensor has (if any)
+- Return the names of the settings
+- Return the maximum length of the settings names (to aid menu formatting)
+- Return the setting type
+- Set a setting
+- Return a count of the number of things which can be configured on this sensor
+- Return the names of the things which can be configured on this sensor
+- Return the maximum length of the configuration item names
+- Return the configuration item type
+- Return the configuration item
+- Set the configuration item
 
 ## Brief Overview
 
@@ -48,19 +48,19 @@ The ```SFE_QUAD_Sensors``` object is responsible for creating the linked-list.
 The possible (known) sensor types are defined in the ```enum SFEQUADSensorType``` in the ```SFE_QUAD_Sensors``` class.
 
 Sensor detection and initialization will typically be performed as follows:
-* For each sensor type in ```enum SFEQUADSensorType```:
-    * If any Qwiic Muxes are detected, sensor detection is performed on all ports of all muxes.
-    * The possible I2C addresses for the sensor are requested using ```getNumI2cAddresses``` and ```getI2cAddress```.
-    * The sensor is detected using ```detectSensor```. This _usually_ calls the sensor's ```begin``` method, but not always.
-    * If the sensor is detected, it is added to the linked-list of ```SFE_QUAD_Sensor``` objects. Its I2C address is recorded. If it is connected through a Mux, the Mux address and port are recorded.
-    * Once detection is complete, each sensor is initialized using ```initializeSensor```.
-    * If a custom initializer has been defined, that is used in place of the standard initializer.
+- For each sensor type in ```enum SFEQUADSensorType```:
+    - If any Qwiic Muxes are detected, sensor detection is performed on all ports of all muxes.
+    - The possible I2C addresses for the sensor are requested using ```getNumI2cAddresses``` and ```getI2cAddress```.
+    - The sensor is detected using ```detectSensor```. This _usually_ calls the sensor's ```begin``` method, but not always.
+    - If the sensor is detected, it is added to the linked-list of ```SFE_QUAD_Sensor``` objects. Its I2C address is recorded. If it is connected through a Mux, the Mux address and port are recorded.
+    - Once detection is complete, each sensor is initialized using ```initializeSensor```.
+    - If a custom initializer has been defined, that is used in place of the standard initializer.
 
 Reading the senses will typically be performed as follows:
-* For each sensor in the linked-list:
-    * ```getSenseCount``` returns the number of senses this sensor has
-    * ```_logSense``` (an array of ```bool```) records if each individual sense is enabled for logging
-    * All enabled senses are read using ```getSenseReading```
+- For each sensor in the linked-list:
+    - ```getSenseCount``` returns the number of senses this sensor has
+    - ```_logSense``` (an array of ```bool```) records if each individual sense is enabled for logging
+    - All enabled senses are read using ```getSenseReading```
 
 The sense names can be read using ```getSenseName```. ```getSenseNameMaxLen``` aids menu formatting (space padding).
 

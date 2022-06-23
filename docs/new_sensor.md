@@ -2,18 +2,18 @@
 
 Adding a new sensor is easy! Here is a summary of the steps:
 
-* Create an _**SFE_QUAD_Sensor_NewSensorName.h**_ file for it, using the existing files as a template
-  * You will find the individual sensor header files in the library [src/src](https://github.com/sparkfun/SparkFun_Qwiic_Universal_Auto-Detect/tree/main/src/src) sub-folder
-* Edit [src/SFE_QUAD_Sensors.h](https://github.com/sparkfun/SparkFun_Qwiic_Universal_Auto-Detect/blob/main/src/SFE_QUAD_Sensors.h) :
-  * Add a _**#define INCLUDE_SFE_QUAD_SENSOR_NewSensorName**_ for the new sensor - in case the user wants to select which sensors to include
-  * Add a new entry for the sensor in _**enum SFEQUADSensorType**_ (3 lines for each new sensor)
-  * Add a new entry for the sensor in _**SFE_QUAD_Sensor <b>*</b>sensorFactory**_ (4 lines for each new sensor)
-* Edit [src/SFE_QUAD_Headers.h](https://github.com/sparkfun/SparkFun_Qwiic_Universal_Auto-Detect/blob/main/src/SFE_QUAD_Headers.h) :
-  * Add a new entry for the sensor (3 lines for each new sensor)
-* Edit [.github/workflows/compile-sketch.yml](https://github.com/sparkfun/SparkFun_Qwiic_Universal_Auto-Detect/blob/main/.github/workflows/compile-sketch.yml) :
-  * Add a _**- name: Update NewSensorName**_ entry for the new sensor
-  * This automates copying the Arduino Library files into the [src/src](https://github.com/sparkfun/SparkFun_Qwiic_Universal_Auto-Detect/tree/main/src/src) sub-folder
-  * The latest versions of the library .h. and .cpp will be copied and added to a GitHub pull request automatically
+- Create an _**SFE_QUAD_Sensor_NewSensorName.h**_ file for it, using the existing files as a template
+    - You will find the individual sensor header files in the library [src/src](https://github.com/sparkfun/SparkFun_Qwiic_Universal_Auto-Detect/tree/main/src/src) sub-folder
+- Edit [src/SFE_QUAD_Sensors.h](https://github.com/sparkfun/SparkFun_Qwiic_Universal_Auto-Detect/blob/main/src/SFE_QUAD_Sensors.h) :
+    - Add a _**#define INCLUDE_SFE_QUAD_SENSOR_NewSensorName**_ for the new sensor - in case the user wants to select which sensors to include
+    - Add a new entry for the sensor in _**enum SFEQUADSensorType**_ (3 lines for each new sensor)
+    - Add a new entry for the sensor in _**SFE_QUAD_Sensor <b>*</b>sensorFactory**_ (4 lines for each new sensor)
+- Edit [src/SFE_QUAD_Headers.h](https://github.com/sparkfun/SparkFun_Qwiic_Universal_Auto-Detect/blob/main/src/SFE_QUAD_Headers.h) :
+    - Add a new entry for the sensor (3 lines for each new sensor)
+- Edit [.github/workflows/compile-sketch.yml](https://github.com/sparkfun/SparkFun_Qwiic_Universal_Auto-Detect/blob/main/.github/workflows/compile-sketch.yml) :
+    - Add a _**- name: Update NewSensorName**_ entry for the new sensor
+    - This automates copying the Arduino Library files into the [src/src](https://github.com/sparkfun/SparkFun_Qwiic_Universal_Auto-Detect/tree/main/src/src) sub-folder
+    - The latest versions of the library .h. and .cpp will be copied and added to a GitHub pull request automatically
 
 _That's all folks!_
 
@@ -120,24 +120,24 @@ Change the definitions to match the new sensor:
 ### Settings vs. Configuration Items
 
 The VL53L1X has five settings:
-* Distance Mode: Short
-* Distance Mode: Long
-* Intermeasurement Period
-* Crosstalk
-* Offset
+- Distance Mode: Short
+- Distance Mode: Long
+- Intermeasurement Period
+- Crosstalk
+- Offset
 
 But it only has four configuration items requiring storage:
-* Distance Mode
-* Intermeasurement Period
-* Crosstalk
-* Offset
+- Distance Mode
+- Intermeasurement Period
+- Crosstalk
+- Offset
 
 We do it this way so that the user can change the distance mode with a single key press.
 
 We could have used a single distance mode ```BOOL``` setting, representing Short vs. Long, but:
-* The user would have had to select the distance mode setting
-* Then enter a valid ```BOOL``` (0 or 1)
-* The code in ```setSetting``` would have had to validate the choice before applying it
+- The user would have had to select the distance mode setting
+- Then enter a valid ```BOOL``` (0 or 1)
+- The code in ```setSetting``` would have had to validate the choice before applying it
 
 By using two ```NONE``` choices, we both make things easier for the user and simplify the code.
 
@@ -174,8 +174,8 @@ for (int i = 1; i < 127; i++)
 ```
 
 However:
-* Getting an acknowledgement does not tell us what type of sensor was detected at that address, just that _something_ was detected
-* The ```beginTransmission``` + ```endTransmission``` test can cause some sensors to produce errors
+- Getting an acknowledgement does not tell us what type of sensor was detected at that address, just that _something_ was detected
+- The ```beginTransmission``` + ```endTransmission``` test can cause some sensors to produce errors
 
 A better way is to use the sensor's ```begin``` method. However, the ```begin``` can sometimes take a long time to complete if no sensor is connected.
 
@@ -318,9 +318,9 @@ The VL53L1X does require initialization. As a minimum, we need to set the distan
 ```_shortDistanceMode```  records or indicates whether the sensor is in short or long distance mode.
 
 Why did we do it this way? Couldn't we have used a ```BOOL``` configuration item for it instead? Yes, we could have done it that way, but, as we explained above:
-* The user would have had to select the distance mode setting
-* Then enter a valid ```BOOL``` (0 or 1)
-* The code in ```setSetting``` would have had to validate the choice before applying it
+- The user would have had to select the distance mode setting
+- Then enter a valid ```BOOL``` (0 or 1)
+- The code in ```setSetting``` would have had to validate the choice before applying it
 
 By using two ```NONE``` choices, and storing the choice in ```_shortDistanceMode```, we both make things easier for the user and simplify the code.
 
@@ -396,11 +396,11 @@ Looking closely at the code for the **Pressure** (sense 0):
 ```_sprintf._dtostrf((double)device->readFloatPressure(), reading);```
 
 The code is:
-* Calling the Arduino Library ```readFloatPressure()``` method, using the ```_classPtr```
-* The result is being cast to double
-* ```_sprintf._dtostrf``` is a helper function from the ```SFE_QUAD_Sensors_sprintf``` class which converts the double to text
-  * ```sprintf``` is not supported correctly on all platforms (Artemis / Apollo3 especially) so we added the helper method to the sensor class to ensure doubles are always converted to text correctly
-* The text is copied into the char array ```reading```
+- Calling the Arduino Library ```readFloatPressure()``` method, using the ```_classPtr```
+- The result is being cast to double
+- ```_sprintf._dtostrf``` is a helper function from the ```SFE_QUAD_Sensors_sprintf``` class which converts the double to text
+    - ```sprintf``` is not supported correctly on all platforms (Artemis / Apollo3 especially) so we added the helper method to the sensor class to ensure doubles are always converted to text correctly
+- The text is copied into the char array ```reading```
 
 If you like **exponent-format**, there is an additional helper function named ```_sprintf._etoa``` which will convert a double to exponent-format text.
 
@@ -603,14 +603,14 @@ But for sensors like the VL53L1X, we do of course want ```setSettings``` to do s
 For the two ```NONE``` types, settings 0 and 1: "Distance Mode: Short" and "Distance Mode: Long" the code in the case statement changes the sensor's distance mode accordingly.
 
 For case 0 ("Distance Mode: Short"), ```setSetting```:
-* Stops the sensor with its ```stopRanging()``` method
-* Sets the member variable ```_shortDistanceMode``` to ```true``` so we have a record of the mode
-* Sets the distance mode to short with ```setDistanceModeShort()```
-* (Re)starts the sensor with ```startRanging()```
+- Stops the sensor with its ```stopRanging()``` method
+- Sets the member variable ```_shortDistanceMode``` to ```true``` so we have a record of the mode
+- Sets the distance mode to short with ```setDistanceModeShort()```
+- (Re)starts the sensor with ```startRanging()```
 
 The code for case 1 ("Distance Mode: Long") is similar, except:
-* ```_shortDistanceMode``` is set to ```false```
-* For the long distance mode, the sensor's measurement period cannot be shorter than 140. The measurement period is increased if necessary
+- ```_shortDistanceMode``` is set to ```false```
+- For the long distance mode, the sensor's measurement period cannot be shorter than 140. The measurement period is increased if necessary
 
 For settings cases 2-4, the ```UINT16_T``` setting value is checked to make sure it is within the correct limits and is then passed to the Arduino Library set method:
 
@@ -662,14 +662,14 @@ the Configuration Items match the Settings.
 The number of ```case``` statements must match **CONFIGURATION_ITEM_COUNT**.
 
 Some important points:
-* Configuration Item names must not contain spaces
-  * Use underscores where necessary
-* The names should be unique
-* Keep the names short but meaningful
-  * Use abbreviations where possible
-  * These names occupy storage media space which - for EEPROM - can be limited
-* Never use commas in the names
-  * The configurations are stored in CSV format
+- Configuration Item names must not contain spaces
+    - Use underscores where necessary
+- The names should be unique
+- Keep the names short but meaningful
+    - Use abbreviations where possible
+    - These names occupy storage media space which - for EEPROM - can be limited
+- Never use commas in the names
+    - The configurations are stored in CSV format
 
 ```c++
   // Return the name of the configuration item
@@ -932,12 +932,12 @@ The entry for our fictitious **FOO** sensor would be something like:
 ```
 
 You need to include the full **raw.githubusercontent.com** address for the library files:
-* Navigate to the Arduino Library on GitHub
-* Navigate to the ```src``` sub-folder
-* Open the ```.h``` file
-* Click the **RAW** button to view the file's raw content
-* Copy and paste the address from your browser into **compile-sketch.yml**
-* Repeat for the ```.cpp``` file
+- Navigate to the Arduino Library on GitHub
+- Navigate to the ```src``` sub-folder
+- Open the ```.h``` file
+- Click the **RAW** button to view the file's raw content
+- Copy and paste the address from your browser into **compile-sketch.yml**
+- Repeat for the ```.cpp``` file
 
 If the Arduino Library contains more than the standard ```.h``` and ```.cpp``` files, include those too. E.g. looking at the SGP40:
 
@@ -951,7 +951,7 @@ If the Arduino Library contains more than the standard ```.h``` and ```.cpp``` f
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SGP40_Arduino_Library/main/src/SparkFun_SGP40_Arduino_Library.cpp
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SGP40_Arduino_Library/main/src/sensirion_arch_config.h
           curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SGP40_Arduino_Library/main/src/sensirion_voc_algorithm.h
-          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SGP40_Arduino_Library/main/src/sensirion_voc_algorithm.cpp
+          curl -O https://raw.githubusercontent.com/sparkfun/SparkFun_SGP40_Arduino_Library/main/src/sensirion_voc_algorithm.c
 ```
 
 Finally, you need to check how the ```.cpp``` file includes its ```.h``` file. In Arduino examples, you will often see files included like this:
