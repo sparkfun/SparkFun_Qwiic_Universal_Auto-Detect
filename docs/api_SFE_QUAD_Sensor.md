@@ -49,18 +49,18 @@ The possible (known) sensor types are defined in the ```enum SFEQUADSensorType``
 
 Sensor detection and initialization will typically be performed as follows:
 * For each sensor type in ```enum SFEQUADSensorType```:
-  * If any Qwiic Muxes are detected, sensor detection is performed on all ports of all muxes.
-  * The possible I2C addresses for the sensor are requested using ```getNumI2cAddresses``` and ```getI2cAddress```.
-  * The sensor is detected using ```detectSensor```. This _usually_ calls the sensor's ```begin``` method, but not always.
-  * If the sensor is detected, it is added to the linked-list of ```SFE_QUAD_Sensor``` objects. Its I2C address is recorded. If it is connected through a Mux, the Mux address and port are recorded.
-  * Once detection is complete, each sensor is initialized using ```initializeSensor```.
-  * If a custom initializer has been defined, that is used in place of the standard initializer.
+    * If any Qwiic Muxes are detected, sensor detection is performed on all ports of all muxes.
+    * The possible I2C addresses for the sensor are requested using ```getNumI2cAddresses``` and ```getI2cAddress```.
+    * The sensor is detected using ```detectSensor```. This _usually_ calls the sensor's ```begin``` method, but not always.
+    * If the sensor is detected, it is added to the linked-list of ```SFE_QUAD_Sensor``` objects. Its I2C address is recorded. If it is connected through a Mux, the Mux address and port are recorded.
+    * Once detection is complete, each sensor is initialized using ```initializeSensor```.
+    * If a custom initializer has been defined, that is used in place of the standard initializer.
 
 Reading the senses will typically be performed as follows:
 * For each sensor in the linked-list:
-  * ```getSenseCount``` returns the number of senses this sensor has
-  * ```_logSense``` (an array of ```bool```) records if each individual sense is enabled for logging
-  * All enabled senses are read using ```getSenseReading```
+    * ```getSenseCount``` returns the number of senses this sensor has
+    * ```_logSense``` (an array of ```bool```) records if each individual sense is enabled for logging
+    * All enabled senses are read using ```getSenseReading```
 
 The sense names can be read using ```getSenseName```. ```getSenseNameMaxLen``` aids menu formatting (space padding).
 
@@ -404,16 +404,16 @@ It allows values to be passed between classes in a homogeneous, non-type-specifi
 The data type is defined by the associated ```SFE_QUAD_Sensor_Setting_Type_e``` enum.
 
 ```c++
-  typedef struct
-  {
-    bool BOOL;
-    float FLOAT;
-    double DOUBLE;
-    int INT;
-    uint8_t UINT8_T;
-    uint16_t UINT16_T;
-    uint32_t UINT32_T;
-  } SFE_QUAD_Sensor_Every_Type_t;
+    typedef struct
+    {
+        bool BOOL;
+        float FLOAT;
+        double DOUBLE;
+        int INT;
+        uint8_t UINT8_T;
+        uint16_t UINT16_T;
+        uint32_t UINT32_T;
+    } SFE_QUAD_Sensor_Every_Type_t;
 ```
 
 | Member | Type | Description |

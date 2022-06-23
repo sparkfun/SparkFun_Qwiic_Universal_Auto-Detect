@@ -15,7 +15,7 @@ This example was written for the [*SparkFun ESP32 Thing Plus C (SPX-18018)*](htt
 * Connecting to WiFi and setting the ESP32 RTC using NTP
 * Configuring the sensor settings through the menu
 * Log data to microSD card using the SdFat library
-  * The logging rate / interval is set by the menu
+    * The logging rate / interval is set by the menu
 * Writing the settings to microSD card using SdFat
 * Reading the settings back from microSD card and applying them
 

@@ -65,8 +65,8 @@ In the ```setup()``` function of this sketch, we need to do several things to:
 * Begin the microSD storage, so we can later write and read the settings to and from microSD card
 * Set up the menu
 * Display which sensors have been found and what the sense names are:
-  * A sensor can have multiple senses. E.g. a MS8607 sensor has three senses: Pressure, Temperature and Humidity
-  * You can tell the QUAD object which senses to enable through the menus. For the MS8607, the code can read: none, one, two or all three senses
+    * A sensor can have multiple senses. E.g. a MS8607 sensor has three senses: Pressure, Temperature and Humidity
+    * You can tell the QUAD object which senses to enable through the menus. For the MS8607, the code can read: none, one, two or all three senses
 
 ```C++
 void setup()
@@ -173,8 +173,8 @@ The sensor name is made up from the following (separated by underscores):
 * The sensor type (e.g. MS8607)
 * Its I<sup>2</sup>C address
 * If the sensor is connected through a [Qwiic Mux](https://www.sparkfun.com/products/16784), the name also contains:
-  * The Mux I<sup>2</sup>C address
-  * The number of the Mux port which the sensor is attached to
+    * The Mux I<sup>2</sup>C address
+    * The number of the Mux port which the sensor is attached to
 * If a Mux is not being used, the Mux address and port are both shown as **0**
 
 ## Sense Names

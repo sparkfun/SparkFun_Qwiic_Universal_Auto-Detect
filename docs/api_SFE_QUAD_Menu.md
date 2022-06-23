@@ -14,21 +14,21 @@ The ```_next``` of the final ```SFE_QUAD_Menu_Item``` in the list is ```NULL```.
 
 There are several different types of menu item, as defined by the ```SFE_QUAD_Menu_Variable_Type_e``` enum:
 * ```SFE_QUAD_MENU_VARIABLE_TYPE_NONE``` contains only the ```_itemName``` as text
-  * The name of the menu and perhaps some underscoring can be defined using this type
-  * This can be used to include 'empty' lines to separate parts of the menu
+    * The name of the menu and perhaps some underscoring can be defined using this type
+    * This can be used to include 'empty' lines to separate parts of the menu
 * ```SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_START``` is a special type which defines the start of a sub-menu
-  * Only this line is printed when the parent menu is displayed
-  * The menu items within the sub-menu are only printed when the sub-menu is opened
-  * ```openMenu``` is called recursively to enter the sub-menus
+    * Only this line is printed when the parent menu is displayed
+    * The menu items within the sub-menu are only printed when the sub-menu is opened
+    * ```openMenu``` is called recursively to enter the sub-menus
 * ```SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END``` marks the end of a sub-menu
 * ```SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_CODE``` contains a pointer to a method which is called when this menu item is selected
 * ```SFE_QUAD_MENU_VARIABLE_TYPE_TEXT``` contains ASCII text
-  * e.g. a WiFi SSID or password
+    * e.g. a WiFi SSID or password
 * ```SFE_QUAD_MENU_VARIABLE_TYPE_BOOL``` is a ```bool``` which is toggled when the menu item is selected
 * ```SFE_QUAD_MENU_VARIABLE_TYPE_FLOAT``` contains a ```float```
-  * There is an equivalent type for ```double```
+    * There is an equivalent type for ```double```
 * ```SFE_QUAD_MENU_VARIABLE_TYPE_INT``` contains a signed integer ```int```
-  * There are equivalent types for ```uint8_t```, ```uint16_t```, ```uint32_t```, ```unsigned long``` and ```long```
+    * There are equivalent types for ```uint8_t```, ```uint16_t```, ```uint32_t```, ```unsigned long``` and ```long```
 
 Menu items are added with ```addMenuItem```. An overloaded method allows ```CODE``` items to be added.
 
