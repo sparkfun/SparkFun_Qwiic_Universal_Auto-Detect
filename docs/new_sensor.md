@@ -72,7 +72,7 @@ Change line 4 so it will include the library header file correctly.
 
 !!! note:
     Always enclose the include file folder and name in double quotes. Do not use less-than and greater-than.
-    This ensures that the copy of the library in the **src/src/FOO** sub-folder is included, not a copy pointed to by the Arduino IDE path.
+    This ensures that the copy of the library in the <b>src/src/FOO</b> sub-folder is included, not a copy pointed to by the Arduino IDE path.
 
 ### CLASSNAME and CLASSTITLE
 
@@ -609,12 +609,14 @@ But for sensors like the VL53L1X, we do of course want ```setSettings``` to do s
 For the two ```NONE``` types, settings 0 and 1: "Distance Mode: Short" and "Distance Mode: Long" the code in the case statement changes the sensor's distance mode accordingly.
 
 For case 0 ("Distance Mode: Short"), ```setSetting```:
+
 - Stops the sensor with its ```stopRanging()``` method
 - Sets the member variable ```_shortDistanceMode``` to ```true``` so we have a record of the mode
 - Sets the distance mode to short with ```setDistanceModeShort()```
 - (Re)starts the sensor with ```startRanging()```
 
 The code for case 1 ("Distance Mode: Long") is similar, except:
+
 - ```_shortDistanceMode``` is set to ```false```
 - For the long distance mode, the sensor's measurement period cannot be shorter than 140. The measurement period is increased if necessary
 

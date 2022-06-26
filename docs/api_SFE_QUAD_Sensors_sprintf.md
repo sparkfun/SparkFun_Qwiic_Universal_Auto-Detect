@@ -55,6 +55,7 @@ bool expStrToDouble(const char *str, double *value)
 Set the precision (number of decimal places) to be used by ```_dtostrf``` and ```_etoa```.
 
 Set this _before_ calling ```mySensors.detectSensors();```:
+
 * ```mySensors._sprintf.setPrecision(5);```
 
 ```c++

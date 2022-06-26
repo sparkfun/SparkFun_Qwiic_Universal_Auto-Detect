@@ -334,6 +334,7 @@ If it does, it returns a pointer to its ```SFE_QUAD_Sensor``` instance.
 ```c++
 SFE_QUAD_Sensor *sensorExists(const char *sensorName, uint8_t i2cAddress, uint8_t muxAddress, uint8_t muxPort)
 ```
+
 | Parameter | Type | Description |
 | :-------- | :--- | :---------- |
 | `sensorName` | `const char *` | The name of the sensor type |

@@ -10,7 +10,7 @@ The ```SFE_QUAD_Menu``` ```_head``` points to the head (start) of the linked lis
 
 The ```_next``` of the final ```SFE_QUAD_Menu_Item``` in the list is ```NULL```.
 
-```_head``` is initially ```NULL```. It is set the the address of the first ```SFE_QUAD_Menu_Item``` when ```addMenuItem``` is called.
+```_head``` is initially ```NULL```. It is set to the address of the first ```SFE_QUAD_Menu_Item``` when ```addMenuItem``` is called.
 
 There are several different types of menu item, as defined by the ```SFE_QUAD_Menu_Variable_Type_e``` enum:
 
@@ -22,7 +22,7 @@ There are several different types of menu item, as defined by the ```SFE_QUAD_Me
     - The menu items within the sub-menu are only printed when the sub-menu is opened
     - ```openMenu``` is called recursively to enter the sub-menus
 - ```SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_END``` marks the end of a sub-menu
-- ```SFE_QUAD_MENU_VARIABLE_TYPE_SUB_MENU_CODE``` contains a pointer to a method which is called when this menu item is selected
+- ```SFE_QUAD_MENU_VARIABLE_TYPE_CODE``` contains a pointer to a method which is called when this menu item is selected
 - ```SFE_QUAD_MENU_VARIABLE_TYPE_TEXT``` contains ASCII text
     - e.g. a WiFi SSID or password
 - ```SFE_QUAD_MENU_VARIABLE_TYPE_BOOL``` is a ```bool``` which is toggled when the menu item is selected
@@ -222,6 +222,7 @@ If start is ```NULL``` (the default), the menu starts at ```_head```.
 ```c++
 bool openMenu(SFE_QUAD_Menu_Item *start)
 ```
+
 | Parameter | Type | Description |
 | :-------- | :--- | :---------- |
 | `start` | `SFE_QUAD_Menu_Item *` | The address of the menu item to be shown first |
@@ -360,7 +361,7 @@ SFE_QUAD_Menu_Item *menuItemExists(const char *itemName)
 
 ### setMenuTimeout()
 
-This method sets the default menu timeout.
+This method sets the menu timeout.
 
 ```c++
 void setMenuTimeout(unsigned long newTimeout)
