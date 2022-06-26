@@ -71,8 +71,7 @@ Change line 4 so it will include the library header file correctly.
 ```
 
 !!! note:
-    Always enclose the include file folder and name in double quotes. Do not use less-than and greater-than.
-    This ensures that the copy of the library in the <b>src/src/FOO</b> sub-folder is included, not a copy pointed to by the Arduino IDE path.
+    Always enclose the include file folder and name in double quotes. Do not use less-than and greater-than. This ensures that the copy of the library in the <b>src/src/FOO</b> sub-folder is included, not a copy pointed to by the Arduino IDE path.
 
 ### CLASSNAME and CLASSTITLE
 
