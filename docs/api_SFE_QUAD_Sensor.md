@@ -37,9 +37,9 @@ A **sensor** can have multiple **senses**. E.g. the BME280 has three : pressure,
 A sensor _may_ have several things which can be set. These are the **settings**.
 E.g. the NAU7802 scale has two : zero offset (```calculateZeroOffset```) and calibration factor (```calculateCalibrationFactor```).
 
-**Configuration items** can be written to and read from storage (SD, EEPROM, LittleFS).
+**Configuration items** are settings which are written to and read from storage (SD, EEPROM, LittleFS).
 They are used to record the sensor configuration and restore the configuration.
-Note: configuration items _may_ or _**may not**_ be the same as the settings.
+Note: the configuration items _may_ or _**may not**_ be the same as the settings.
 
 Individual ```SFE_QUAD_Sensor``` instances are connected in a linked-list. The ```SFE_QUAD_Sensor``` object contains a pointer to the
 ```_next``` object in the list. The ```_next``` of the final ```SFE_QUAD_Sensor``` in the list is ```NULL```.
