@@ -55,8 +55,16 @@ public:
 
   void deleteSensorStorage(void)
   {
-    delete (CLASSNAME *)_classPtr;
-    delete[] _logSense;
+    if (_classPtr != NULL)
+    {
+      delete (CLASSNAME *)_classPtr;
+      _classPtr = NULL;
+    }
+    if (_logSense != NULL)
+    {
+      delete[] _logSense;
+      _logSense = NULL;
+    }
   }
 
   // Return the sensor name as char

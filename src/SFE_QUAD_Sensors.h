@@ -86,6 +86,9 @@ public:
   // Pointer to the custom initializeSensor (if any)
   void (*_customInitializePtr)(uint8_t sensorAddress, TwoWire &port, void *_classPtr);
 
+  // Record the sensor type so we can delete it safely
+  uint16_t _type;
+
   SFE_QUAD_Sensor(void)
   {
     _sensorAddress = 0;
@@ -95,6 +98,12 @@ public:
     _next = NULL;
     _logSense = NULL;
     _customInitializePtr = NULL;
+    _type = 0xFFFF; // Mark the _type as 'unknown' for now. Higher code will set this - after calling sensorFactory
+  }
+
+  virtual ~SFE_QUAD_Sensor(void)
+  {
+    deleteSensorStorage();
   }
 
   // Enum for the different settings types
@@ -414,6 +423,114 @@ public:
       return new SFE_QUAD_Sensor_VL53L1X(*_i2cPort);
 #endif
     return NULL;
+  }
+
+  void deleteSensor(SFE_QUAD_Sensor *sensor, SFEQUADSensorType type) // Delete the sensor
+  {
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_ADS122C04) // <=== Add more copies of these four lines when adding new sensors
+    if (type == Sensor_ADS122C04)
+      delete (SFE_QUAD_Sensor_ADS122C04 *)sensor;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_AHT20)
+    if (type == Sensor_AHT20)
+      delete (SFE_QUAD_Sensor_AHT20 *)sensor;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_BME280)
+    if (type == Sensor_BME280)
+      delete (SFE_QUAD_Sensor_BME280 *)sensor;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_CCS811_5A)
+    if (type == Sensor_CCS811_5A)
+      delete (SFE_QUAD_Sensor_CCS811_5A *)sensor;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_CCS811_5B)
+    if (type == Sensor_CCS811_5B)
+      delete (SFE_QUAD_Sensor_CCS811_5B *)sensor;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_LPS25HB)
+    if (type == Sensor_LPS25HB)
+      delete (SFE_QUAD_Sensor_LPS25HB *)sensor;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MAX17048)
+    if (type == Sensor_MAX17048)
+      delete (SFE_QUAD_Sensor_MAX17048 *)sensor;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MCP9600)
+    if (type == Sensor_MCP9600)
+      delete (SFE_QUAD_Sensor_MCP9600 *)sensor;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MICROPRESSURE)
+    if (type == Sensor_MICROPRESSURE)
+      delete (SFE_QUAD_Sensor_MICROPRESSURE *)sensor;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MS5637)
+    if (type == Sensor_MS5637)
+      delete (SFE_QUAD_Sensor_MS5637 *)sensor;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_MS8607)
+    if (type == Sensor_MS8607)
+      delete (SFE_QUAD_Sensor_MS8607 *)sensor;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_NAU7802)
+    if (type == Sensor_NAU7802)
+      delete (SFE_QUAD_Sensor_NAU7802 *)sensor;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_QWIICBUTTON)
+    if (type == Sensor_QWIICBUTTON)
+      delete (SFE_QUAD_Sensor_QWIICBUTTON *)sensor;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_SCD30)
+    if (type == Sensor_SCD30)
+      delete (SFE_QUAD_Sensor_SCD30 *)sensor;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_SCD40)
+    if (type == Sensor_SCD40)
+      delete (SFE_QUAD_Sensor_SCD40 *)sensor;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_SDP3X)
+    if (type == Sensor_SDP3X)
+      delete (SFE_QUAD_Sensor_SDP3X *)sensor;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_SGP30)
+    if (type == Sensor_SGP30)
+      delete (SFE_QUAD_Sensor_SGP30 *)sensor;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_SGP40)
+    if (type == Sensor_SGP40)
+      delete (SFE_QUAD_Sensor_SGP40 *)sensor;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_SHTC3)
+    if (type == Sensor_SHTC3)
+      delete (SFE_QUAD_Sensor_SHTC3 *)sensor;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_STC31)
+    if (type == Sensor_STC31)
+      delete (SFE_QUAD_Sensor_STC31 *)sensor;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_TMP117)
+    if (type == Sensor_TMP117)
+      delete (SFE_QUAD_Sensor_TMP117 *)sensor;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_UBLOX_GNSS)
+    if (type == Sensor_UBLOX_GNSS)
+      delete (SFE_QUAD_Sensor_UBLOX_GNSS *)sensor;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_VCNL4040)
+    if (type == Sensor_VCNL4040)
+      delete (SFE_QUAD_Sensor_VCNL4040 *)sensor;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_VEML6075)
+    if (type == Sensor_VEML6075)
+      delete (SFE_QUAD_Sensor_VEML6075 *)sensor;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_VEML7700)
+    if (type == Sensor_VEML7700)
+      delete (SFE_QUAD_Sensor_VEML7700 *)sensor;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_VL53L1X)
+    if (type == Sensor_VL53L1X)
+      delete (SFE_QUAD_Sensor_VL53L1X *)sensor;
+#endif
   }
 
   void setWirePort(TwoWire &port);    // Define which Wire (I2C) port will be used
