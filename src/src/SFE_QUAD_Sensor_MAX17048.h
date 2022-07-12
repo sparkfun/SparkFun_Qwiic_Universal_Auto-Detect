@@ -95,7 +95,7 @@ public:
   {
     if (_customInitializePtr == NULL) // Has a custom initialize function been defined?
     {
-      CLASSNAME *device = (CLASSNAME *)_classPtr;
+      //CLASSNAME *device = (CLASSNAME *)_classPtr;
       return (true);
     }
     else
