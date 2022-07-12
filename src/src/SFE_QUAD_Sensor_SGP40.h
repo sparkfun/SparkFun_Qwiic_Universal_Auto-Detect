@@ -231,7 +231,7 @@ public:
   // Set the specified setting. ===> Adapt this to match the sensor type <===
   bool setSetting(uint8_t setting, SFE_QUAD_Sensor_Every_Type_t *value)
   {
-    CLASSNAME *device = (CLASSNAME *)_classPtr;
+    //CLASSNAME *device = (CLASSNAME *)_classPtr;
     switch (setting)
     {
     case 0:
@@ -304,7 +304,7 @@ public:
   // Get (read) the sensor configuration item
   bool getConfigurationItem(uint8_t configItem, SFE_QUAD_Sensor_Every_Type_t *value)
   {
-    CLASSNAME *device = (CLASSNAME *)_classPtr;
+    //CLASSNAME *device = (CLASSNAME *)_classPtr;
     switch (configItem)
     {
     case 0:
@@ -323,7 +323,7 @@ public:
   // Set (write) the sensor configuration item
   bool setConfigurationItem(uint8_t configItem, SFE_QUAD_Sensor_Every_Type_t *value)
   {
-    CLASSNAME *device = (CLASSNAME *)_classPtr;
+    //CLASSNAME *device = (CLASSNAME *)_classPtr;
     switch (configItem)
     {
     case 0:
