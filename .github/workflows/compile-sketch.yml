@@ -348,6 +348,8 @@ jobs:
           libraries: |
             - source-path: ./
             - name: SD
+            - name: Wire
+            - name: SdFat
           sketch-paths: |
             - examples/Example1_ESP32_Thing_Plus_C
           enable-warnings-report: true
