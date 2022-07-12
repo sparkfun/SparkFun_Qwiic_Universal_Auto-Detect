@@ -57,8 +57,16 @@ public:
 
   void deleteSensorStorage(void)
   {
-    delete (CLASSNAME *)_classPtr;
-    delete[] _logSense;
+    if (_classPtr != NULL)
+    {
+      delete (CLASSNAME *)_classPtr;
+      _classPtr = NULL;
+    }
+    if (_logSense != NULL)
+    {
+      delete[] _logSense;
+      _logSense = NULL;
+    }
   }
 
   // Return the sensor name as char
@@ -227,7 +235,7 @@ public:
   // Set the specified setting. ===> Adapt this to match the sensor type <===
   bool setSetting(uint8_t setting, SFE_QUAD_Sensor_Every_Type_t *value)
   {
-    CLASSNAME *device = (CLASSNAME *)_classPtr;
+    //CLASSNAME *device = (CLASSNAME *)_classPtr;
     switch (setting)
     {
     default:
@@ -282,7 +290,7 @@ public:
   // Get (read) the sensor configuration item
   bool getConfigurationItem(uint8_t configItem, SFE_QUAD_Sensor_Every_Type_t *value)
   {
-    CLASSNAME *device = (CLASSNAME *)_classPtr;
+    //CLASSNAME *device = (CLASSNAME *)_classPtr;
     switch (configItem)
     {
     default:
@@ -295,7 +303,7 @@ public:
   // Set (write) the sensor configuration item
   bool setConfigurationItem(uint8_t configItem, SFE_QUAD_Sensor_Every_Type_t *value)
   {
-    CLASSNAME *device = (CLASSNAME *)_classPtr;
+    //CLASSNAME *device = (CLASSNAME *)_classPtr;
     switch (configItem)
     {
     default:

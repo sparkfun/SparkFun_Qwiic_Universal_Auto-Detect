@@ -302,7 +302,7 @@ SFE_QUAD_Sensors::~SFE_QUAD_Sensors(void)
     if (_head->_next == NULL) // Is the the last / only sensor?
     {
       _head->deleteSensorStorage();
-      delete _head;
+      deleteSensor(_head, (SFEQUADSensorType)_head->_type);
       _head = NULL;
     }
     else
@@ -315,7 +315,7 @@ SFE_QUAD_Sensors::~SFE_QUAD_Sensors(void)
         nextSensor = nextSensor->_next;
       }
       nextSensor->deleteSensorStorage();
-      delete nextSensor; // Delete the sensor at the end of the list
+      deleteSensor(nextSensor, (SFEQUADSensorType)nextSensor->_type); // Delete the sensor at the end of the list
       thisSensor->_next = NULL;
     }
   }
@@ -348,7 +348,7 @@ bool SFE_QUAD_Sensors::detectSensors(void)
     return (false);
   }
 
-  unsigned long detectStart = millis();
+  // unsigned long detectStart = millis();
 
   // Begin by checking for a SHTC3 on the main branch
   bool shtc3OnMain = false;
@@ -516,6 +516,7 @@ bool SFE_QUAD_Sensors::detectSensors(void)
                       _head->_muxAddress = muxAddr == 0x6F ? 0 : muxAddr;
                       _head->_muxPort = muxAddr == 0x6F ? 0 : muxPort;
                       _head->_sprintf._prec = _sprintf._prec; // Inherit _prec from the Sensors
+                      _head->_type = type;
                     }
                     else
                     {
@@ -529,6 +530,7 @@ bool SFE_QUAD_Sensors::detectSensors(void)
                       nextSensor->_next->_muxAddress = muxAddr == 0x6F ? 0 : muxAddr;
                       nextSensor->_next->_muxPort = muxAddr == 0x6F ? 0 : muxPort;
                       nextSensor->_next->_sprintf._prec = _sprintf._prec; // Inherit _prec from the Sensors
+                      nextSensor->_next->_type = type;
                     }
                   }
                 }

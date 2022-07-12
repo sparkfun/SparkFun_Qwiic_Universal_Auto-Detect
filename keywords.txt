@@ -58,6 +58,7 @@ getConfigurationItem	KEYWORD2
 setConfigurationItem	KEYWORD2
 
 sensorFactory	KEYWORD2
+deleteSensor	KEYWORD2
 setWirePort	KEYWORD2
 enableDebugging	KEYWORD2
 setMenuPort	KEYWORD2

@@ -331,8 +331,6 @@ bool LPS25HB::removeSetting(uint8_t reg_adr, uint8_t setting)
 */
 bool LPS25HB::read(uint8_t reg_adr, uint8_t *pdata, uint8_t size)
 {
-	bool retval = false;
-
 	_i2cPort->beginTransmission(sensor_address); // Begin talking to the desired sensor
 	_i2cPort->write(reg_adr | (1 << 7));		 // Setting the 7th bit (the MSb) in this tells the device that we want a 'multi-byte' read
 	// _i2cPort->write(reg_adr);													// A multi-byte bit is not needed in this command

@@ -8,6 +8,7 @@ Adding a new sensor is easy! Here is a summary of the steps:
     - Add a _**#define INCLUDE_SFE_QUAD_SENSOR_NewSensorName**_ for the new sensor - in case the user wants to select which sensors to include
     - Add a new entry for the sensor in _**enum SFEQUADSensorType**_ (3 lines for each new sensor)
     - Add a new entry for the sensor in _**SFE_QUAD_Sensor <b>*</b>sensorFactory**_ (4 lines for each new sensor)
+    - Add a new entry for the sensor in _**void deleteSensor(SFE_QUAD_Sensor <b>*</b>sensor, SFEQUADSensorType type)**_ (4 lines for each new sensor)
 - Edit [src/SFE_QUAD_Headers.h](https://github.com/sparkfun/SparkFun_Qwiic_Universal_Auto-Detect/blob/main/src/SFE_QUAD_Headers.h) :
     - Add a new entry for the sensor (3 lines for each new sensor)
 - Edit [.github/workflows/compile-sketch.yml](https://github.com/sparkfun/SparkFun_Qwiic_Universal_Auto-Detect/blob/main/.github/workflows/compile-sketch.yml) :
@@ -71,8 +72,7 @@ Change line 4 so it will include the library header file correctly.
 ```
 
 !!! note:
-    Always enclose the include file folder and name in double quotes. Do not use less-than and greater-than.
-    This ensures that the copy of the library in the <b>src/src/FOO</b> sub-folder is included, not a copy pointed to by the Arduino IDE path.
+    Always enclose the include file folder and name in double quotes. Do not use less-than and greater-than. This ensures that the copy of the library in the <b>src/src/FOO</b> sub-folder is included, not a copy pointed to by the Arduino IDE path.
 
 ### CLASSNAME and CLASSTITLE
 
@@ -884,7 +884,7 @@ We may still be able to merge your Pull Request, but we will need to make everyo
 
 ### sensorFactory
 
-The final change to **SFE_QUAD_Sensors.h** is to add the new sensor to the ```sensorFactory```. This is the method which returns a new object of the requested sensor class.
+We need to add the new sensor to the ```sensorFactory```. This is the method which returns a new object of the requested sensor class.
 
 The order here is not important. Insert the new sensor alphabetically (unless there is a good reason not to):
 
@@ -900,6 +900,28 @@ The order here is not important. Insert the new sensor alphabetically (unless th
 #if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_LPS25HB)
     if (type == Sensor_LPS25HB)
       return new SFE_QUAD_Sensor_LPS25HB;
+#endif
+```
+
+### deleteSensor
+
+The final change to **SFE_QUAD_Sensors.h** is to add the new sensor to the ```deleteSensor```.
+This is the method which deletes the sensor in a safe way, casting ```sensor``` to the correct class.
+
+The order here is not important. Insert the new sensor alphabetically (unless there is a good reason not to):
+
+```c++
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_CCS811_5B)
+    if (type == Sensor_CCS811_5B)
+      delete (SFE_QUAD_Sensor_CCS811_5B *)sensor;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_FOO)
+    if (type == Sensor_FOO)
+      delete (SFE_QUAD_Sensor_FOO *)sensor;
+#endif
+#if defined(INCLUDE_SFE_QUAD_SENSOR_ALL) || defined(INCLUDE_SFE_QUAD_SENSOR_LPS25HB)
+    if (type == Sensor_LPS25HB)
+      delete (SFE_QUAD_Sensor_LPS25HB *)sensor;
 #endif
 ```
 

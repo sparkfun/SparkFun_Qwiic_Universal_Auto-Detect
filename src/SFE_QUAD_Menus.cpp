@@ -1673,7 +1673,7 @@ bool SFE_QUAD_Menu::getMenuVariableAsCSV(uint16_t num, char *var, size_t maxLen)
         size_t len = strlen(menuItemPtr->_itemName);
         len += 4;
         char tempStr[32]; // TODO: find a better way to do this!
-        sprintf(tempStr, "%d", menuItemPtr->_theVariable->ULONG);
+        sprintf(tempStr, "%ld", menuItemPtr->_theVariable->ULONG);
         len += strlen(tempStr);
         if (len < maxLen)
         {
@@ -1687,13 +1687,13 @@ bool SFE_QUAD_Menu::getMenuVariableAsCSV(uint16_t num, char *var, size_t maxLen)
           if (menuItemPtr->_minVal != NULL)
           {
             strcat(var, ",min,");
-            sprintf(tempStr, "%d", menuItemPtr->_minVal->ULONG);
+            sprintf(tempStr, "%ld", menuItemPtr->_minVal->ULONG);
             strcat(var, tempStr);
           }
           if (menuItemPtr->_maxVal != NULL)
           {
             strcat(var, ",max,");
-            sprintf(tempStr, "%d", menuItemPtr->_maxVal->ULONG);
+            sprintf(tempStr, "%ld", menuItemPtr->_maxVal->ULONG);
             strcat(var, tempStr);
           }
           return (true);
@@ -1718,7 +1718,7 @@ bool SFE_QUAD_Menu::getMenuVariableAsCSV(uint16_t num, char *var, size_t maxLen)
         size_t len = strlen(menuItemPtr->_itemName);
         len += 4;
         char tempStr[32]; // TODO: find a better way to do this!
-        sprintf(tempStr, "%d", menuItemPtr->_theVariable->LONG);
+        sprintf(tempStr, "%ld", menuItemPtr->_theVariable->LONG);
         len += strlen(tempStr);
         if (len < maxLen)
         {
@@ -1732,13 +1732,13 @@ bool SFE_QUAD_Menu::getMenuVariableAsCSV(uint16_t num, char *var, size_t maxLen)
           if (menuItemPtr->_minVal != NULL)
           {
             strcat(var, ",min,");
-            sprintf(tempStr, "%d", menuItemPtr->_minVal->LONG);
+            sprintf(tempStr, "%ld", menuItemPtr->_minVal->LONG);
             strcat(var, tempStr);
           }
           if (menuItemPtr->_maxVal != NULL)
           {
             strcat(var, ",max,");
-            sprintf(tempStr, "%d", menuItemPtr->_maxVal->LONG);
+            sprintf(tempStr, "%ld", menuItemPtr->_maxVal->LONG);
             strcat(var, tempStr);
           }
           return (true);
