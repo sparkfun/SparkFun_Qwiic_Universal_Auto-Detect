@@ -489,11 +489,11 @@ uint8_t SDP3X::_CRC8(uint16_t data)
 //Generates CRC8 for SDP3X from lookup table
 uint8_t SDP3X::_CRC8(uint16_t data)
 {
-  uint8_t CRC = 0xFF; //inital value
-  CRC ^= (uint8_t)(data >> 8); //start with MSB
-  CRC = _CRC8LookupTable[CRC >> 4][CRC & 0xF]; //look up table [MSnibble][LSnibble]
-  CRC ^= (uint8_t)data; //use LSB
-  CRC = _CRC8LookupTable[CRC >> 4][CRC & 0xF]; //look up table [MSnibble][LSnibble]
-  return CRC;
+  uint8_t crc8 = 0xFF; //inital value
+  crc8 ^= (uint8_t)(data >> 8); //start with MSB
+  crc8 = _CRC8LookupTable[crc8 >> 4][crc8 & 0xF]; //look up table [MSnibble][LSnibble]
+  crc8 ^= (uint8_t)data; //use LSB
+  crc8 = _CRC8LookupTable[crc8 >> 4][crc8 & 0xF]; //look up table [MSnibble][LSnibble]
+  return crc8;
 }
 #endif
