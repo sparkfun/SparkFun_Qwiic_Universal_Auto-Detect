@@ -84,6 +84,22 @@ A full [API Reference](api_SFE_QUAD_Sensors.md) is also provided for the library
 - [ESP32 with microSD](https://www.sparkfun.com/products/18018)
 - [ESP32 with EEPROM or LittleFS](https://www.sparkfun.com/products/15663)
 - [Artemis (Apollo3) with EEPROM](https://www.sparkfun.com/products/15574)
+- [SAMD21 with FlashAsEEPROM_SAMD as EEPROM](https://www.sparkfun.com/products/14812)
+- [SAMD51 with FlashAsEEPROM_SAMD as EEPROM](https://www.sparkfun.com/products/14713)
+- [STM32 with FlashStorage_STM32 as EEPROM](https://www.sparkfun.com/products/17712)
+- [RP2040 with microSD](https://www.sparkfun.com/products/17745) following the instructions in the [Hookup Guide](https://learn.sparkfun.com/tutorials/rp2040-thing-plus-hookup-guide/software-overview) and using the pin definitions shown below:
+
+```c++
+// pins_arduino.h : pin definitions for the RP2040 Thing Plus (DEV-17745)
+// SPI
+#define PIN_SPI_MISO  (12u)
+#define PIN_SPI_MOSI  (15u)
+#define PIN_SPI_SCK   (14u)
+#define PIN_SPI_SS    (9u)
+// Wire
+#define PIN_WIRE_SDA  (6u)
+#define PIN_WIRE_SCL  (7u)
+```
 
 ## License
 
