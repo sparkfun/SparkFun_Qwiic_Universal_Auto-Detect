@@ -25,6 +25,8 @@
 
 //#include <FlashAsEEPROM_SAMD.h> // Khoi Hoang's FlashStorage_SAMD works well too:  http://librarymanager/All#FlashStorage_SAMD
 
+//#include <FlashStorage_STM32.h> // Khoi Hoang's FlashStorage_STM32 works well too:  http://librarymanager/All#FlashStorage_STM32
+
 #include "SFE_QUAD_Sensors.h" // Click here to get the library:  http://librarymanager/All#SparkFun_Qwiic_Universal_Auto-Detect
 
 SFE_QUAD_Sensors__EEPROM mySensors;

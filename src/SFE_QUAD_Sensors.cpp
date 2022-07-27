@@ -2506,7 +2506,7 @@ bool SFE_QUAD_Sensors__EEPROM::writeStorageCRC(void)
   EEPROM.write(crc1address, crc1);             // Write the checksum bytes
   EEPROM.write(crc1address + 1, crc2);
 
-#if defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_SAMD)
+#if defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_SAMD) || defined(FLASH_STORAGE_STM32_VERSION)
   EEPROM.commit();
 #endif
 
