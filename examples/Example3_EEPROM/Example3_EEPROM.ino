@@ -69,8 +69,8 @@ void setup()
   mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   mySensors.theMenu.addMenuItem("Open the sensor logging menu", openLoggingMenu);
   mySensors.theMenu.addMenuItem("Open the sensor settings menu", openSettingMenu);
-  mySensors.theMenu.addMenuItem("Write the sensor configuration to SD", writeConfig);
-  mySensors.theMenu.addMenuItem("Read the sensor configuration from SD", readConfig);
+  mySensors.theMenu.addMenuItem("Write the sensor configuration to EEPROM", writeConfig);
+  mySensors.theMenu.addMenuItem("Read the sensor configuration from EEPROM", readConfig);
   mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   
   while (mySensors.theMenu._menuPort->available()) // Clear the menu serial buffer
