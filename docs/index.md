@@ -3,6 +3,10 @@
 <p align="center">
 		<a href="https://github.com/sparkfun/SparkFun_Qwiic_Universal_Auto-Detect/issues" alt="Issues">
 				<img src="https://img.shields.io/github/issues/sparkfun/SparkFun_Qwiic_Universal_Auto-Detect.svg" /></a>
+    	<a href="https://github.com/sparkfun/SparkFun_Qwiic_Universal_Auto-Detect/actions" alt="Actions">
+        		<img src="https://github.com/sparkfun/SparkFun_Qwiic_Universal_Auto-Detect/actions/workflows/mkdocs.yml/badge.svg" /></a>
+    	<a href="https://github.com/sparkfun/SparkFun_Qwiic_Universal_Auto-Detect/actions" alt="Actions">
+        		<img src="https://github.com/sparkfun/SparkFun_Qwiic_Universal_Auto-Detect/actions/workflows/compile-sketch.yml/badge.svg" /></a>
 		<a href="https://github.com/sparkfun/SparkFun_Qwiic_Universal_Auto-Detect/blob/master/LICENSE" alt="License">
 				<img src="https://img.shields.io/badge/license-MIT-blue.svg" /></a>
 		<a href="https://twitter.com/intent/follow?screen_name=sparkfun">

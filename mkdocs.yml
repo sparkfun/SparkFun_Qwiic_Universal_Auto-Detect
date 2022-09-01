@@ -93,4 +93,5 @@ nav:
     - SFE_QUAD_Sensors_sprintf: api_SFE_QUAD_Sensors_sprintf.md
     - SFE_QUAD_Menu_sprintf: api_SFE_QUAD_Menu_sprintf.md
   - Examples: '!include ./examples/mkdocs.yml'
-    
+  - Contribution/Issues:
+    - Contribute: contribute.md    
