@@ -721,4 +721,28 @@ private:
 
 #endif
 
+// For STM32 platforms that support FlashStorage_STM32.h
+#if __has_include(<FlashStorage_STM32.h>) || (defined(_COMPILER_NO_HAS_INCLUDE) && defined(FLASH_STORAGE_STM32_VERSION))
+
+#define SFE_QUAD_SENSORS_EEPROM
+
+#include <FlashStorage_STM32.hpp> // See: https://github.com/khoih-prog/FlashStorage_STM32#howto-fix-multiple-definitions-linker-error
+
+class SFE_QUAD_Sensors__EEPROM : public SFE_QUAD_Sensors
+{
+public:
+  ~SFE_QUAD_Sensors__EEPROM();
+
+  bool beginStorage(void);                               // Begin LittleFS
+  bool writeConfigurationToStorage(bool append = false); // Write configuration to theFileName
+  bool readConfigurationFromStorage(void);               // Read theFileName, copy the contents into configuration
+  bool endStorage(void);                                 // End the storage (if required)
+
+private:
+  bool checkStorageCRC(int *crc1address = NULL, uint8_t *CRC1 = NULL, uint8_t *CRC2 = NULL);
+  bool writeStorageCRC(void);
+};
+
+#endif
+
 #endif

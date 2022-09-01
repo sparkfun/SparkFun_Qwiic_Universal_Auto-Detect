@@ -25,6 +25,8 @@
 
 //#include <FlashAsEEPROM_SAMD.h> // Khoi Hoang's FlashStorage_SAMD works well too:  http://librarymanager/All#FlashStorage_SAMD
 
+//#include <FlashStorage_STM32.h> // Khoi Hoang's FlashStorage_STM32 works well too:  http://librarymanager/All#FlashStorage_STM32
+
 #include "SFE_QUAD_Sensors.h" // Click here to get the library:  http://librarymanager/All#SparkFun_Qwiic_Universal_Auto-Detect
 
 SFE_QUAD_Sensors__EEPROM mySensors;
@@ -69,8 +71,8 @@ void setup()
   mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   mySensors.theMenu.addMenuItem("Open the sensor logging menu", openLoggingMenu);
   mySensors.theMenu.addMenuItem("Open the sensor settings menu", openSettingMenu);
-  mySensors.theMenu.addMenuItem("Write the sensor configuration to SD", writeConfig);
-  mySensors.theMenu.addMenuItem("Read the sensor configuration from SD", readConfig);
+  mySensors.theMenu.addMenuItem("Write the sensor configuration to EEPROM", writeConfig);
+  mySensors.theMenu.addMenuItem("Read the sensor configuration from EEPROM", readConfig);
   mySensors.theMenu.addMenuItem("", SFE_QUAD_MENU_VARIABLE_TYPE_NONE);
   
   while (mySensors.theMenu._menuPort->available()) // Clear the menu serial buffer

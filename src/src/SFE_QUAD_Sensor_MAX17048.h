@@ -187,9 +187,9 @@ public:
   uint8_t getSettingNameMaxLen()
   {
     size_t longest = 0;
-    for (uint8_t x = 0; x < SETTING_COUNT; x++)
-      if (strlen(getSettingName(x)) > longest)
-        longest = strlen(getSettingName(x));
+    // for (uint8_t x = 0; x < SETTING_COUNT; x++)
+    //   if (strlen(getSettingName(x)) > longest)
+    //     longest = strlen(getSettingName(x));
     return (longest);
   }
 
@@ -241,9 +241,9 @@ public:
   uint8_t getConfigurationItemNameMaxLen()
   {
     size_t longest = 0;
-    for (uint8_t x = 0; x < CONFIGURATION_ITEM_COUNT; x++)
-      if (strlen(getConfigurationItemName(x)) > longest)
-        longest = strlen(getConfigurationItemName(x));
+    // for (uint8_t x = 0; x < CONFIGURATION_ITEM_COUNT; x++)
+    //   if (strlen(getConfigurationItemName(x)) > longest)
+    //     longest = strlen(getConfigurationItemName(x));
     return (longest);
   }
 
